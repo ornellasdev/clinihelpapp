@@ -10,33 +10,169 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedClinicRouteImport } from './routes/_authenticated/_clinic'
+import { Route as AuthenticatedClinicAgendaRouteImport } from './routes/_authenticated/_clinic/agenda'
+import { Route as AuthenticatedClinicEquipeRouteImport } from './routes/_authenticated/_clinic/equipe'
+import { Route as AuthenticatedClinicFinanceiroRouteImport } from './routes/_authenticated/_clinic/financeiro'
+import { Route as AuthenticatedClinicPainelRouteImport } from './routes/_authenticated/_clinic/painel'
+import { Route as AuthenticatedClinicSalasRouteImport } from './routes/_authenticated/_clinic/salas'
+import { Route as AuthenticatedClinicPacientesIndexRouteImport } from './routes/_authenticated/_clinic/pacientes.index'
+import { Route as AuthenticatedClinicPacientesIdRouteImport } from './routes/_authenticated/_clinic/pacientes.$id'
+import { Route as AuthenticatedClinicPacientesNovoRouteImport } from './routes/_authenticated/_clinic/pacientes.novo'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedClinicRoute = AuthenticatedClinicRouteImport.update({
+  id: '/_clinic',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedClinicAgendaRoute =
+  AuthenticatedClinicAgendaRouteImport.update({
+    id: '/agenda',
+    path: '/agenda',
+    getParentRoute: () => AuthenticatedClinicRoute,
+  } as any)
+const AuthenticatedClinicEquipeRoute =
+  AuthenticatedClinicEquipeRouteImport.update({
+    id: '/equipe',
+    path: '/equipe',
+    getParentRoute: () => AuthenticatedClinicRoute,
+  } as any)
+const AuthenticatedClinicFinanceiroRoute =
+  AuthenticatedClinicFinanceiroRouteImport.update({
+    id: '/financeiro',
+    path: '/financeiro',
+    getParentRoute: () => AuthenticatedClinicRoute,
+  } as any)
+const AuthenticatedClinicPainelRoute =
+  AuthenticatedClinicPainelRouteImport.update({
+    id: '/painel',
+    path: '/painel',
+    getParentRoute: () => AuthenticatedClinicRoute,
+  } as any)
+const AuthenticatedClinicSalasRoute =
+  AuthenticatedClinicSalasRouteImport.update({
+    id: '/salas',
+    path: '/salas',
+    getParentRoute: () => AuthenticatedClinicRoute,
+  } as any)
+const AuthenticatedClinicPacientesIndexRoute =
+  AuthenticatedClinicPacientesIndexRouteImport.update({
+    id: '/pacientes/',
+    path: '/pacientes/',
+    getParentRoute: () => AuthenticatedClinicRoute,
+  } as any)
+const AuthenticatedClinicPacientesIdRoute =
+  AuthenticatedClinicPacientesIdRouteImport.update({
+    id: '/pacientes/$id',
+    path: '/pacientes/$id',
+    getParentRoute: () => AuthenticatedClinicRoute,
+  } as any)
+const AuthenticatedClinicPacientesNovoRoute =
+  AuthenticatedClinicPacientesNovoRouteImport.update({
+    id: '/pacientes/novo',
+    path: '/pacientes/novo',
+    getParentRoute: () => AuthenticatedClinicRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/agenda': typeof AuthenticatedClinicAgendaRoute
+  '/equipe': typeof AuthenticatedClinicEquipeRoute
+  '/financeiro': typeof AuthenticatedClinicFinanceiroRoute
+  '/painel': typeof AuthenticatedClinicPainelRoute
+  '/salas': typeof AuthenticatedClinicSalasRoute
+  '/pacientes/$id': typeof AuthenticatedClinicPacientesIdRoute
+  '/pacientes/novo': typeof AuthenticatedClinicPacientesNovoRoute
+  '/pacientes/': typeof AuthenticatedClinicPacientesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/agenda': typeof AuthenticatedClinicAgendaRoute
+  '/equipe': typeof AuthenticatedClinicEquipeRoute
+  '/financeiro': typeof AuthenticatedClinicFinanceiroRoute
+  '/painel': typeof AuthenticatedClinicPainelRoute
+  '/salas': typeof AuthenticatedClinicSalasRoute
+  '/pacientes/$id': typeof AuthenticatedClinicPacientesIdRoute
+  '/pacientes/novo': typeof AuthenticatedClinicPacientesNovoRoute
+  '/pacientes': typeof AuthenticatedClinicPacientesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/_clinic': typeof AuthenticatedClinicRouteWithChildren
+  '/_authenticated/_clinic/agenda': typeof AuthenticatedClinicAgendaRoute
+  '/_authenticated/_clinic/equipe': typeof AuthenticatedClinicEquipeRoute
+  '/_authenticated/_clinic/financeiro': typeof AuthenticatedClinicFinanceiroRoute
+  '/_authenticated/_clinic/painel': typeof AuthenticatedClinicPainelRoute
+  '/_authenticated/_clinic/salas': typeof AuthenticatedClinicSalasRoute
+  '/_authenticated/_clinic/pacientes/$id': typeof AuthenticatedClinicPacientesIdRoute
+  '/_authenticated/_clinic/pacientes/novo': typeof AuthenticatedClinicPacientesNovoRoute
+  '/_authenticated/_clinic/pacientes/': typeof AuthenticatedClinicPacientesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/agenda'
+    | '/equipe'
+    | '/financeiro'
+    | '/painel'
+    | '/salas'
+    | '/pacientes/$id'
+    | '/pacientes/novo'
+    | '/pacientes/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/agenda'
+    | '/equipe'
+    | '/financeiro'
+    | '/painel'
+    | '/salas'
+    | '/pacientes/$id'
+    | '/pacientes/novo'
+    | '/pacientes'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/_clinic'
+    | '/_authenticated/_clinic/agenda'
+    | '/_authenticated/_clinic/equipe'
+    | '/_authenticated/_clinic/financeiro'
+    | '/_authenticated/_clinic/painel'
+    | '/_authenticated/_clinic/salas'
+    | '/_authenticated/_clinic/pacientes/$id'
+    | '/_authenticated/_clinic/pacientes/novo'
+    | '/_authenticated/_clinic/pacientes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +184,127 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/_clinic': {
+      id: '/_authenticated/_clinic'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedClinicRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/_clinic/agenda': {
+      id: '/_authenticated/_clinic/agenda'
+      path: '/agenda'
+      fullPath: '/agenda'
+      preLoaderRoute: typeof AuthenticatedClinicAgendaRouteImport
+      parentRoute: typeof AuthenticatedClinicRoute
+    }
+    '/_authenticated/_clinic/equipe': {
+      id: '/_authenticated/_clinic/equipe'
+      path: '/equipe'
+      fullPath: '/equipe'
+      preLoaderRoute: typeof AuthenticatedClinicEquipeRouteImport
+      parentRoute: typeof AuthenticatedClinicRoute
+    }
+    '/_authenticated/_clinic/financeiro': {
+      id: '/_authenticated/_clinic/financeiro'
+      path: '/financeiro'
+      fullPath: '/financeiro'
+      preLoaderRoute: typeof AuthenticatedClinicFinanceiroRouteImport
+      parentRoute: typeof AuthenticatedClinicRoute
+    }
+    '/_authenticated/_clinic/painel': {
+      id: '/_authenticated/_clinic/painel'
+      path: '/painel'
+      fullPath: '/painel'
+      preLoaderRoute: typeof AuthenticatedClinicPainelRouteImport
+      parentRoute: typeof AuthenticatedClinicRoute
+    }
+    '/_authenticated/_clinic/salas': {
+      id: '/_authenticated/_clinic/salas'
+      path: '/salas'
+      fullPath: '/salas'
+      preLoaderRoute: typeof AuthenticatedClinicSalasRouteImport
+      parentRoute: typeof AuthenticatedClinicRoute
+    }
+    '/_authenticated/_clinic/pacientes/': {
+      id: '/_authenticated/_clinic/pacientes/'
+      path: '/pacientes'
+      fullPath: '/pacientes/'
+      preLoaderRoute: typeof AuthenticatedClinicPacientesIndexRouteImport
+      parentRoute: typeof AuthenticatedClinicRoute
+    }
+    '/_authenticated/_clinic/pacientes/$id': {
+      id: '/_authenticated/_clinic/pacientes/$id'
+      path: '/pacientes/$id'
+      fullPath: '/pacientes/$id'
+      preLoaderRoute: typeof AuthenticatedClinicPacientesIdRouteImport
+      parentRoute: typeof AuthenticatedClinicRoute
+    }
+    '/_authenticated/_clinic/pacientes/novo': {
+      id: '/_authenticated/_clinic/pacientes/novo'
+      path: '/pacientes/novo'
+      fullPath: '/pacientes/novo'
+      preLoaderRoute: typeof AuthenticatedClinicPacientesNovoRouteImport
+      parentRoute: typeof AuthenticatedClinicRoute
+    }
   }
 }
 
+interface AuthenticatedClinicRouteChildren {
+  AuthenticatedClinicAgendaRoute: typeof AuthenticatedClinicAgendaRoute
+  AuthenticatedClinicEquipeRoute: typeof AuthenticatedClinicEquipeRoute
+  AuthenticatedClinicFinanceiroRoute: typeof AuthenticatedClinicFinanceiroRoute
+  AuthenticatedClinicPainelRoute: typeof AuthenticatedClinicPainelRoute
+  AuthenticatedClinicSalasRoute: typeof AuthenticatedClinicSalasRoute
+  AuthenticatedClinicPacientesIdRoute: typeof AuthenticatedClinicPacientesIdRoute
+  AuthenticatedClinicPacientesNovoRoute: typeof AuthenticatedClinicPacientesNovoRoute
+  AuthenticatedClinicPacientesIndexRoute: typeof AuthenticatedClinicPacientesIndexRoute
+}
+
+const AuthenticatedClinicRouteChildren: AuthenticatedClinicRouteChildren = {
+  AuthenticatedClinicAgendaRoute: AuthenticatedClinicAgendaRoute,
+  AuthenticatedClinicEquipeRoute: AuthenticatedClinicEquipeRoute,
+  AuthenticatedClinicFinanceiroRoute: AuthenticatedClinicFinanceiroRoute,
+  AuthenticatedClinicPainelRoute: AuthenticatedClinicPainelRoute,
+  AuthenticatedClinicSalasRoute: AuthenticatedClinicSalasRoute,
+  AuthenticatedClinicPacientesIdRoute: AuthenticatedClinicPacientesIdRoute,
+  AuthenticatedClinicPacientesNovoRoute: AuthenticatedClinicPacientesNovoRoute,
+  AuthenticatedClinicPacientesIndexRoute:
+    AuthenticatedClinicPacientesIndexRoute,
+}
+
+const AuthenticatedClinicRouteWithChildren =
+  AuthenticatedClinicRoute._addFileChildren(AuthenticatedClinicRouteChildren)
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedClinicRoute: typeof AuthenticatedClinicRouteWithChildren
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedClinicRoute: AuthenticatedClinicRouteWithChildren,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
