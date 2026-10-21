@@ -95,7 +95,7 @@ export function ProntuarioTab({ pacienteId, agendamentoId }: { pacienteId: strin
                           ativo && "bg-secondary text-secondary-foreground",
                         )}
                       >
-                        <span className="w-16 font-medium">{fmtData(d.data, "dd/MM EEE")}</span>
+                        <span className="whitespace-nowrap font-medium">{fmtData(d.data, "dd/MM")} <span className="font-normal text-muted-foreground">{fmtData(d.data, "EEEEEE")}</span></span>
                         <span className="flex flex-1 gap-1">
                           {[...d.esps].map((id) => (
                             <span key={id} className={cn("size-2 rounded-full border", corEsp(espMap[id]?.cor))} />
