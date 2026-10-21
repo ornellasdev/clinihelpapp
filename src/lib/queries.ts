@@ -147,24 +147,28 @@ export const evolucoesQuery = (pacienteId: string) =>
 const AGENDA_SELECT =
   "*, paciente:pacientes(id, nome), profissional:profiles(id, nome), sala:salas(id, nome), especialidade:especialidades(id, nome, cor)";
 
+async function fetchAgenda(inicioISO: string, fimISO: string) {
+  return ok(
+    await supabase
+      .from("agendamentos")
+      .select(AGENDA_SELECT)
+      .gte("inicio", inicioISO)
+      .lt("inicio", fimISO)
+      .order("inicio"),
+  );
+}
+export type AgendaItem = Awaited<ReturnType<typeof fetchAgenda>>[number];
+
 export const agendaQuery = (inicioISO: string, fimISO: string) =>
   queryOptions({
     queryKey: ["agenda", inicioISO, fimISO],
-    queryFn: async () =>
-      ok(
-        await supabase
-          .from("agendamentos")
-          .select(AGENDA_SELECT)
-          .gte("inicio", inicioISO)
-          .lt("inicio", fimISO)
-          .order("inicio"),
-      ),
+    queryFn: () => fetchAgenda(inicioISO, fimISO),
   });
 
 export const agendaPacienteQuery = (pacienteId: string) =>
   queryOptions({
     queryKey: ["agenda", "paciente", pacienteId],
-    queryFn: async () =>
+    queryFn: async (): Promise<AgendaItem[]> =>
       ok(
         await supabase
           .from("agendamentos")
