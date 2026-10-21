@@ -33,7 +33,7 @@ function SalasPage() {
     e.preventDefault();
     if (!nome.trim()) return;
     const { error } = await supabase.from("salas").insert({ nome: nome.trim(), descricao: desc.trim() || null });
-    if (error) return toast.error(erroAmigavel(error.message));
+    if (error) { toast.error(erroAmigavel(error.message)); return; }
     setNome("");
     setDesc("");
     recarregar();
@@ -41,7 +41,7 @@ function SalasPage() {
 
   async function atualizar(id: string, patch: { nome?: string; descricao?: string | null; ativa?: boolean }) {
     const { error } = await supabase.from("salas").update(patch).eq("id", id);
-    if (error) return toast.error(erroAmigavel(error.message));
+    if (error) { toast.error(erroAmigavel(error.message)); return; }
     recarregar();
   }
 

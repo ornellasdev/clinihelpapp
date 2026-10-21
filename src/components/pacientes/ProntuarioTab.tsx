@@ -19,14 +19,14 @@ import { cn } from "@/lib/utils";
 
 type Evolucao = Tables<"evolucoes">;
 
-export function ProntuarioTab({ pacienteId, agendamentoId }: { pacienteId: string; agendamentoId?: string }) {
+export function ProntuarioTab({ pacienteId, agendamentoId }: { pacienteId: string; agendamentoId?: string | undefined }) {
   const me = useMe();
   const { data: especialidades } = useSuspenseQuery(especialidadesQuery);
   const { data: evolucoes } = useSuspenseQuery(evolucoesQuery(pacienteId));
   const [esp, setEsp] = useState("todas");
   const [de, setDe] = useState("");
   const [ate, setAte] = useState("");
-  const [form, setForm] = useState<{ editar?: Evolucao; agendamentoId?: string } | null>(
+  const [form, setForm] = useState<{ editar?: Evolucao | undefined; agendamentoId?: string | undefined } | null>(
     agendamentoId ? { agendamentoId } : null,
   );
 
@@ -201,8 +201,8 @@ function EvolucaoForm({
   onClose,
 }: {
   pacienteId: string;
-  editar?: Evolucao;
-  agendamentoId?: string;
+  editar?: Evolucao | undefined;
+  agendamentoId?: string | undefined;
   onClose: () => void;
 }) {
   const me = useMe();
@@ -212,7 +212,7 @@ function EvolucaoForm({
   const minhas = especialidades.filter((e) => me.especialidades.includes(e.id));
   const meusAtend = agenda.filter((a) => a.profissional_id === me.id && a.status !== "cancelado");
 
-  const [espId, setEspId] = useState(editar?.especialidade_id ?? (minhas.length === 1 ? minhas[0].id : ""));
+  const [espId, setEspId] = useState(editar?.especialidade_id ?? (minhas.length === 1 ? minhas[0]!.id : ""));
   const [data, setData] = useState(editar?.data_atendimento ?? format(new Date(), "yyyy-MM-dd"));
   const [agId, setAgId] = useState(editar?.agendamento_id ?? agendamentoId ?? "");
   const [texto, setTexto] = useState(editar?.conteudo ?? "");
@@ -228,7 +228,7 @@ function EvolucaoForm({
   }, [agId, agenda, editar, me.especialidades]);
 
   async function salvar() {
-    if (!espId || !texto.trim()) return toast.error("Escolha a especialidade e escreva a evolução.");
+    if (!espId || !texto.trim()) { toast.error("Escolha a especialidade e escreva a evolução."); return; }
     setSalvando(true);
     const payload = { data_atendimento: data, conteudo: texto.trim(), agendamento_id: agId || null };
     const { error } = editar
@@ -239,7 +239,7 @@ function EvolucaoForm({
       qc.invalidateQueries({ queryKey: ["agenda"] });
     }
     setSalvando(false);
-    if (error) return toast.error(erroAmigavel(error.message));
+    if (error) { toast.error(erroAmigavel(error.message)); return; }
     toast.success(editar ? "Evolução atualizada." : "Evolução registrada.");
     qc.invalidateQueries({ queryKey: ["evolucoes", pacienteId] });
     onClose();

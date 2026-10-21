@@ -155,8 +155,8 @@ function MembroDialog({
   config,
   onClose,
 }: {
-  membro?: Membro;
-  config?: { valor_sessao_padrao: number; percentual_repasse_padrao: number };
+  membro?: Membro | undefined;
+  config?: { valor_sessao_padrao: number; percentual_repasse_padrao: number } | undefined;
   onClose: () => void;
 }) {
   const qc = useQueryClient();
@@ -178,8 +178,8 @@ function MembroDialog({
   const isProf = papeis.includes("profissional");
 
   async function salvar() {
-    if (!nome.trim() || papeis.length === 0) return toast.error("Informe o nome e ao menos um papel.");
-    if (isProf && esps.length === 0) return toast.error("Profissionais precisam de ao menos uma especialidade.");
+    if (!nome.trim() || papeis.length === 0) { toast.error("Informe o nome e ao menos um papel."); return; }
+    if (isProf && esps.length === 0) { toast.error("Profissionais precisam de ao menos uma especialidade."); return; }
     setSalvando(true);
     try {
       if (!membro) {

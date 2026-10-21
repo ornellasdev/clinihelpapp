@@ -23,7 +23,7 @@ export function AgendamentoDetalhe({ item, onClose }: { item: AgendaItem | null;
 
   async function mudarStatus(status: (typeof STATUS_OPCOES)[number]) {
     const { error } = await supabase.from("agendamentos").update({ status }).eq("id", item!.id);
-    if (error) return toast.error(erroAmigavel(error.message));
+    if (error) { toast.error(erroAmigavel(error.message)); return; }
     toast.success(`Status: ${STATUS_AGENDA[status].label}`);
     qc.invalidateQueries({ queryKey: ["agenda"] });
     qc.invalidateQueries({ queryKey: ["financeiro"] });
@@ -33,7 +33,7 @@ export function AgendamentoDetalhe({ item, onClose }: { item: AgendaItem | null;
   async function excluir() {
     if (!confirm("Excluir este agendamento? Prefira marcar como cancelado para manter o histórico.")) return;
     const { error } = await supabase.from("agendamentos").delete().eq("id", item!.id);
-    if (error) return toast.error(erroAmigavel(error.message));
+    if (error) { toast.error(erroAmigavel(error.message)); return; }
     qc.invalidateQueries({ queryKey: ["agenda"] });
     onClose();
   }

@@ -44,7 +44,7 @@ function AuthPage() {
     setEnviando(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
     setEnviando(false);
-    if (error) return toast.error(erroAmigavel(error.message));
+    if (error) { toast.error(erroAmigavel(error.message)); return; }
     navigate({ to: "/painel", replace: true });
   }
 

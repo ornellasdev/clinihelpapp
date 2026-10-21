@@ -76,7 +76,7 @@ function FinanceiroPage() {
 
   async function atualizar(id: string, patch: { valor?: number; percentual_repasse?: number; pagamento_status?: string; repasse_pago?: boolean }) {
     const { error } = await supabase.from("atendimento_financeiro").update(patch).eq("agendamento_id", id);
-    if (error) return toast.error(erroAmigavel(error.message));
+    if (error) { toast.error(erroAmigavel(error.message)); return; }
     qc.invalidateQueries({ queryKey: q.queryKey });
   }
 

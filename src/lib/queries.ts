@@ -114,7 +114,11 @@ export const pacientesOpcoesQuery = queryOptions({
 export const pacienteQuery = (id: string) =>
   queryOptions({
     queryKey: ["paciente", id],
-    queryFn: async () => ok(await supabase.from("pacientes").select("*").eq("id", id).single()),
+    queryFn: async () => {
+      const { data, error } = await supabase.from("pacientes").select("*").eq("id", id).single();
+      if (error) throw new Error(error.message);
+      return data;
+    },
   });
 
 export const documentosQuery = (pacienteId: string) =>

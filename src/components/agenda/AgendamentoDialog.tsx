@@ -62,7 +62,7 @@ export function AgendamentoDialog({
   );
 
   useEffect(() => {
-    if (espsDoProf.length === 1) setEspecialidadeId(espsDoProf[0].id);
+    if (espsDoProf.length === 1) setEspecialidadeId(espsDoProf[0]!.id);
     else if (!espsDoProf.some((e) => e.id === especialidadeId)) setEspecialidadeId("");
   }, [espsDoProf, especialidadeId]);
 

@@ -18,7 +18,8 @@ export const BARRA_ESPECIALIDADE: Record<string, string> = {
 export const corEsp = (cor?: string | null) => COR_ESPECIALIDADE[cor ?? "chart-1"] ?? COR_ESPECIALIDADE["chart-1"];
 export const barraEsp = (cor?: string | null) => BARRA_ESPECIALIDADE[cor ?? "chart-1"] ?? BARRA_ESPECIALIDADE["chart-1"];
 
-export const STATUS_AGENDA: Record<string, { label: string; className: string }> = {
+export type StatusAgenda = "agendado" | "confirmado" | "realizado" | "falta" | "cancelado";
+export const STATUS_AGENDA: Record<StatusAgenda, { label: string; className: string }> = {
   agendado: { label: "Agendado", className: "bg-muted text-muted-foreground" },
   confirmado: { label: "Confirmado", className: "bg-secondary text-secondary-foreground" },
   realizado: { label: "Realizado", className: "bg-success/15 text-success" },

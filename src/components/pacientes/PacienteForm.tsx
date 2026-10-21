@@ -57,7 +57,7 @@ export function PacienteForm({
             <Input type="date" value={v("data_nascimento")} onChange={set("data_nascimento")} />
           </Campo>
           <Campo label="Sexo">
-            <Select value={v("sexo")} onValueChange={(x) => setD((p) => ({ ...p, sexo: x }))} disabled={somenteLeitura}>
+            <Select value={v("sexo")} onValueChange={(x) => setD((p) => ({ ...p, sexo: x }))} disabled={!!somenteLeitura}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
@@ -129,7 +129,7 @@ export function PacienteForm({
             <Textarea rows={3} value={v("observacoes")} onChange={set("observacoes")} />
           </Campo>
           <div className="flex items-center gap-3">
-            <Switch checked={d.ativo ?? true} onCheckedChange={(x) => setD((p) => ({ ...p, ativo: x }))} disabled={somenteLeitura} />
+            <Switch checked={d.ativo ?? true} onCheckedChange={(x) => setD((p) => ({ ...p, ativo: x }))} disabled={!!somenteLeitura} />
             <Label>Paciente ativo</Label>
           </div>
         </Secao>

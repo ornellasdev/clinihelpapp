@@ -55,7 +55,7 @@ export function DocumentosTab({ pacienteId }: { pacienteId: string }) {
 
   async function baixar(path: string) {
     const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(path, 120);
-    if (error || !data) return toast.error("Não foi possível abrir o arquivo.");
+    if (error || !data) { toast.error("Não foi possível abrir o arquivo."); return; }
     window.open(data.signedUrl, "_blank", "noopener");
   }
 
@@ -63,7 +63,7 @@ export function DocumentosTab({ pacienteId }: { pacienteId: string }) {
     if (!confirm("Remover este documento?")) return;
     await supabase.storage.from(BUCKET).remove([path]);
     const { error } = await supabase.from("paciente_documentos").delete().eq("id", id);
-    if (error) return toast.error(erroAmigavel(error.message));
+    if (error) { toast.error(erroAmigavel(error.message)); return; }
     qc.invalidateQueries({ queryKey: ["documentos", pacienteId] });
   }
 
