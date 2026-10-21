@@ -14,16 +14,499 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      agendamentos: {
+        Row: {
+          created_at: string
+          criado_por: string | null
+          especialidade_id: string
+          fim: string
+          id: string
+          inicio: string
+          observacoes: string | null
+          paciente_id: string
+          profissional_id: string
+          sala_id: string
+          status: Database["public"]["Enums"]["agendamento_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          criado_por?: string | null
+          especialidade_id: string
+          fim: string
+          id?: string
+          inicio: string
+          observacoes?: string | null
+          paciente_id: string
+          profissional_id: string
+          sala_id: string
+          status?: Database["public"]["Enums"]["agendamento_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          criado_por?: string | null
+          especialidade_id?: string
+          fim?: string
+          id?: string
+          inicio?: string
+          observacoes?: string | null
+          paciente_id?: string
+          profissional_id?: string
+          sala_id?: string
+          status?: Database["public"]["Enums"]["agendamento_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agendamentos_especialidade_id_fkey"
+            columns: ["especialidade_id"]
+            isOneToOne: false
+            referencedRelation: "especialidades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agendamentos_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "pacientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agendamentos_profissional_id_fkey"
+            columns: ["profissional_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agendamentos_sala_id_fkey"
+            columns: ["sala_id"]
+            isOneToOne: false
+            referencedRelation: "salas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      atendimento_financeiro: {
+        Row: {
+          agendamento_id: string
+          observacoes: string | null
+          pagamento_status: string
+          percentual_repasse: number
+          repasse_pago: boolean
+          updated_at: string
+          valor: number
+          valor_repasse: number | null
+        }
+        Insert: {
+          agendamento_id: string
+          observacoes?: string | null
+          pagamento_status?: string
+          percentual_repasse?: number
+          repasse_pago?: boolean
+          updated_at?: string
+          valor?: number
+          valor_repasse?: number | null
+        }
+        Update: {
+          agendamento_id?: string
+          observacoes?: string | null
+          pagamento_status?: string
+          percentual_repasse?: number
+          repasse_pago?: boolean
+          updated_at?: string
+          valor?: number
+          valor_repasse?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "atendimento_financeiro_agendamento_id_fkey"
+            columns: ["agendamento_id"]
+            isOneToOne: true
+            referencedRelation: "agendamentos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      especialidades: {
+        Row: {
+          cor: string
+          created_at: string
+          id: string
+          nome: string
+        }
+        Insert: {
+          cor?: string
+          created_at?: string
+          id?: string
+          nome: string
+        }
+        Update: {
+          cor?: string
+          created_at?: string
+          id?: string
+          nome?: string
+        }
+        Relationships: []
+      }
+      evolucoes: {
+        Row: {
+          agendamento_id: string | null
+          conteudo: string
+          created_at: string
+          data_atendimento: string
+          especialidade_id: string
+          id: string
+          paciente_id: string
+          profissional_id: string
+          profissional_nome: string | null
+          profissional_registro: string | null
+          updated_at: string
+        }
+        Insert: {
+          agendamento_id?: string | null
+          conteudo: string
+          created_at?: string
+          data_atendimento?: string
+          especialidade_id: string
+          id?: string
+          paciente_id: string
+          profissional_id?: string
+          profissional_nome?: string | null
+          profissional_registro?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agendamento_id?: string | null
+          conteudo?: string
+          created_at?: string
+          data_atendimento?: string
+          especialidade_id?: string
+          id?: string
+          paciente_id?: string
+          profissional_id?: string
+          profissional_nome?: string | null
+          profissional_registro?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evolucoes_agendamento_id_fkey"
+            columns: ["agendamento_id"]
+            isOneToOne: false
+            referencedRelation: "agendamentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evolucoes_especialidade_id_fkey"
+            columns: ["especialidade_id"]
+            isOneToOne: false
+            referencedRelation: "especialidades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evolucoes_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "pacientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      paciente_documentos: {
+        Row: {
+          categoria: string
+          created_at: string
+          enviado_por: string
+          id: string
+          mime_type: string | null
+          nome: string
+          paciente_id: string
+          storage_path: string
+          tamanho: number | null
+        }
+        Insert: {
+          categoria?: string
+          created_at?: string
+          enviado_por?: string
+          id?: string
+          mime_type?: string | null
+          nome: string
+          paciente_id: string
+          storage_path: string
+          tamanho?: number | null
+        }
+        Update: {
+          categoria?: string
+          created_at?: string
+          enviado_por?: string
+          id?: string
+          mime_type?: string | null
+          nome?: string
+          paciente_id?: string
+          storage_path?: string
+          tamanho?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paciente_documentos_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "pacientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pacientes: {
+        Row: {
+          alergias: string | null
+          ativo: boolean
+          carteirinha: string | null
+          cid: string | null
+          cidade: string | null
+          convenio: string | null
+          cpf: string | null
+          created_at: string
+          data_nascimento: string | null
+          diagnostico: string | null
+          endereco: string | null
+          escola: string | null
+          id: string
+          medicamentos: string | null
+          nome: string
+          observacoes: string | null
+          responsavel_email: string | null
+          responsavel_nome: string | null
+          responsavel_parentesco: string | null
+          responsavel_telefone: string | null
+          responsavel2_nome: string | null
+          responsavel2_telefone: string | null
+          sexo: string | null
+          updated_at: string
+        }
+        Insert: {
+          alergias?: string | null
+          ativo?: boolean
+          carteirinha?: string | null
+          cid?: string | null
+          cidade?: string | null
+          convenio?: string | null
+          cpf?: string | null
+          created_at?: string
+          data_nascimento?: string | null
+          diagnostico?: string | null
+          endereco?: string | null
+          escola?: string | null
+          id?: string
+          medicamentos?: string | null
+          nome: string
+          observacoes?: string | null
+          responsavel_email?: string | null
+          responsavel_nome?: string | null
+          responsavel_parentesco?: string | null
+          responsavel_telefone?: string | null
+          responsavel2_nome?: string | null
+          responsavel2_telefone?: string | null
+          sexo?: string | null
+          updated_at?: string
+        }
+        Update: {
+          alergias?: string | null
+          ativo?: boolean
+          carteirinha?: string | null
+          cid?: string | null
+          cidade?: string | null
+          convenio?: string | null
+          cpf?: string | null
+          created_at?: string
+          data_nascimento?: string | null
+          diagnostico?: string | null
+          endereco?: string | null
+          escola?: string | null
+          id?: string
+          medicamentos?: string | null
+          nome?: string
+          observacoes?: string | null
+          responsavel_email?: string | null
+          responsavel_nome?: string | null
+          responsavel_parentesco?: string | null
+          responsavel_telefone?: string | null
+          responsavel2_nome?: string | null
+          responsavel2_telefone?: string | null
+          sexo?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          ativo: boolean
+          conselho: string | null
+          created_at: string
+          email: string | null
+          id: string
+          nome: string
+          registro_profissional: string | null
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          conselho?: string | null
+          created_at?: string
+          email?: string | null
+          id: string
+          nome?: string
+          registro_profissional?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          conselho?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          nome?: string
+          registro_profissional?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profissional_config: {
+        Row: {
+          percentual_repasse_padrao: number
+          updated_at: string
+          user_id: string
+          valor_sessao_padrao: number
+        }
+        Insert: {
+          percentual_repasse_padrao?: number
+          updated_at?: string
+          user_id: string
+          valor_sessao_padrao?: number
+        }
+        Update: {
+          percentual_repasse_padrao?: number
+          updated_at?: string
+          user_id?: string
+          valor_sessao_padrao?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profissional_config_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profissional_especialidades: {
+        Row: {
+          especialidade_id: string
+          user_id: string
+        }
+        Insert: {
+          especialidade_id: string
+          user_id: string
+        }
+        Update: {
+          especialidade_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profissional_especialidades_especialidade_id_fkey"
+            columns: ["especialidade_id"]
+            isOneToOne: false
+            referencedRelation: "especialidades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profissional_especialidades_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      salas: {
+        Row: {
+          ativa: boolean
+          created_at: string
+          descricao: string | null
+          id: string
+          nome: string
+        }
+        Insert: {
+          ativa?: boolean
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome: string
+        }
+        Update: {
+          ativa?: boolean
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      can_view_especialidade: {
+        Args: { _esp: string; _user_id: string }
+        Returns: boolean
+      }
+      has_especialidade: {
+        Args: { _esp: string; _user_id: string }
+        Returns: boolean
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_staff: { Args: { _user_id: string }; Returns: boolean }
+      master_exists: { Args: never; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      agendamento_status:
+        | "agendado"
+        | "confirmado"
+        | "realizado"
+        | "falta"
+        | "cancelado"
+      app_role: "master" | "recepcao" | "profissional" | "financeiro"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +633,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      agendamento_status: [
+        "agendado",
+        "confirmado",
+        "realizado",
+        "falta",
+        "cancelado",
+      ],
+      app_role: ["master", "recepcao", "profissional", "financeiro"],
+    },
   },
 } as const
