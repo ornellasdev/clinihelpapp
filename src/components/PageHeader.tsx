@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export function PageHeader({ titulo, descricao, acoes }: { titulo: string; descricao?: string; acoes?: ReactNode }) {
+export function PageHeader({ titulo, descricao, acoes }: { titulo: string; descricao?: string | undefined; acoes?: ReactNode }) {
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
       <div>
