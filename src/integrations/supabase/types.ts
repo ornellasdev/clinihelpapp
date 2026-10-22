@@ -506,7 +506,12 @@ export type Database = {
         | "realizado"
         | "falta"
         | "cancelado"
-      app_role: "master" | "recepcao" | "profissional" | "financeiro"
+      app_role:
+        | "master"
+        | "recepcao"
+        | "profissional"
+        | "financeiro"
+        | "administrador"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -641,7 +646,13 @@ export const Constants = {
         "falta",
         "cancelado",
       ],
-      app_role: ["master", "recepcao", "profissional", "financeiro"],
+      app_role: [
+        "master",
+        "recepcao",
+        "profissional",
+        "financeiro",
+        "administrador",
+      ],
     },
   },
 } as const
