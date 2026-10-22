@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/_clinic/painel")({
     const [a, b] = hojeRange();
     return context.queryClient.ensureQueryData(agendaQuery(a, b));
   },
-  head: () => ({ meta: [{ title: "Painel — Florescer" }] }),
+  head: () => ({ meta: [{ title: "Painel — CliniHelp" }] }),
   component: Painel,
 });
 

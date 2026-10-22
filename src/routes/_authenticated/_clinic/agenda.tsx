@@ -41,7 +41,7 @@ export const Route = createFileRoute("/_authenticated/_clinic/agenda")({
       context.queryClient.ensureQueryData(especialidadesQuery),
     ]);
   },
-  head: () => ({ meta: [{ title: "Agenda — Florescer" }] }),
+  head: () => ({ meta: [{ title: "Agenda — CliniHelp" }] }),
   component: AgendaPage,
 });
 

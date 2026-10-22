@@ -17,7 +17,7 @@ export const Route = createFileRoute("/_authenticated/_clinic/salas")({
     if (!me.papeis.includes("master")) throw redirect({ to: "/painel" });
   },
   loader: ({ context }) => context.queryClient.ensureQueryData(salasQuery),
-  head: () => ({ meta: [{ title: "Salas — Florescer" }] }),
+  head: () => ({ meta: [{ title: "Salas — CliniHelp" }] }),
   component: SalasPage,
 });
 

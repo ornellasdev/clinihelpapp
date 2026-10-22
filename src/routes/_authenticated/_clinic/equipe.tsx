@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_authenticated/_clinic/equipe")({
       context.queryClient.ensureQueryData(especialidadesQuery),
       context.queryClient.ensureQueryData(configFinanceiraQuery),
     ]),
-  head: () => ({ meta: [{ title: "Equipe — Florescer" }] }),
+  head: () => ({ meta: [{ title: "Equipe — CliniHelp" }] }),
   component: EquipePage,
 });
 
