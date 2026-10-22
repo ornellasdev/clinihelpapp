@@ -6,12 +6,12 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Florescer — Gestão para clínicas de atendimento infantil" },
+      { title: "CliniHelp — Gestão para clínicas de atendimento infantil" },
       {
         name: "description",
         content: "Agenda por sala e profissional, prontuário por especialidade, documentos e repasses para clínicas de crianças com necessidades especiais.",
       },
-      { property: "og:title", content: "Florescer — Gestão para clínicas de atendimento infantil" },
+      { property: "og:title", content: "CliniHelp — Gestão para clínicas de atendimento infantil" },
       {
         property: "og:description",
         content: "Agenda, prontuário por especialidade, documentos e repasses em um só lugar.",

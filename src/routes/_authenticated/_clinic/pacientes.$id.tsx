@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/_clinic/pacientes/$id")({
     agendamento: z.string().optional(),
   }),
   loader: ({ context, params }) => context.queryClient.ensureQueryData(pacienteQuery(params.id)),
-  head: ({ loaderData }) => ({ meta: [{ title: `${loaderData?.nome ?? "Paciente"} — Florescer` }] }),
+  head: ({ loaderData }) => ({ meta: [{ title: `${loaderData?.nome ?? "Paciente"} — CliniHelp` }] }),
   component: PacientePage,
 });
 

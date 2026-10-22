@@ -14,9 +14,9 @@ import { Label } from "@/components/ui/label";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Entrar — Florescer" },
+      { title: "Entrar — CliniHelp" },
       { name: "description", content: "Acesso da equipe da clínica à agenda, prontuários e financeiro." },
-      { property: "og:title", content: "Entrar — Florescer" },
+      { property: "og:title", content: "Entrar — CliniHelp" },
       { property: "og:description", content: "Acesso da equipe da clínica à agenda, prontuários e financeiro." },
     ],
   }),

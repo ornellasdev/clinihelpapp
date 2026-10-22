@@ -33,7 +33,7 @@ export const Route = createFileRoute("/_authenticated/_clinic/financeiro")({
       context.queryClient.ensureQueryData(equipeQuery),
     ]);
   },
-  head: () => ({ meta: [{ title: "Financeiro — Florescer" }] }),
+  head: () => ({ meta: [{ title: "Financeiro — CliniHelp" }] }),
   component: FinanceiroPage,
 });
 

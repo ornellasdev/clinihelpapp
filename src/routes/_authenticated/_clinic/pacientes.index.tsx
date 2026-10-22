@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_authenticated/_clinic/pacientes/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(pacientesQuery("")),
-  head: () => ({ meta: [{ title: "Pacientes — Florescer" }] }),
+  head: () => ({ meta: [{ title: "Pacientes — CliniHelp" }] }),
   component: PacientesPage,
 });
 
