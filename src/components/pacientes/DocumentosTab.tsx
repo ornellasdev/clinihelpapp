@@ -113,7 +113,7 @@ export function DocumentosTab({ pacienteId }: { pacienteId: string }) {
                 <Button size="icon" variant="ghost" onClick={() => baixar(d.storage_path)} aria-label="Abrir">
                   <Download />
                 </Button>
-                {(me.papeis.includes("master") || d.enviado_por === me.id) && (
+                {(ehGestor(me.papeis) || d.enviado_por === me.id) && (
                   <Button size="icon" variant="ghost" className="text-destructive" onClick={() => remover(d.id, d.storage_path)} aria-label="Remover">
                     <Trash2 />
                   </Button>

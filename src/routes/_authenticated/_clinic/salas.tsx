@@ -14,7 +14,7 @@ import { Switch } from "@/components/ui/switch";
 export const Route = createFileRoute("/_authenticated/_clinic/salas")({
   beforeLoad: async ({ context }) => {
     const me = await context.queryClient.ensureQueryData(meQuery);
-    if (!me.papeis.includes("master")) throw redirect({ to: "/painel" });
+    if (!ehGestor(me.papeis)) throw redirect({ to: "/painel" });
   },
   loader: ({ context }) => context.queryClient.ensureQueryData(salasQuery),
   head: () => ({ meta: [{ title: "Salas — CliniHelp" }] }),
