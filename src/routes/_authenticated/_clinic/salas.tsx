@@ -5,6 +5,7 @@ import { DoorOpen, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { meQuery, salasQuery } from "@/lib/queries";
+import { ehGestor } from "@/lib/permissions";
 import { erroAmigavel } from "@/lib/ui-helpers";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
