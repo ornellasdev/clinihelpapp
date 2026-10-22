@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const papelSchema = z.enum(["master", "recepcao", "profissional", "financeiro"]);
+const papelSchema = z.enum(["master", "administrador", "recepcao", "profissional", "financeiro"]);
 
 const masterSchema = z.object({
   nome: z.string().trim().min(2).max(120),
@@ -36,9 +36,21 @@ export const criarMasterInicial = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-async function exigirMaster(supabase: any, userId: string) {
-  const { data: isMaster } = await supabase.rpc("has_role", { _user_id: userId, _role: "master" });
-  if (!isMaster) throw new Error("Apenas o acesso master pode fazer isso.");
+/** Master ou administrador podem gerir a equipe. Retorna se quem chama é master. */
+async function exigirGestor(supabase: any, userId: string) {
+  const [{ data: isMaster }, { data: isGestor }] = await Promise.all([
+    supabase.rpc("has_role", { _user_id: userId, _role: "master" }),
+    supabase.rpc("is_gestor", { _user_id: userId }),
+  ]);
+  if (!isMaster && !isGestor) throw new Error("Apenas o acesso master ou administrador pode fazer isso.");
+  return { isMaster: !!isMaster };
+}
+
+/** O administrador não pode alterar contas master (evita chegar aos prontuários por elas). */
+async function bloquearAlvoMaster(supabase: any, isMaster: boolean, alvoId: string) {
+  if (isMaster) return;
+  const { data: alvoMaster } = await supabase.rpc("has_role", { _user_id: alvoId, _role: "master" });
+  if (alvoMaster) throw new Error("Apenas o acesso master pode alterar uma conta master.");
 }
 
 const membroSchema = z.object({
@@ -58,7 +70,10 @@ export const criarMembro = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: z.input<typeof membroSchema>) => membroSchema.parse(input))
   .handler(async ({ data, context }) => {
-    await exigirMaster(context.supabase, context.userId);
+    const { isMaster } = await exigirGestor(context.supabase, context.userId);
+    if (!isMaster && data.papeis.includes("master")) {
+      throw new Error("Apenas o acesso master pode criar outra conta master.");
+    }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
@@ -98,7 +113,8 @@ export const definirAtivo = createServerFn({ method: "POST" })
     z.object({ userId: z.string().uuid(), ativo: z.boolean() }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    await exigirMaster(context.supabase, context.userId);
+    const { isMaster } = await exigirGestor(context.supabase, context.userId);
+    await bloquearAlvoMaster(context.supabase, isMaster, data.userId);
     if (data.userId === context.userId && !data.ativo) throw new Error("Você não pode desativar a própria conta.");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin.auth.admin.updateUserById(data.userId, {
@@ -114,7 +130,8 @@ export const redefinirSenha = createServerFn({ method: "POST" })
     z.object({ userId: z.string().uuid(), password: z.string().min(8).max(72) }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    await exigirMaster(context.supabase, context.userId);
+    const { isMaster } = await exigirGestor(context.supabase, context.userId);
+    await bloquearAlvoMaster(context.supabase, isMaster, data.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, { password: data.password });
     if (error) throw new Error(error.message);
