@@ -496,6 +496,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_gestor: { Args: { _user_id: string }; Returns: boolean }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       master_exists: { Args: never; Returns: boolean }
     }
