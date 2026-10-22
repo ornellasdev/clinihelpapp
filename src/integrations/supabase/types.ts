@@ -496,6 +496,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_gestor: { Args: { _user_id: string }; Returns: boolean }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       master_exists: { Args: never; Returns: boolean }
     }
@@ -506,7 +507,12 @@ export type Database = {
         | "realizado"
         | "falta"
         | "cancelado"
-      app_role: "master" | "recepcao" | "profissional" | "financeiro"
+      app_role:
+        | "master"
+        | "recepcao"
+        | "profissional"
+        | "financeiro"
+        | "administrador"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -641,7 +647,13 @@ export const Constants = {
         "falta",
         "cancelado",
       ],
-      app_role: ["master", "recepcao", "profissional", "financeiro"],
+      app_role: [
+        "master",
+        "recepcao",
+        "profissional",
+        "financeiro",
+        "administrador",
+      ],
     },
   },
 } as const

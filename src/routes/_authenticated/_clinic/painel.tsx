@@ -28,7 +28,7 @@ function Painel() {
   const me = useMe();
   const [a, b] = hojeRange();
   const { data: hoje } = useSuspenseQuery(agendaQuery(a, b));
-  const soProfissional = me.papeis.includes("profissional") && !podeAgendar(me.papeis) && !me.papeis.includes("master");
+  const soProfissional = me.papeis.includes("profissional") && !podeAgendar(me.papeis);
   const lista = (soProfissional ? hoje.filter((i) => i.profissional_id === me.id) : hoje).filter((i) => i.status !== "cancelado");
   const meus = hoje.filter((i) => i.profissional_id === me.id && i.status !== "cancelado");
   const realizados = lista.filter((i) => i.status === "realizado").length;

@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { calcularRepasse, liquidoClinica } from "./financeiro";
-import { podeEscreverEvolucao, podeVerProntuario, podeGerirFinanceiro, podeAgendar } from "./permissions";
+import {
+  papeisAtribuiveis,
+  podeAgendar,
+  podeAlterarMembro,
+  podeEscreverEvolucao,
+  podeGerirEquipe,
+  podeGerirFinanceiro,
+  podeVerProntuario,
+} from "./permissions";
 
 const PSICO = "esp-psicologia";
 const FONO = "esp-fono";
@@ -46,5 +54,26 @@ describe("separação de funções", () => {
   it("financeiro gere valores mas não agenda", () => {
     expect(podeGerirFinanceiro(["financeiro"])).toBe(true);
     expect(podeAgendar(["financeiro"])).toBe(false);
+  });
+});
+
+describe("administrador: tudo do master, exceto prontuários", () => {
+  it("administrador não vê prontuário de nenhuma especialidade", () => {
+    expect(podeVerProntuario(["administrador"], [], PSICO)).toBe(false);
+    expect(podeVerProntuario(["administrador"], [], FONO)).toBe(false);
+  });
+  it("administrador agenda, gere financeiro e equipe", () => {
+    expect(podeAgendar(["administrador"])).toBe(true);
+    expect(podeGerirFinanceiro(["administrador"])).toBe(true);
+    expect(podeGerirEquipe(["administrador"])).toBe(true);
+  });
+  it("administrador não concede o papel master", () => {
+    expect(papeisAtribuiveis(["administrador"])).not.toContain("master");
+    expect(papeisAtribuiveis(["master"])).toContain("master");
+  });
+  it("administrador não altera contas master", () => {
+    expect(podeAlterarMembro(["administrador"], ["master"])).toBe(false);
+    expect(podeAlterarMembro(["administrador"], ["profissional"])).toBe(true);
+    expect(podeAlterarMembro(["master"], ["master"])).toBe(true);
   });
 });

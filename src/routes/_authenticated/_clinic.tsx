@@ -33,9 +33,9 @@ const ITENS: Item[] = [
   { to: "/painel", label: "Painel", icon: LayoutDashboard },
   { to: "/agenda", label: "Agenda", icon: CalendarDays },
   { to: "/pacientes", label: "Pacientes", icon: Users },
-  { to: "/financeiro", label: "Financeiro", icon: Wallet, papeis: ["master", "financeiro", "profissional"] },
-  { to: "/equipe", label: "Equipe", icon: UserRoundCog, papeis: ["master"] },
-  { to: "/salas", label: "Salas", icon: DoorOpen, papeis: ["master"] },
+  { to: "/financeiro", label: "Financeiro", icon: Wallet, papeis: ["master", "administrador", "financeiro", "profissional"] },
+  { to: "/equipe", label: "Equipe", icon: UserRoundCog, papeis: ["master", "administrador"] },
+  { to: "/salas", label: "Salas", icon: DoorOpen, papeis: ["master", "administrador"] },
 ];
 
 function ClinicLayout() {
@@ -69,7 +69,7 @@ function ClinicLayout() {
   }
 
   const itens = ITENS.filter((i) => !i.papeis || temPapel(me.papeis, ...i.papeis)).map((i) =>
-    i.to === "/financeiro" && !temPapel(me.papeis, "master", "financeiro") ? { ...i, label: "Meus repasses" } : i,
+    i.to === "/financeiro" && !temPapel(me.papeis, "master", "administrador", "financeiro") ? { ...i, label: "Meus repasses" } : i,
   );
   const principais = itens.slice(0, 4);
   const papelLabel = me.papeis.map((p) => PAPEIS.find((x) => x.value === p)?.label).join(" · ");

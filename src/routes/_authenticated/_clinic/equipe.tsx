@@ -7,7 +7,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { configFinanceiraQuery, equipeQuery, especialidadesQuery, meQuery, type Membro } from "@/lib/queries";
 import { criarMembro, definirAtivo, redefinirSenha } from "@/lib/equipe.functions";
-import { PAPEIS, type Papel } from "@/lib/permissions";
+import { PAPEIS, ehGestor, papeisAtribuiveis, podeAlterarMembro, type Papel } from "@/lib/permissions";
+import { useMe } from "@/hooks/use-me";
 import { corEsp, erroAmigavel, iniciais } from "@/lib/ui-helpers";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/_clinic/equipe")({
   beforeLoad: async ({ context }) => {
     const me = await context.queryClient.ensureQueryData(meQuery);
-    if (!me.papeis.includes("master")) throw redirect({ to: "/painel" });
+    if (!ehGestor(me.papeis)) throw redirect({ to: "/painel" });
   },
   loader: ({ context }) =>
     Promise.all([
@@ -33,6 +34,7 @@ export const Route = createFileRoute("/_authenticated/_clinic/equipe")({
 });
 
 function EquipePage() {
+  const me = useMe();
   const { data: equipe } = useSuspenseQuery(equipeQuery);
   const { data: especialidades } = useSuspenseQuery(especialidadesQuery);
   const { data: configs } = useSuspenseQuery(configFinanceiraQuery);
@@ -74,7 +76,7 @@ function EquipePage() {
         }
       />
 
-      <div className="mb-6 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-6 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
         {PAPEIS.map((p) => (
           <div key={p.value} className="rounded-xl border bg-surface p-3">
             <div className="text-sm font-semibold">{p.label}</div>
@@ -123,6 +125,7 @@ function EquipePage() {
                   Sessão R$ {Number(conf.valor_sessao_padrao).toFixed(2)}
                 </div>
               )}
+              {podeAlterarMembro(me.papeis, m.papeis) ? (
               <div className="flex gap-1">
                 <Button size="icon" variant="ghost" onClick={() => setEditando(m)} aria-label="Editar">
                   <Pencil />
@@ -134,6 +137,9 @@ function EquipePage() {
                   {m.ativo ? <UserX /> : <UserCheck />}
                 </Button>
               </div>
+              ) : (
+                <span className="text-xs text-muted-foreground">Só o master altera</span>
+              )}
             </div>
           );
         })}
@@ -160,7 +166,11 @@ function MembroDialog({
   onClose: () => void;
 }) {
   const qc = useQueryClient();
+  const me = useMe();
   const { data: especialidades } = useSuspenseQuery(especialidadesQuery);
+  const opcoesPapel = PAPEIS.filter((p) => papeisAtribuiveis(me.papeis).includes(p.value));
+  // Administrador não vincula especialidades a si mesmo (isso abriria os prontuários).
+  const travarEspecialidades = !!membro && membro.id === me.id && !me.papeis.includes("master");
   const criar = useServerFn(criarMembro);
   const [nome, setNome] = useState(membro?.nome ?? "");
   const [email, setEmail] = useState(membro?.email ?? "");
@@ -214,8 +224,8 @@ function MembroDialog({
         const alvo = isProf ? esps : [];
         const addE = alvo.filter((e) => !membro.especialidades.includes(e));
         const remE = membro.especialidades.filter((e) => !alvo.includes(e));
-        if (addE.length) await supabase.from("profissional_especialidades").insert(addE.map((especialidade_id) => ({ user_id: id, especialidade_id })));
-        if (remE.length) await supabase.from("profissional_especialidades").delete().eq("user_id", id).in("especialidade_id", remE);
+        if (addE.length && !travarEspecialidades) await supabase.from("profissional_especialidades").insert(addE.map((especialidade_id) => ({ user_id: id, especialidade_id })));
+        if (remE.length && !travarEspecialidades) await supabase.from("profissional_especialidades").delete().eq("user_id", id).in("especialidade_id", remE);
         const c = await supabase.from("profissional_config").upsert({
           user_id: id,
           valor_sessao_padrao: Number(valor) || 0,
@@ -268,7 +278,7 @@ function MembroDialog({
           <div>
             <Label>Papéis de acesso</Label>
             <div className="mt-2 grid gap-2 sm:grid-cols-2">
-              {PAPEIS.map((p) => (
+              {opcoesPapel.map((p) => (
                 <label key={p.value} className="flex cursor-pointer items-start gap-2 rounded-lg border p-2.5">
                   <Checkbox checked={papeis.includes(p.value)} onCheckedChange={() => setPapeis((x) => toggle(x, p.value))} className="mt-0.5" />
                   <span>
@@ -284,11 +294,15 @@ function MembroDialog({
             <>
               <div>
                 <Label>Especialidades (define quais prontuários a pessoa vê)</Label>
+                {travarEspecialidades && (
+                  <p className="mt-1 text-xs text-muted-foreground">Suas especialidades só podem ser alteradas pelo master.</p>
+                )}
                 <div className="mt-2 flex flex-wrap gap-2">
                   {especialidades.map((e) => (
                     <button
                       type="button"
                       key={e.id}
+                      disabled={travarEspecialidades}
                       onClick={() => setEsps((x) => toggle(x, e.id))}
                       className={cn("rounded-full border px-3 py-1 text-sm transition", esps.includes(e.id) ? corEsp(e.cor) : "text-muted-foreground")}
                     >
