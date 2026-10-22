@@ -45,7 +45,7 @@ function Index() {
         <p className="mt-6 max-w-xl text-lg text-sidebar-foreground/75">
           Agenda, prontuário, documentos e financeiro da clínica — pensado para registrar evoluções direto do celular.
         </p>
-        <Button asChild size="lg" className="mt-8 h-12 bg-sidebar-primary px-8 text-sidebar-primary-foreground hover:bg-sidebar-primary/90">
+        <Button asChild size="lg" className="mt-8 h-12 bg-gradient-brand px-8 font-semibold text-sidebar-primary-foreground hover:opacity-90">
           <Link to="/painel">Acessar o sistema</Link>
         </Button>
 
