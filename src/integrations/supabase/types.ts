@@ -279,11 +279,14 @@ export type Database = {
           responsavel_cpf: string | null
           responsavel_email: string | null
           responsavel_financeiro_cpf: string | null
+          responsavel_financeiro_email: string | null
           responsavel_financeiro_nome: string | null
+          responsavel_financeiro_telefone: string | null
           responsavel_nome: string | null
           responsavel_parentesco: string | null
           responsavel_telefone: string | null
           responsavel2_cpf: string | null
+          responsavel2_email: string | null
           responsavel2_nome: string | null
           responsavel2_telefone: string | null
           sexo: string | null
@@ -309,11 +312,14 @@ export type Database = {
           responsavel_cpf?: string | null
           responsavel_email?: string | null
           responsavel_financeiro_cpf?: string | null
+          responsavel_financeiro_email?: string | null
           responsavel_financeiro_nome?: string | null
+          responsavel_financeiro_telefone?: string | null
           responsavel_nome?: string | null
           responsavel_parentesco?: string | null
           responsavel_telefone?: string | null
           responsavel2_cpf?: string | null
+          responsavel2_email?: string | null
           responsavel2_nome?: string | null
           responsavel2_telefone?: string | null
           sexo?: string | null
@@ -339,11 +345,14 @@ export type Database = {
           responsavel_cpf?: string | null
           responsavel_email?: string | null
           responsavel_financeiro_cpf?: string | null
+          responsavel_financeiro_email?: string | null
           responsavel_financeiro_nome?: string | null
+          responsavel_financeiro_telefone?: string | null
           responsavel_nome?: string | null
           responsavel_parentesco?: string | null
           responsavel_telefone?: string | null
           responsavel2_cpf?: string | null
+          responsavel2_email?: string | null
           responsavel2_nome?: string | null
           responsavel2_telefone?: string | null
           sexo?: string | null
