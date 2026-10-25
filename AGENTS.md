@@ -19,3 +19,4 @@
 - Account creation, deactivation and password resets go through server functions in `src/lib/equipe.functions.ts` (service-role, master-checked). Public signup is disabled; the first master is created via `criarMasterInicial`, which locks once a master exists.
 - Data reads use `queryOptions` in `src/lib/queries.ts` with the browser client (RLS applies), loaded via route loaders + `useSuspenseQuery`.
 - Business rules have tests in `src/lib/regras.test.ts`.
+- Financial exports (PDF/CSV/XLSX) are generated in the browser by `src/lib/exportar-financeiro.ts` from the rows already loaded on the Financeiro page, with jspdf/exceljs imported lazily on click. Why: exports respect the same RLS-filtered data the user sees and keep heavy libs out of the initial bundle.

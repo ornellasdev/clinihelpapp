@@ -276,10 +276,14 @@ export type Database = {
           medicamentos: string | null
           nome: string
           observacoes: string | null
+          responsavel_cpf: string | null
           responsavel_email: string | null
+          responsavel_financeiro_cpf: string | null
+          responsavel_financeiro_nome: string | null
           responsavel_nome: string | null
           responsavel_parentesco: string | null
           responsavel_telefone: string | null
+          responsavel2_cpf: string | null
           responsavel2_nome: string | null
           responsavel2_telefone: string | null
           sexo: string | null
@@ -302,10 +306,14 @@ export type Database = {
           medicamentos?: string | null
           nome: string
           observacoes?: string | null
+          responsavel_cpf?: string | null
           responsavel_email?: string | null
+          responsavel_financeiro_cpf?: string | null
+          responsavel_financeiro_nome?: string | null
           responsavel_nome?: string | null
           responsavel_parentesco?: string | null
           responsavel_telefone?: string | null
+          responsavel2_cpf?: string | null
           responsavel2_nome?: string | null
           responsavel2_telefone?: string | null
           sexo?: string | null
@@ -328,10 +336,14 @@ export type Database = {
           medicamentos?: string | null
           nome?: string
           observacoes?: string | null
+          responsavel_cpf?: string | null
           responsavel_email?: string | null
+          responsavel_financeiro_cpf?: string | null
+          responsavel_financeiro_nome?: string | null
           responsavel_nome?: string | null
           responsavel_parentesco?: string | null
           responsavel_telefone?: string | null
+          responsavel2_cpf?: string | null
           responsavel2_nome?: string | null
           responsavel2_telefone?: string | null
           sexo?: string | null
