@@ -286,6 +286,7 @@ export type Database = {
           responsavel_financeiro_cpf: string | null
           responsavel_financeiro_email: string | null
           responsavel_financeiro_nome: string | null
+          responsavel_financeiro_parentesco: string | null
           responsavel_financeiro_telefone: string | null
           responsavel_nome: string | null
           responsavel_parentesco: string | null
@@ -293,6 +294,7 @@ export type Database = {
           responsavel2_cpf: string | null
           responsavel2_email: string | null
           responsavel2_nome: string | null
+          responsavel2_parentesco: string | null
           responsavel2_telefone: string | null
           sexo: string | null
           updated_at: string
@@ -324,6 +326,7 @@ export type Database = {
           responsavel_financeiro_cpf?: string | null
           responsavel_financeiro_email?: string | null
           responsavel_financeiro_nome?: string | null
+          responsavel_financeiro_parentesco?: string | null
           responsavel_financeiro_telefone?: string | null
           responsavel_nome?: string | null
           responsavel_parentesco?: string | null
@@ -331,6 +334,7 @@ export type Database = {
           responsavel2_cpf?: string | null
           responsavel2_email?: string | null
           responsavel2_nome?: string | null
+          responsavel2_parentesco?: string | null
           responsavel2_telefone?: string | null
           sexo?: string | null
           updated_at?: string
@@ -362,6 +366,7 @@ export type Database = {
           responsavel_financeiro_cpf?: string | null
           responsavel_financeiro_email?: string | null
           responsavel_financeiro_nome?: string | null
+          responsavel_financeiro_parentesco?: string | null
           responsavel_financeiro_telefone?: string | null
           responsavel_nome?: string | null
           responsavel_parentesco?: string | null
@@ -369,6 +374,7 @@ export type Database = {
           responsavel2_cpf?: string | null
           responsavel2_email?: string | null
           responsavel2_nome?: string | null
+          responsavel2_parentesco?: string | null
           responsavel2_telefone?: string | null
           sexo?: string | null
           updated_at?: string
