@@ -12,7 +12,7 @@ const base = {
 
 describe("exportação financeira", () => {
   it("usa o percentual da sessão para repasse e líquido", () => {
-    const [l] = montarLinhas([base], (s) => s);
+    const l = montarLinhas([base], (s) => s)[0]!;
     expect(l.repasse).toBe(90);
     expect(l.liquido).toBe(60);
     expect(l.pagoPaciente).toBe("Sim");
