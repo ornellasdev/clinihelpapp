@@ -36,6 +36,13 @@
       "when": 1792894852645,
       "tag": "0004_pacientes_contatos_responsaveis",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792894976013,
+      "tag": "0005_pacientes_endereco_detalhado",
+      "breakpoints": true
     }
   ]
 }
