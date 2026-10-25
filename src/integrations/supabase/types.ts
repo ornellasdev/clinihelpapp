@@ -263,8 +263,10 @@ export type Database = {
           alergias: string | null
           ativo: boolean
           carteirinha: string | null
+          cep: string | null
           cid: string | null
           cidade: string | null
+          complemento: string | null
           convenio: string | null
           cpf: string | null
           created_at: string
@@ -272,10 +274,13 @@ export type Database = {
           diagnostico: string | null
           endereco: string | null
           escola: string | null
+          estado: string | null
           id: string
           medicamentos: string | null
           nome: string
+          numero: string | null
           observacoes: string | null
+          pais: string | null
           responsavel_cpf: string | null
           responsavel_email: string | null
           responsavel_financeiro_cpf: string | null
@@ -296,8 +301,10 @@ export type Database = {
           alergias?: string | null
           ativo?: boolean
           carteirinha?: string | null
+          cep?: string | null
           cid?: string | null
           cidade?: string | null
+          complemento?: string | null
           convenio?: string | null
           cpf?: string | null
           created_at?: string
@@ -305,10 +312,13 @@ export type Database = {
           diagnostico?: string | null
           endereco?: string | null
           escola?: string | null
+          estado?: string | null
           id?: string
           medicamentos?: string | null
           nome: string
+          numero?: string | null
           observacoes?: string | null
+          pais?: string | null
           responsavel_cpf?: string | null
           responsavel_email?: string | null
           responsavel_financeiro_cpf?: string | null
@@ -329,8 +339,10 @@ export type Database = {
           alergias?: string | null
           ativo?: boolean
           carteirinha?: string | null
+          cep?: string | null
           cid?: string | null
           cidade?: string | null
+          complemento?: string | null
           convenio?: string | null
           cpf?: string | null
           created_at?: string
@@ -338,10 +350,13 @@ export type Database = {
           diagnostico?: string | null
           endereco?: string | null
           escola?: string | null
+          estado?: string | null
           id?: string
           medicamentos?: string | null
           nome?: string
+          numero?: string | null
           observacoes?: string | null
+          pais?: string | null
           responsavel_cpf?: string | null
           responsavel_email?: string | null
           responsavel_financeiro_cpf?: string | null
