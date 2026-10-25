@@ -29,6 +29,13 @@
       "when": 1792894552965,
       "tag": "0003_pacientes_filiacao_cpf_financeiro",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792894852645,
+      "tag": "0004_pacientes_contatos_responsaveis",
+      "breakpoints": true
     }
   ]
 }
