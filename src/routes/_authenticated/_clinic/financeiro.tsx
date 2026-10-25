@@ -16,6 +16,10 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import { Download, FileDown, FileSpreadsheet, FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { exportarCsv, exportarPdf, exportarXlsx, gerarCsv, montarLinhas } from "@/lib/exportar-financeiro";
 
 const mesAtual = () => format(new Date(), "yyyy-MM");
 
@@ -93,11 +97,53 @@ function FinanceiroPage() {
         { label: "Já recebido", v: totais.repassePago },
       ];
 
+  async function exportar(tipo: "pdf" | "csv" | "xlsx") {
+    const dados = montarLinhas(filtradas, (s) => STATUS_AGENDA[s as keyof typeof STATUS_AGENDA]?.label ?? s);
+    if (dados.length === 0) {
+      toast.info("Não há atendimentos no período para exportar.");
+      return;
+    }
+    const periodo = format(ini, "MMMM 'de' yyyy", { locale: ptBR });
+    const prof = search.prof ? equipe.find((m) => m.id === search.prof)?.nome : undefined;
+    const titulo = `${gestor ? "Financeiro" : "Meus repasses"} — ${periodo}`;
+    const subtitulo = [`CliniHelp · gerado em ${format(new Date(), "dd/MM/yyyy HH:mm")}`, prof && `Profissional: ${prof}`]
+      .filter(Boolean)
+      .join(" · ");
+    const nomeBase = `financeiro-${mes}${prof ? `-${prof.toLowerCase().normalize("NFD").replace(/[^a-z0-9]+/g, "-")}` : ""}`;
+    try {
+      if (tipo === "csv") exportarCsv(dados, nomeBase);
+      else if (tipo === "xlsx") await exportarXlsx(dados, nomeBase, titulo);
+      else await exportarPdf(dados, nomeBase, titulo, subtitulo);
+    } catch {
+      toast.error("Não foi possível gerar o arquivo. Tente novamente.");
+    }
+  }
+
   return (
     <div>
       <PageHeader
         titulo={gestor ? "Financeiro" : "Meus repasses"}
         descricao={format(ini, "MMMM 'de' yyyy", { locale: ptBR })}
+        acoes={
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <Download /> Exportar
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => exportar("pdf")}>
+                <FileText /> PDF
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => exportar("xlsx")}>
+                <FileSpreadsheet /> Excel (.xlsx)
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => exportar("csv")}>
+                <FileDown /> CSV
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        }
       />
 
       <div className="mb-5 flex flex-wrap gap-2">
