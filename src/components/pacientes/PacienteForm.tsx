@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 type Dados = TablesInsert<"pacientes">;
 
-const VAZIO: Dados = { nome: "", ativo: true };
+const VAZIO: Dados = { nome: "", ativo: true, pais: "Brasil" };
 
 export function PacienteForm({
   inicial,
@@ -128,11 +128,26 @@ export function PacienteForm({
         </Secao>
 
         <Secao titulo="Endereço e convênio">
-          <Campo label="Endereço" className="sm:col-span-2">
+          <Campo label="CEP">
+            <Input value={v("cep")} onChange={set("cep")} inputMode="numeric" placeholder="00000-000" />
+          </Campo>
+          <Campo label="Endereço (rua, avenida...)" className="sm:col-span-2">
             <Input value={v("endereco")} onChange={set("endereco")} />
           </Campo>
-          <Campo label="Cidade">
+          <Campo label="Número">
+            <Input value={v("numero")} onChange={set("numero")} />
+          </Campo>
+          <Campo label="Complemento" className="sm:col-span-2">
+            <Input value={v("complemento")} onChange={set("complemento")} placeholder="Apto, bloco, casa..." />
+          </Campo>
+          <Campo label="Município">
             <Input value={v("cidade")} onChange={set("cidade")} />
+          </Campo>
+          <Campo label="Estado">
+            <Input value={v("estado")} onChange={set("estado")} placeholder="Ex.: SP" />
+          </Campo>
+          <Campo label="País">
+            <Input value={v("pais")} onChange={set("pais")} />
           </Campo>
           <Campo label="Convênio">
             <Input value={v("convenio")} onChange={set("convenio")} placeholder="Particular, plano..." />
