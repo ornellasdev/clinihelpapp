@@ -188,7 +188,10 @@ export function PacienteForm({
             <Input value={v("cidade")} onChange={set("cidade")} />
           </Campo>
           <Campo label="Estado">
-            <Input value={v("estado")} onChange={set("estado")} placeholder="Ex.: SP" />
+            <Input value={v("estado")} onChange={set("estado")} placeholder="Ex.: São Paulo" />
+          </Campo>
+          <Campo label="UF">
+            <Input value={v("uf")} onChange={(e) => setD((x) => ({ ...x, uf: e.target.value.toUpperCase().slice(0, 2) }))} placeholder="Ex.: SP" maxLength={2} />
           </Campo>
           <Campo label="País">
             <Input value={v("pais")} onChange={set("pais")} />

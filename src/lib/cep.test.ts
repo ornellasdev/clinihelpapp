@@ -9,8 +9,8 @@ describe("CEP", () => {
 
   it("preenche endereço com rua e bairro, município, estado e país", () => {
     expect(
-      enderecoDeViaCep("01001000", { logradouro: "Praça da Sé", bairro: "Sé", localidade: "São Paulo", uf: "SP" }),
-    ).toEqual({ cep: "01001-000", endereco: "Praça da Sé - Sé", cidade: "São Paulo", estado: "SP", pais: "Brasil" });
+      enderecoDeViaCep("01001000", { logradouro: "Praça da Sé", bairro: "Sé", localidade: "São Paulo", uf: "SP", estado: "São Paulo" }),
+    ).toEqual({ cep: "01001-000", endereco: "Praça da Sé - Sé", cidade: "São Paulo", estado: "São Paulo", uf: "SP", pais: "Brasil" });
   });
 
   it("retorna nada quando o CEP não existe", () => {

@@ -297,6 +297,7 @@ export type Database = {
           responsavel2_parentesco: string | null
           responsavel2_telefone: string | null
           sexo: string | null
+          uf: string | null
           updated_at: string
         }
         Insert: {
@@ -337,6 +338,7 @@ export type Database = {
           responsavel2_parentesco?: string | null
           responsavel2_telefone?: string | null
           sexo?: string | null
+          uf?: string | null
           updated_at?: string
         }
         Update: {
@@ -377,6 +379,7 @@ export type Database = {
           responsavel2_parentesco?: string | null
           responsavel2_telefone?: string | null
           sexo?: string | null
+          uf?: string | null
           updated_at?: string
         }
         Relationships: []
