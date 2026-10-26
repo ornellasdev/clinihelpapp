@@ -1,6 +1,7 @@
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { Loader2 } from "lucide-react";
 import type { Tables, TablesInsert } from "@/integrations/supabase/types";
+import { buscarCep, formatarCep } from "@/lib/cep";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,8 +30,40 @@ export function PacienteForm({
     return resto;
   });
   const [salvando, setSalvando] = useState(false);
+  const [buscandoCep, setBuscandoCep] = useState(false);
+  const [avisoCep, setAvisoCep] = useState<string | null>(null);
+  const consultaCep = useRef<AbortController | null>(null);
+  const numeroRef = useRef<HTMLInputElement>(null);
   const set = (k: keyof Dados) => (e: { target: { value: string } }) => setD((x) => ({ ...x, [k]: e.target.value }));
   const v = (k: keyof Dados) => (d[k] as string | null | undefined) ?? "";
+
+  async function mudarCep(e: { target: { value: string } }) {
+    const cep = formatarCep(e.target.value);
+    setD((x) => ({ ...x, cep }));
+    setAvisoCep(null);
+    consultaCep.current?.abort();
+    if (cep.replace(/\D/g, "").length !== 8) {
+      setBuscandoCep(false);
+      return;
+    }
+    const ctrl = new AbortController();
+    consultaCep.current = ctrl;
+    setBuscandoCep(true);
+    try {
+      const end = await buscarCep(cep, ctrl.signal);
+      if (ctrl.signal.aborted) return;
+      if (!end) {
+        setAvisoCep("CEP não encontrado. Preencha o endereço manualmente.");
+        return;
+      }
+      setD((x) => ({ ...x, ...end }));
+      numeroRef.current?.focus();
+    } catch {
+      if (!ctrl.signal.aborted) setAvisoCep("Não foi possível consultar o CEP agora. Preencha manualmente.");
+    } finally {
+      if (!ctrl.signal.aborted) setBuscandoCep(false);
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -134,13 +167,19 @@ export function PacienteForm({
 
         <Secao titulo="Endereço e convênio">
           <Campo label="CEP">
-            <Input value={v("cep")} onChange={set("cep")} inputMode="numeric" placeholder="00000-000" />
+            <div className="relative">
+              <Input value={v("cep")} onChange={mudarCep} inputMode="numeric" placeholder="00000-000" maxLength={9} />
+              {buscandoCep && (
+                <Loader2 className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+              )}
+            </div>
+            {avisoCep && <p className="text-xs text-destructive">{avisoCep}</p>}
           </Campo>
           <Campo label="Endereço (rua, avenida...)" className="sm:col-span-2">
             <Input value={v("endereco")} onChange={set("endereco")} />
           </Campo>
           <Campo label="Número">
-            <Input value={v("numero")} onChange={set("numero")} />
+            <Input ref={numeroRef} value={v("numero")} onChange={set("numero")} />
           </Campo>
           <Campo label="Complemento" className="sm:col-span-2">
             <Input value={v("complemento")} onChange={set("complemento")} placeholder="Apto, bloco, casa..." />
