@@ -129,6 +129,56 @@ export type Database = {
           },
         ]
       }
+      convenio_valores: {
+        Row: {
+          convenio_id: string
+          updated_at: string
+          valor_sessao: number
+        }
+        Insert: {
+          convenio_id: string
+          updated_at?: string
+          valor_sessao?: number
+        }
+        Update: {
+          convenio_id?: string
+          updated_at?: string
+          valor_sessao?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "convenio_valores_convenio_id_fkey"
+            columns: ["convenio_id"]
+            isOneToOne: true
+            referencedRelation: "convenios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      convenios: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          id: string
+          nome: string
+          tipo: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          nome: string
+          tipo?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          nome?: string
+          tipo?: string
+        }
+        Relationships: []
+      }
       especialidades: {
         Row: {
           cor: string
@@ -268,6 +318,7 @@ export type Database = {
           cidade: string | null
           complemento: string | null
           convenio: string | null
+          convenio_id: string | null
           cpf: string | null
           created_at: string
           data_nascimento: string | null
@@ -309,6 +360,7 @@ export type Database = {
           cidade?: string | null
           complemento?: string | null
           convenio?: string | null
+          convenio_id?: string | null
           cpf?: string | null
           created_at?: string
           data_nascimento?: string | null
@@ -350,6 +402,7 @@ export type Database = {
           cidade?: string | null
           complemento?: string | null
           convenio?: string | null
+          convenio_id?: string | null
           cpf?: string | null
           created_at?: string
           data_nascimento?: string | null
@@ -382,7 +435,15 @@ export type Database = {
           uf?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "pacientes_convenio_id_fkey"
+            columns: ["convenio_id"]
+            isOneToOne: false
+            referencedRelation: "convenios"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
