@@ -57,6 +57,13 @@
       "when": 1793043450383,
       "tag": "0007_pacientes_uf",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793044306653,
+      "tag": "0008_convenios_tabela_valores",
+      "breakpoints": true
     }
   ]
 }
