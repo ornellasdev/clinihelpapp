@@ -120,9 +120,7 @@ function EquipePage() {
               </div>
               {m.papeis.includes("profissional") && conf && (
                 <div className="text-right text-xs text-muted-foreground">
-                  Repasse padrão <span className="font-semibold text-foreground">{Number(conf.percentual_repasse_padrao)}%</span>
-                  <br />
-                  Sessão R$ {Number(conf.valor_sessao_padrao).toFixed(2)}
+                  Repasse de profissional <span className="font-semibold text-foreground">{Number(conf.percentual_repasse_padrao)}%</span>
                 </div>
               )}
               {podeAlterarMembro(me.papeis, m.papeis) ? (
@@ -321,11 +319,7 @@ function MembroDialog({
                   <Input value={registro} onChange={(e) => setRegistro(e.target.value)} placeholder="06/123456" />
                 </div>
                 <div className="grid gap-1.5">
-                  <Label>Valor padrão da sessão (R$)</Label>
-                  <Input type="number" min={0} step="0.01" value={valor} onChange={(e) => setValor(e.target.value)} />
-                </div>
-                <div className="grid gap-1.5">
-                  <Label>Repasse padrão (%)</Label>
+                  <Label>Repasse de profissional (%)</Label>
                   <Input type="number" min={0} max={100} step="0.5" value={pct} onChange={(e) => setPct(e.target.value)} />
                 </div>
               </div>
