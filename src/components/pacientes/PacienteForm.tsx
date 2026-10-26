@@ -102,6 +102,9 @@ export function PacienteForm({
           <Campo label="Segundo responsável">
             <Input value={v("responsavel2_nome")} onChange={set("responsavel2_nome")} />
           </Campo>
+          <Campo label="Parentesco do segundo responsável">
+            <Input value={v("responsavel2_parentesco")} onChange={set("responsavel2_parentesco")} placeholder="Mãe, pai, avó..." />
+          </Campo>
           <Campo label="CPF do segundo responsável">
             <Input value={v("responsavel2_cpf")} onChange={set("responsavel2_cpf")} inputMode="numeric" />
           </Campo>
@@ -112,9 +115,11 @@ export function PacienteForm({
             <Input type="email" value={v("responsavel2_email")} onChange={set("responsavel2_email")} />
           </Campo>
           <div className="hidden lg:block" />
-          <div className="hidden lg:block" />
           <Campo label="Responsável financeiro">
             <Input value={v("responsavel_financeiro_nome")} onChange={set("responsavel_financeiro_nome")} />
+          </Campo>
+          <Campo label="Parentesco do responsável financeiro">
+            <Input value={v("responsavel_financeiro_parentesco")} onChange={set("responsavel_financeiro_parentesco")} placeholder="Mãe, pai, avó..." />
           </Campo>
           <Campo label="CPF do responsável financeiro">
             <Input value={v("responsavel_financeiro_cpf")} onChange={set("responsavel_financeiro_cpf")} inputMode="numeric" />
