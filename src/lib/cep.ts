@@ -18,7 +18,7 @@ export function enderecoDeViaCep(cep: string, r: RespostaViaCep): EnderecoCep | 
 export async function buscarCep(cep: string, signal?: AbortSignal): Promise<EnderecoCep | null> {
   const d = cep.replace(/\D/g, "");
   if (d.length !== 8) return null;
-  const res = await fetch(`https://viacep.com.br/ws/${d}/json/`, { signal });
+  const res = await fetch(`https://viacep.com.br/ws/${d}/json/`, { signal: signal ?? null });
   if (!res.ok) throw new Error(`Falha na consulta do CEP (${res.status})`);
   return enderecoDeViaCep(d, (await res.json()) as RespostaViaCep);
 }
