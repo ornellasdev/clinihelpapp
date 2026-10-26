@@ -25,7 +25,13 @@ export const Route = createFileRoute("/_authenticated/_clinic/pacientes/$id")({
     aba: z.enum(ABAS).optional(),
     agendamento: z.string().optional(),
   }),
-  loader: ({ context, params }) => context.queryClient.ensureQueryData(pacienteQuery(params.id)),
+  loader: async ({ context, params }) => {
+    const [paciente] = await Promise.all([
+      context.queryClient.ensureQueryData(pacienteQuery(params.id)),
+      context.queryClient.ensureQueryData(conveniosQuery),
+    ]);
+    return paciente;
+  },
   head: ({ loaderData }) => ({ meta: [{ title: `${loaderData?.nome ?? "Paciente"} — CliniHelp` }] }),
   component: PacientePage,
 });

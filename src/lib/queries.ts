@@ -91,6 +91,19 @@ export const configFinanceiraQuery = queryOptions({
   queryFn: async () => ok(await supabase.from("profissional_config").select("*")),
 });
 
+/** Nomes e tipos dos convênios (toda a equipe vê, para escolher no cadastro do paciente). */
+export const conveniosQuery = queryOptions({
+  queryKey: ["convenios"],
+  staleTime: 60_000,
+  queryFn: async () => ok(await supabase.from("convenios").select("id, nome, tipo, ativo").order("nome")),
+});
+
+/** Valores por sessão de cada convênio (só gestão e financeiro enxergam pelo RLS). */
+export const convenioValoresQuery = queryOptions({
+  queryKey: ["convenios", "valores"],
+  queryFn: async () => ok(await supabase.from("convenio_valores").select("convenio_id, valor_sessao")),
+});
+
 export const pacientesQuery = (busca: string) =>
   queryOptions({
     queryKey: ["pacientes", busca],
