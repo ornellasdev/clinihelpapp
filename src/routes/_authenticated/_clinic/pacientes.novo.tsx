@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { erroAmigavel } from "@/lib/ui-helpers";
+import { conveniosQuery } from "@/lib/queries";
 import { PageHeader } from "@/components/PageHeader";
 import { PacienteForm } from "@/components/pacientes/PacienteForm";
 import { Button } from "@/components/ui/button";

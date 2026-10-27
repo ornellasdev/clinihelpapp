@@ -6,7 +6,7 @@ import { ArrowLeft, CalendarPlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { agendaPacienteQuery, pacienteQuery } from "@/lib/queries";
+import { agendaPacienteQuery, conveniosQuery, pacienteQuery } from "@/lib/queries";
 import { useMe } from "@/hooks/use-me";
 import { podeAgendar, podeEditarPaciente } from "@/lib/permissions";
 import { STATUS_AGENDA, corEsp, erroAmigavel, fmtData, fmtHora, idade, iniciais } from "@/lib/ui-helpers";
