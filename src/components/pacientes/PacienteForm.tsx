@@ -34,6 +34,7 @@ export function PacienteForm({
     const { id: _id, created_at: _c, updated_at: _u, ...resto } = inicial;
     return resto;
   });
+  const { data: convenios } = useSuspenseQuery(conveniosQuery);
   const [salvando, setSalvando] = useState(false);
   const [buscandoCep, setBuscandoCep] = useState(false);
   const [avisoCep, setAvisoCep] = useState<string | null>(null);
