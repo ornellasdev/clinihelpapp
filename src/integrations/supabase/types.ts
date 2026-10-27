@@ -129,6 +129,48 @@ export type Database = {
           },
         ]
       }
+      auditoria: {
+        Row: {
+          acao: string
+          antes: Json | null
+          campos: string[] | null
+          created_at: string
+          depois: Json | null
+          descricao: string | null
+          id: number
+          registro_id: string | null
+          tabela: string
+          usuario_id: string | null
+          usuario_nome: string | null
+        }
+        Insert: {
+          acao: string
+          antes?: Json | null
+          campos?: string[] | null
+          created_at?: string
+          depois?: Json | null
+          descricao?: string | null
+          id?: never
+          registro_id?: string | null
+          tabela: string
+          usuario_id?: string | null
+          usuario_nome?: string | null
+        }
+        Update: {
+          acao?: string
+          antes?: Json | null
+          campos?: string[] | null
+          created_at?: string
+          depois?: Json | null
+          descricao?: string | null
+          id?: never
+          registro_id?: string | null
+          tabela?: string
+          usuario_id?: string | null
+          usuario_nome?: string | null
+        }
+        Relationships: []
+      }
       convenio_valores: {
         Row: {
           convenio_id: string
@@ -605,6 +647,7 @@ export type Database = {
       is_gestor: { Args: { _user_id: string }; Returns: boolean }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       master_exists: { Args: never; Returns: boolean }
+      registrar_acesso: { Args: { _acao: string }; Returns: undefined }
     }
     Enums: {
       agendamento_status:
