@@ -106,7 +106,7 @@ export const convenioValoresQuery = queryOptions({
 
 export const LIMITE_AUDITORIA = 500;
 
-export type FiltroAuditoria = { de: string; ate: string; usuario?: string; area?: string; acao?: string };
+export type FiltroAuditoria = { de: string; ate: string; usuario?: string | undefined; area?: string | undefined; acao?: string | undefined };
 
 /** Registros de auditoria do período (RLS esconde o prontuário de quem não é master). */
 export const auditoriaQuery = (f: FiltroAuditoria) =>

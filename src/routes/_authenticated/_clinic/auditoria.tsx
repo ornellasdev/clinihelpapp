@@ -187,7 +187,7 @@ function AuditoriaPage() {
               <span className={cn("rounded-full px-2 py-0.5 text-xs font-medium", TOM[acao.tom])}>{acao.label}</span>
               <span className="text-xs text-muted-foreground">{AREAS_AUDITORIA[r.tabela] ?? r.tabela}</span>
               <span className="min-w-0 flex-1 truncate">
-                {r.tabela === "convenios" && depois.tipo ? `${r.descricao} · ${rotuloTipoConvenio(String(depois.tipo))}` : r.descricao}
+                {r.tabela === "convenios" && depois["tipo"] ? `${r.descricao} · ${rotuloTipoConvenio(String(depois["tipo"]))}` : r.descricao}
               </span>
               {temDetalhe && <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />}
             </div>
