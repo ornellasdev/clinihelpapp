@@ -42,3 +42,7 @@ export function podeAlterarMembro(meusPapeis: readonly Papel[], papeisDoMembro: 
 export function papeisAtribuiveis(meusPapeis: readonly Papel[]): Papel[] {
   return PAPEIS.map((p) => p.value).filter((v) => v !== "master" || meusPapeis.includes("master"));
 }
+
+/** Auditoria: master e administrador; os registros de prontuário só aparecem para o master. */
+export const podeVerAuditoria = (p: readonly Papel[]) => ehGestor(p);
+export const veAuditoriaDoProntuario = (p: readonly Papel[]) => p.includes("master");

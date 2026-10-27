@@ -33,6 +33,14 @@ export const criarMasterInicial = createServerFn({ method: "POST" })
       .from("user_roles")
       .insert({ user_id: created.user.id, role: "master" });
     if (roleErr) throw new Error(roleErr.message);
+    const { registrarAuditoria } = await import("./auditoria.server");
+    await registrarAuditoria(supabaseAdmin, {
+      usuarioId: created.user.id,
+      acao: "criou",
+      registroId: created.user.id,
+      descricao: `Conta master inicial · ${data.nome}`,
+      depois: { nome: data.nome, email: data.email, papeis: ["master"] },
+    });
     return { ok: true };
   });
 
@@ -104,6 +112,14 @@ export const criarMembro = createServerFn({ method: "POST" })
       valor_sessao_padrao: data.valorPadrao,
       percentual_repasse_padrao: data.percentualPadrao,
     });
+    const { registrarAuditoria } = await import("./auditoria.server");
+    await registrarAuditoria(supabaseAdmin, {
+      usuarioId: context.userId,
+      acao: "criou",
+      registroId: id,
+      descricao: `${data.nome} · ${data.email}`,
+      depois: { nome: data.nome, email: data.email, papeis: data.papeis, percentual_repasse_padrao: data.percentualPadrao },
+    });
     return { id };
   });
 
@@ -121,6 +137,14 @@ export const definirAtivo = createServerFn({ method: "POST" })
       ban_duration: data.ativo ? "none" : "876000h",
     });
     await supabaseAdmin.from("profiles").update({ ativo: data.ativo }).eq("id", data.userId);
+    const { registrarAuditoria } = await import("./auditoria.server");
+    const { data: alvo } = await supabaseAdmin.from("profiles").select("nome, email").eq("id", data.userId).maybeSingle();
+    await registrarAuditoria(supabaseAdmin, {
+      usuarioId: context.userId,
+      acao: data.ativo ? "reativou" : "desativou",
+      registroId: data.userId,
+      descricao: [alvo?.nome, alvo?.email].filter(Boolean).join(" · "),
+    });
     return { ok: true };
   });
 
@@ -135,5 +159,13 @@ export const redefinirSenha = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, { password: data.password });
     if (error) throw new Error(error.message);
+    const { registrarAuditoria } = await import("./auditoria.server");
+    const { data: alvo } = await supabaseAdmin.from("profiles").select("nome, email").eq("id", data.userId).maybeSingle();
+    await registrarAuditoria(supabaseAdmin, {
+      usuarioId: context.userId,
+      acao: "redefiniu_senha",
+      registroId: data.userId,
+      descricao: [alvo?.nome, alvo?.email].filter(Boolean).join(" · "),
+    });
     return { ok: true };
   });

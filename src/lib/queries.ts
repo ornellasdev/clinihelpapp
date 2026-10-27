@@ -104,6 +104,29 @@ export const convenioValoresQuery = queryOptions({
   queryFn: async () => ok(await supabase.from("convenio_valores").select("convenio_id, valor_sessao")),
 });
 
+export const LIMITE_AUDITORIA = 500;
+
+export type FiltroAuditoria = { de: string; ate: string; usuario?: string | undefined; area?: string | undefined; acao?: string | undefined };
+
+/** Registros de auditoria do período (RLS esconde o prontuário de quem não é master). */
+export const auditoriaQuery = (f: FiltroAuditoria) =>
+  queryOptions({
+    queryKey: ["auditoria", f],
+    queryFn: async () => {
+      let q = supabase
+        .from("auditoria")
+        .select("*")
+        .gte("created_at", new Date(`${f.de}T00:00:00`).toISOString())
+        .lte("created_at", new Date(`${f.ate}T23:59:59.999`).toISOString())
+        .order("created_at", { ascending: false })
+        .limit(LIMITE_AUDITORIA);
+      if (f.usuario) q = q.eq("usuario_id", f.usuario);
+      if (f.area) q = q.eq("tabela", f.area);
+      if (f.acao) q = q.eq("acao", f.acao);
+      return ok(await q);
+    },
+  });
+
 export const pacientesQuery = (busca: string) =>
   queryOptions({
     queryKey: ["pacientes", busca],
