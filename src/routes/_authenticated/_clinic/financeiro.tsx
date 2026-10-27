@@ -6,7 +6,8 @@ import { ptBR } from "date-fns/locale";
 import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { equipeQuery, financeiroQuery } from "@/lib/queries";
+import { convenioValoresQuery, conveniosQuery, equipeQuery, financeiroQuery } from "@/lib/queries";
+import { TabelaConvenios } from "@/components/financeiro/TabelaConvenios";
 import { useMe } from "@/hooks/use-me";
 import { podeGerirFinanceiro } from "@/lib/permissions";
 import { calcularRepasse, formatarMoeda } from "@/lib/financeiro";
@@ -35,6 +36,8 @@ export const Route = createFileRoute("/_authenticated/_clinic/financeiro")({
     return Promise.all([
       context.queryClient.ensureQueryData(financeiroQuery(ini.toISOString(), addMonths(ini, 1).toISOString())),
       context.queryClient.ensureQueryData(equipeQuery),
+      context.queryClient.ensureQueryData(conveniosQuery),
+      context.queryClient.ensureQueryData(convenioValoresQuery),
     ]);
   },
   head: () => ({ meta: [{ title: "Financeiro — CliniHelp" }] }),
@@ -289,9 +292,10 @@ function FinanceiroPage() {
       </div>
       {gestor && (
         <p className="mt-3 text-xs text-muted-foreground">
-          Valor e percentual começam com o padrão do profissional (definido em Equipe) e podem ser ajustados em cada sessão.
+          O valor de cada sessão vem do convênio do paciente (tabela abaixo) e o percentual, do repasse do profissional (definido em Equipe). Os dois podem ser ajustados em cada sessão.
         </p>
       )}
+      {gestor && <TabelaConvenios />}
     </div>
   );
 }
