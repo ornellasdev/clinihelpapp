@@ -111,7 +111,7 @@ function AuditoriaPage() {
 
   return (
     <div>
-      <PageHeader titulo="Auditoria" descricao="Quem fez o quê no sistema, e quando. Os registros não podem ser alterados nem apagados." />
+      <PageHeader titulo="Auditoria" descricao="Os logs do Sistema estão aqui. Os registros não podem ser alterados nem apagados." />
 
       <div className="mb-5 flex flex-wrap items-end gap-2">
         <label className="grid gap-1 text-xs text-muted-foreground">
