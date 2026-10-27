@@ -13,6 +13,12 @@ export const Route = createFileRoute("/_authenticated/_clinic/pacientes/novo")({
   loader: ({ context }) => context.queryClient.ensureQueryData(conveniosQuery),
   head: () => ({ meta: [{ title: "Novo paciente — CliniHelp" }] }),
   component: NovoPaciente,
+  errorComponent: ({ error }) => (
+    <div role="alert" className="rounded-2xl border bg-card p-6 text-sm">
+      <p className="font-medium">Não foi possível abrir o cadastro de paciente.</p>
+      <p className="mt-1 text-muted-foreground">{error instanceof Error ? error.message : String(error)}</p>
+    </div>
+  ),
 });
 
 function NovoPaciente() {
