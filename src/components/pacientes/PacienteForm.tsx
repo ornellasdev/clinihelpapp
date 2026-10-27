@@ -1,7 +1,12 @@
 import { useRef, useState, type ReactNode } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import type { Tables, TablesInsert } from "@/integrations/supabase/types";
 import { buscarCep, formatarCep } from "@/lib/cep";
+import { conveniosQuery } from "@/lib/queries";
+import { rotuloTipoConvenio } from "@/lib/convenios";
+
+const NENHUM = "__nenhum";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -196,8 +201,35 @@ export function PacienteForm({
           <Campo label="País">
             <Input value={v("pais")} onChange={set("pais")} />
           </Campo>
-          <Campo label="Convênio">
-            <Input value={v("convenio")} onChange={set("convenio")} placeholder="Particular, plano..." />
+          <Campo label="Convênio / particular / liminar">
+            <Select
+              value={d.convenio_id ?? NENHUM}
+              onValueChange={(x) => {
+                const c = convenios.find((c) => c.id === x);
+                setD((p) => ({ ...p, convenio_id: c?.id ?? null, convenio: c?.nome ?? null }));
+              }}
+              disabled={!!somenteLeitura}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NENHUM}>Não informado</SelectItem>
+                {convenios
+                  .filter((c) => c.ativo || c.id === d.convenio_id)
+                  .map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.nome} · {rotuloTipoConvenio(c.tipo)}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+            {!d.convenio_id && d.convenio && (
+              <p className="text-xs text-muted-foreground">Informado antes: {d.convenio}. Escolha na lista para vincular o valor.</p>
+            )}
+            {convenios.length === 0 && (
+              <p className="text-xs text-muted-foreground">Nenhum convênio cadastrado. O financeiro cadastra na tela Financeiro.</p>
+            )}
           </Campo>
           <Campo label="Nº da carteirinha">
             <Input value={v("carteirinha")} onChange={set("carteirinha")} />
