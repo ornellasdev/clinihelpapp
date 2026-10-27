@@ -45,6 +45,7 @@ function AuthPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
     setEnviando(false);
     if (error) { toast.error(erroAmigavel(error.message)); return; }
+    await supabase.rpc("registrar_acesso", { _acao: "login" });
     navigate({ to: "/painel", replace: true });
   }
 
@@ -55,6 +56,7 @@ function AuthPage() {
       await criarMaster({ data: { nome, email, password: senha } });
       const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
       if (error) throw error;
+      await supabase.rpc("registrar_acesso", { _acao: "login" });
       toast.success("Conta master criada!");
       navigate({ to: "/painel", replace: true });
     } catch (err) {

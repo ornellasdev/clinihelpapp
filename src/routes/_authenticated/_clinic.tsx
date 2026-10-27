@@ -8,6 +8,7 @@ import {
   LogOut,
   Menu,
   ShieldAlert,
+  ScrollText,
   Users,
   UserRoundCog,
   Wallet,
@@ -36,6 +37,7 @@ const ITENS: Item[] = [
   { to: "/financeiro", label: "Financeiro", icon: Wallet, papeis: ["master", "administrador", "financeiro", "profissional"] },
   { to: "/equipe", label: "Equipe", icon: UserRoundCog, papeis: ["master", "administrador"] },
   { to: "/salas", label: "Salas", icon: DoorOpen, papeis: ["master", "administrador"] },
+  { to: "/auditoria", label: "Auditoria", icon: ScrollText, papeis: ["master", "administrador"] },
 ];
 
 function ClinicLayout() {
@@ -45,6 +47,7 @@ function ClinicLayout() {
   const [menuAberto, setMenuAberto] = useState(false);
 
   async function sair() {
+    await supabase.rpc("registrar_acesso", { _acao: "logout" });
     await queryClient.cancelQueries();
     queryClient.clear();
     await supabase.auth.signOut();
