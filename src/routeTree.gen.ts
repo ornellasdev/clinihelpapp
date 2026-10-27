@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedClinicRouteImport } from './routes/_authenticated/_clinic'
 import { Route as AuthenticatedClinicAgendaRouteImport } from './routes/_authenticated/_clinic/agenda'
+import { Route as AuthenticatedClinicAuditoriaRouteImport } from './routes/_authenticated/_clinic/auditoria'
 import { Route as AuthenticatedClinicEquipeRouteImport } from './routes/_authenticated/_clinic/equipe'
 import { Route as AuthenticatedClinicFinanceiroRouteImport } from './routes/_authenticated/_clinic/financeiro'
 import { Route as AuthenticatedClinicPainelRouteImport } from './routes/_authenticated/_clinic/painel'
@@ -44,6 +45,12 @@ const AuthenticatedClinicAgendaRoute =
   AuthenticatedClinicAgendaRouteImport.update({
     id: '/agenda',
     path: '/agenda',
+    getParentRoute: () => AuthenticatedClinicRoute,
+  } as any)
+const AuthenticatedClinicAuditoriaRoute =
+  AuthenticatedClinicAuditoriaRouteImport.update({
+    id: '/auditoria',
+    path: '/auditoria',
     getParentRoute: () => AuthenticatedClinicRoute,
   } as any)
 const AuthenticatedClinicEquipeRoute =
@@ -93,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/agenda': typeof AuthenticatedClinicAgendaRoute
+  '/auditoria': typeof AuthenticatedClinicAuditoriaRoute
   '/equipe': typeof AuthenticatedClinicEquipeRoute
   '/financeiro': typeof AuthenticatedClinicFinanceiroRoute
   '/painel': typeof AuthenticatedClinicPainelRoute
@@ -105,6 +113,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/agenda': typeof AuthenticatedClinicAgendaRoute
+  '/auditoria': typeof AuthenticatedClinicAuditoriaRoute
   '/equipe': typeof AuthenticatedClinicEquipeRoute
   '/financeiro': typeof AuthenticatedClinicFinanceiroRoute
   '/painel': typeof AuthenticatedClinicPainelRoute
@@ -120,6 +129,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/_clinic': typeof AuthenticatedClinicRouteWithChildren
   '/_authenticated/_clinic/agenda': typeof AuthenticatedClinicAgendaRoute
+  '/_authenticated/_clinic/auditoria': typeof AuthenticatedClinicAuditoriaRoute
   '/_authenticated/_clinic/equipe': typeof AuthenticatedClinicEquipeRoute
   '/_authenticated/_clinic/financeiro': typeof AuthenticatedClinicFinanceiroRoute
   '/_authenticated/_clinic/painel': typeof AuthenticatedClinicPainelRoute
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/agenda'
+    | '/auditoria'
     | '/equipe'
     | '/financeiro'
     | '/painel'
@@ -146,6 +157,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/agenda'
+    | '/auditoria'
     | '/equipe'
     | '/financeiro'
     | '/painel'
@@ -160,6 +172,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/_clinic'
     | '/_authenticated/_clinic/agenda'
+    | '/_authenticated/_clinic/auditoria'
     | '/_authenticated/_clinic/equipe'
     | '/_authenticated/_clinic/financeiro'
     | '/_authenticated/_clinic/painel'
@@ -210,6 +223,13 @@ declare module '@tanstack/react-router' {
       path: '/agenda'
       fullPath: '/agenda'
       preLoaderRoute: typeof AuthenticatedClinicAgendaRouteImport
+      parentRoute: typeof AuthenticatedClinicRoute
+    }
+    '/_authenticated/_clinic/auditoria': {
+      id: '/_authenticated/_clinic/auditoria'
+      path: '/auditoria'
+      fullPath: '/auditoria'
+      preLoaderRoute: typeof AuthenticatedClinicAuditoriaRouteImport
       parentRoute: typeof AuthenticatedClinicRoute
     }
     '/_authenticated/_clinic/equipe': {
@@ -266,6 +286,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedClinicRouteChildren {
   AuthenticatedClinicAgendaRoute: typeof AuthenticatedClinicAgendaRoute
+  AuthenticatedClinicAuditoriaRoute: typeof AuthenticatedClinicAuditoriaRoute
   AuthenticatedClinicEquipeRoute: typeof AuthenticatedClinicEquipeRoute
   AuthenticatedClinicFinanceiroRoute: typeof AuthenticatedClinicFinanceiroRoute
   AuthenticatedClinicPainelRoute: typeof AuthenticatedClinicPainelRoute
@@ -277,6 +298,7 @@ interface AuthenticatedClinicRouteChildren {
 
 const AuthenticatedClinicRouteChildren: AuthenticatedClinicRouteChildren = {
   AuthenticatedClinicAgendaRoute: AuthenticatedClinicAgendaRoute,
+  AuthenticatedClinicAuditoriaRoute: AuthenticatedClinicAuditoriaRoute,
   AuthenticatedClinicEquipeRoute: AuthenticatedClinicEquipeRoute,
   AuthenticatedClinicFinanceiroRoute: AuthenticatedClinicFinanceiroRoute,
   AuthenticatedClinicPainelRoute: AuthenticatedClinicPainelRoute,
