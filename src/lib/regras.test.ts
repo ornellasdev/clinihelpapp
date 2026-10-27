@@ -77,3 +77,23 @@ describe("administrador: tudo do master, exceto prontuários", () => {
     expect(podeAlterarMembro(["master"], ["master"])).toBe(true);
   });
 });
+
+import { podeVerAuditoria, veAuditoriaDoProntuario } from "./permissions";
+import { areasVisiveis } from "./auditoria";
+
+describe("auditoria", () => {
+  it("só master e administrador abrem a auditoria", () => {
+    expect(podeVerAuditoria(["master"])).toBe(true);
+    expect(podeVerAuditoria(["administrador"])).toBe(true);
+    expect(podeVerAuditoria(["financeiro"])).toBe(false);
+    expect(podeVerAuditoria(["recepcao"])).toBe(false);
+    expect(podeVerAuditoria(["profissional"])).toBe(false);
+  });
+
+  it("o administrador não vê registros do prontuário; o master vê", () => {
+    expect(veAuditoriaDoProntuario(["administrador"])).toBe(false);
+    expect(areasVisiveis(false).map(([k]) => k)).not.toContain("evolucoes");
+    expect(veAuditoriaDoProntuario(["master"])).toBe(true);
+    expect(areasVisiveis(true).map(([k]) => k)).toContain("evolucoes");
+  });
+});
