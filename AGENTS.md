@@ -20,3 +20,4 @@
 - Data reads use `queryOptions` in `src/lib/queries.ts` with the browser client (RLS applies), loaded via route loaders + `useSuspenseQuery`.
 - Business rules have tests in `src/lib/regras.test.ts`.
 - Financial exports (PDF/CSV/XLSX) are generated in the browser by `src/lib/exportar-financeiro.ts` from the rows already loaded on the Financeiro page, with jspdf/exceljs imported lazily on click. Why: exports respect the same RLS-filtered data the user sees and keep heavy libs out of the initial bundle.
+- Session prices come from the patient's plan: `convenios` (name/type, readable by all staff) + `convenio_valores` (price, gestor/financeiro only); `criar_financeiro_agendamento` uses the plan price, falling back to `profissional_config`. Why: reception picks the plan without seeing prices (SOD).
