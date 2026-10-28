@@ -71,6 +71,13 @@
       "when": 1793061030435,
       "tag": "0009_auditoria",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793150919822,
+      "tag": "0010_multi_clinicas",
+      "breakpoints": true
     }
   ]
 }
