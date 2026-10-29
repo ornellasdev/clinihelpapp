@@ -1,7 +1,8 @@
-import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, redirect, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import {
+  ArrowLeftRight,
   CalendarDays,
   DoorOpen,
   LayoutDashboard,
@@ -24,20 +25,35 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/_authenticated/_clinic")({
+export const Route = createFileRoute("/_authenticated/$clinica")({
+  beforeLoad: async ({ context, params, location }) => {
+    let me = await context.queryClient.ensureQueryData(meQuery);
+    if (me.dev_pendente) throw redirect({ to: "/dev" });
+    if (me.dev && me.clinica?.slug !== params.clinica) {
+      // Desenvolvedor abrindo outra clínica: troca a clínica ativa e descarta dados da anterior.
+      const { error } = await supabase.rpc("dev_entrar_clinica", { _slug: params.clinica });
+      if (error) throw redirect({ to: "/dev" });
+      context.queryClient.clear();
+      me = await context.queryClient.fetchQuery(meQuery);
+    }
+    if (!me.dev && me.clinica && me.clinica.slug !== params.clinica) {
+      const resto = location.pathname.split("/").slice(2).join("/");
+      throw redirect({ href: `/${me.clinica.slug}/${resto || "painel"}` });
+    }
+  },
   loader: ({ context }) => context.queryClient.ensureQueryData(meQuery),
   component: ClinicLayout,
 });
 
-type Item = { to: string; label: string; icon: LucideIcon; papeis?: Papel[] };
+type Item = { to: "/$clinica/painel" | "/$clinica/agenda" | "/$clinica/pacientes" | "/$clinica/financeiro" | "/$clinica/equipe" | "/$clinica/salas" | "/$clinica/auditoria"; label: string; icon: LucideIcon; papeis?: Papel[] };
 const ITENS: Item[] = [
-  { to: "/painel", label: "Painel", icon: LayoutDashboard },
-  { to: "/agenda", label: "Agenda", icon: CalendarDays },
-  { to: "/pacientes", label: "Pacientes", icon: Users },
-  { to: "/financeiro", label: "Financeiro", icon: Wallet, papeis: ["master", "administrador", "financeiro", "profissional"] },
-  { to: "/equipe", label: "Equipe", icon: UserRoundCog, papeis: ["master", "administrador"] },
-  { to: "/salas", label: "Salas", icon: DoorOpen, papeis: ["master", "administrador"] },
-  { to: "/auditoria", label: "Auditoria", icon: ScrollText, papeis: ["master", "administrador"] },
+  { to: "/$clinica/painel", label: "Painel", icon: LayoutDashboard },
+  { to: "/$clinica/agenda", label: "Agenda", icon: CalendarDays },
+  { to: "/$clinica/pacientes", label: "Pacientes", icon: Users },
+  { to: "/$clinica/financeiro", label: "Financeiro", icon: Wallet, papeis: ["master", "administrador", "financeiro", "profissional"] },
+  { to: "/$clinica/equipe", label: "Equipe", icon: UserRoundCog, papeis: ["master", "administrador"] },
+  { to: "/$clinica/salas", label: "Salas", icon: DoorOpen, papeis: ["master", "administrador"] },
+  { to: "/$clinica/auditoria", label: "Auditoria", icon: ScrollText, papeis: ["master", "administrador"] },
 ];
 
 function ClinicLayout() {
@@ -47,6 +63,12 @@ function ClinicLayout() {
   const [menuAberto, setMenuAberto] = useState(false);
 
   async function sair() {
+    if (me.dev) {
+      await queryClient.cancelQueries();
+      queryClient.clear();
+      navigate({ to: "/dev", replace: true });
+      return;
+    }
     await supabase.rpc("registrar_acesso", { _acao: "logout" });
     await queryClient.cancelQueries();
     queryClient.clear();
@@ -54,14 +76,16 @@ function ClinicLayout() {
     navigate({ to: "/auth", replace: true });
   }
 
-  if (me.papeis.length === 0) {
+  if (me.papeis.length === 0 || !me.clinica) {
     return (
       <div className="flex min-h-screen items-center justify-center p-6">
         <div className="max-w-sm text-center">
           <ShieldAlert className="mx-auto size-10 text-warning" />
           <h1 className="mt-4 text-xl font-semibold">Acesso não liberado</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Sua conta ainda não tem um perfil de acesso ativo. Fale com o administrador da clínica.
+            {me.clinica && !me.clinica.ativa
+              ? "O acesso desta clínica está suspenso. Entre em contato com o suporte CliniHelp."
+              : "Sua conta ainda não tem um perfil de acesso ativo. Fale com o administrador da clínica."}
           </p>
           <Button className="mt-6" variant="outline" onClick={sair}>
             Sair
@@ -72,7 +96,7 @@ function ClinicLayout() {
   }
 
   const itens = ITENS.filter((i) => !i.papeis || temPapel(me.papeis, ...i.papeis)).map((i) =>
-    i.to === "/financeiro" && !temPapel(me.papeis, "master", "administrador", "financeiro") ? { ...i, label: "Meus repasses" } : i,
+    i.to === "/$clinica/financeiro" && !temPapel(me.papeis, "master", "administrador", "financeiro") ? { ...i, label: "Meus repasses" } : i,
   );
   const principais = itens.slice(0, 4);
   const papelLabel = me.papeis.map((p) => PAPEIS.find((x) => x.value === p)?.label).join(" · ");
@@ -82,6 +106,7 @@ function ClinicLayout() {
       <Link
         key={i.to}
         to={i.to}
+        params={{ clinica: me.clinica?.slug ?? "" }}
         onClick={onClick}
         className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground/75 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
         activeProps={{ className: "!bg-sidebar-accent !text-sidebar-accent-foreground" }}
@@ -100,8 +125,8 @@ function ClinicLayout() {
         <div className="truncate text-sm font-medium">{me.nome}</div>
         <div className="truncate text-xs text-sidebar-foreground/60">{papelLabel}</div>
       </div>
-      <button onClick={sair} className="rounded-lg p-2 text-sidebar-foreground/70 hover:bg-sidebar hover:text-sidebar-foreground" aria-label="Sair">
-        <LogOut className="size-4" />
+      <button onClick={sair} className="rounded-lg p-2 text-sidebar-foreground/70 hover:bg-sidebar hover:text-sidebar-foreground" aria-label={me.dev ? "Trocar de clínica" : "Sair"} title={me.dev ? "Trocar de clínica" : "Sair"}>
+        {me.dev ? <ArrowLeftRight className="size-4" /> : <LogOut className="size-4" />}
       </button>
     </div>
   );
@@ -111,7 +136,8 @@ function ClinicLayout() {
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col bg-sidebar p-4 text-sidebar-foreground md:flex">
         <Logo className="px-2 py-3" />
-        <nav className="mt-6 flex flex-1 flex-col gap-1">{navLinks()}</nav>
+        <NomeClinica nome={me.clinica.nome} dev={me.dev} />
+        <nav className="mt-4 flex flex-1 flex-col gap-1">{navLinks()}</nav>
         {perfil}
       </aside>
 
@@ -126,6 +152,7 @@ function ClinicLayout() {
         <SheetContent side="right" className="flex w-72 flex-col border-sidebar-border bg-sidebar p-4 text-sidebar-foreground">
           <SheetTitle className="sr-only">Menu</SheetTitle>
           <Logo className="px-2 py-3" />
+          <NomeClinica nome={me.clinica.nome} dev={me.dev} />
           <nav className="mt-4 flex flex-1 flex-col gap-1">{navLinks(() => setMenuAberto(false))}</nav>
           {perfil}
         </SheetContent>
@@ -143,6 +170,7 @@ function ClinicLayout() {
           <Link
             key={i.to}
             to={i.to}
+            params={{ clinica: me.clinica?.slug ?? "" }}
             className={cn("flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium text-muted-foreground")}
             activeProps={{ className: "!text-primary" }}
           >
@@ -151,6 +179,17 @@ function ClinicLayout() {
           </Link>
         ))}
       </nav>
+    </div>
+  );
+}
+
+function NomeClinica({ nome, dev }: { nome: string; dev: boolean }) {
+  return (
+    <div className="mt-2 rounded-xl border border-sidebar-border px-3 py-2">
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+        {dev ? "Acesso desenvolvedor" : "Clínica"}
+      </div>
+      <div className="truncate text-sm font-medium">{nome}</div>
     </div>
   );
 }

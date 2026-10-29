@@ -18,10 +18,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/_authenticated/_clinic/equipe")({
-  beforeLoad: async ({ context }) => {
+export const Route = createFileRoute("/_authenticated/$clinica/equipe")({
+  beforeLoad: async ({ context, params }) => {
     const me = await context.queryClient.ensureQueryData(meQuery);
-    if (!ehGestor(me.papeis)) throw redirect({ to: "/painel" });
+    if (!ehGestor(me.papeis)) throw redirect({ to: "/$clinica/painel", params });
   },
   loader: ({ context }) =>
     Promise.all([

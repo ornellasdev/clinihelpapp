@@ -1,3 +1,4 @@
+import { useClinica } from "@/hooks/use-clinica";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense, useState } from "react";
@@ -20,7 +21,7 @@ import { cn } from "@/lib/utils";
 
 const ABAS = ["prontuario", "cadastro", "documentos", "atendimentos"] as const;
 
-export const Route = createFileRoute("/_authenticated/_clinic/pacientes/$id")({
+export const Route = createFileRoute("/_authenticated/$clinica/pacientes/$id")({
   validateSearch: z.object({
     aba: z.enum(ABAS).optional(),
     agendamento: z.string().optional(),
@@ -43,6 +44,7 @@ const Carregando = () => (
 );
 
 function PacientePage() {
+  const clinica = useClinica();
   const { id } = Route.useParams();
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
@@ -55,7 +57,7 @@ function PacientePage() {
   return (
     <div>
       <Button asChild variant="ghost" size="sm" className="-ml-2 mb-2">
-        <Link to="/pacientes">
+        <Link to="/$clinica/pacientes" params={{ clinica }}>
           <ArrowLeft /> Pacientes
         </Link>
       </Button>

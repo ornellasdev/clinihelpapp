@@ -1,10 +1,10 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { meQuery } from "@/lib/queries";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { criarMasterInicial } from "@/lib/equipe.functions";
 import { erroAmigavel } from "@/lib/ui-helpers";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
@@ -25,45 +25,50 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const [modo, setModo] = useState<"carregando" | "login" | "setup">("carregando");
-  const [nome, setNome] = useState("");
+  const qc = useQueryClient();
+  const [modo, setModo] = useState<"carregando" | "login" | "sem-clinica">("carregando");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [enviando, setEnviando] = useState(false);
-  const criarMaster = useServerFn(criarMasterInicial);
+
+  /** Leva cada pessoa para o endereço da própria clínica (ou para a área do desenvolvedor). */
+  async function irParaClinica(): Promise<boolean> {
+    qc.removeQueries({ queryKey: ["me"] });
+    const me = await qc.fetchQuery(meQuery);
+    if (me.dev || me.dev_pendente) {
+      navigate({ to: "/dev", replace: true });
+      return true;
+    }
+    if (me.clinica) {
+      navigate({ to: "/$clinica/painel", params: { clinica: me.clinica.slug }, replace: true });
+      return true;
+    }
+    setModo("sem-clinica");
+    return false;
+  }
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/painel", replace: true });
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (data.user) await irParaClinica().catch(() => setModo("login"));
+      else setModo("login");
     });
-    supabase.rpc("master_exists").then(({ data }) => setModo(data === false ? "setup" : "login"));
-  }, [navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function entrar(e: React.FormEvent) {
     e.preventDefault();
     setEnviando(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
-    setEnviando(false);
-    if (error) { toast.error(erroAmigavel(error.message)); return; }
+    if (error) { setEnviando(false); toast.error(erroAmigavel(error.message)); return; }
     await supabase.rpc("registrar_acesso", { _acao: "login" });
-    navigate({ to: "/painel", replace: true });
+    await irParaClinica();
+    setEnviando(false);
   }
 
-  async function configurar(e: React.FormEvent) {
-    e.preventDefault();
-    setEnviando(true);
-    try {
-      await criarMaster({ data: { nome, email, password: senha } });
-      const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
-      if (error) throw error;
-      await supabase.rpc("registrar_acesso", { _acao: "login" });
-      toast.success("Conta master criada!");
-      navigate({ to: "/painel", replace: true });
-    } catch (err) {
-      toast.error(erroAmigavel((err as Error).message));
-    } finally {
-      setEnviando(false);
-    }
+  async function sair() {
+    qc.clear();
+    await supabase.auth.signOut();
+    setModo("login");
   }
 
   return (
@@ -111,36 +116,18 @@ function AuthPage() {
               <p className="text-center text-xs text-muted-foreground">
                 Esqueceu a senha? Peça ao administrador (acesso master) para redefinir.
               </p>
+              <p className="text-center text-xs">
+                <Link to="/dev" className="text-muted-foreground/70 hover:text-foreground">Acesso desenvolvedor</Link>
+              </p>
             </form>
           )}
 
-          {modo === "setup" && (
-            <form onSubmit={configurar} className="space-y-5">
-              <div>
-                <span className="inline-block rounded-full bg-accent px-3 py-1 text-xs font-medium text-accent-foreground">
-                  Primeiro acesso
-                </span>
-                <h2 className="mt-3 text-2xl font-semibold">Criar conta master</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Esta conta terá acesso total e poderá cadastrar o restante da equipe.
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="nome">Nome completo</Label>
-                <Input id="nome" required value={nome} onChange={(e) => setNome(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">E-mail</Label>
-                <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="senha">Senha (mínimo 8 caracteres)</Label>
-                <Input id="senha" type="password" minLength={8} required value={senha} onChange={(e) => setSenha(e.target.value)} />
-              </div>
-              <Button type="submit" className="h-11 w-full" disabled={enviando}>
-                {enviando && <Loader2 className="animate-spin" />} Criar e entrar
-              </Button>
-            </form>
+          {modo === "sem-clinica" && (
+            <div className="space-y-4 text-center">
+              <h2 className="text-xl font-semibold">Conta sem clínica</h2>
+              <p className="text-sm text-muted-foreground">Esta conta não está ligada a nenhuma clínica. Fale com o suporte CliniHelp.</p>
+              <Button variant="outline" onClick={sair}>Sair</Button>
+            </div>
           )}
         </div>
       </main>

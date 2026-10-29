@@ -1,3 +1,4 @@
+import { useClinica } from "@/hooks/use-clinica";
 import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Clock, DoorOpen, FilePenLine, Trash2, User, UserRound } from "lucide-react";
@@ -14,6 +15,7 @@ import { cn } from "@/lib/utils";
 const STATUS_OPCOES = ["agendado", "confirmado", "realizado", "falta", "cancelado"] as const;
 
 export function AgendamentoDetalhe({ item, onClose }: { item: AgendaItem | null; onClose: () => void }) {
+  const clinica = useClinica();
   const me = useMe();
   const qc = useQueryClient();
   if (!item) return null;
@@ -83,13 +85,13 @@ export function AgendamentoDetalhe({ item, onClose }: { item: AgendaItem | null;
 
         <div className="flex flex-wrap gap-2 border-t pt-4">
           <Button asChild variant="secondary" size="sm">
-            <Link to="/pacientes/$id" params={{ id: item.paciente_id }}>
+            <Link to="/$clinica/pacientes/$id" params={{ clinica, id: item.paciente_id }}>
               <User /> Ficha do paciente
             </Link>
           </Button>
           {podeEvoluir && (
             <Button asChild size="sm">
-              <Link to="/pacientes/$id" params={{ id: item.paciente_id }} search={{ aba: "prontuario", agendamento: item.id }}>
+              <Link to="/$clinica/pacientes/$id" params={{ clinica, id: item.paciente_id }} search={{ aba: "prontuario", agendamento: item.id }}>
                 <FilePenLine /> Registrar evolução
               </Link>
             </Button>

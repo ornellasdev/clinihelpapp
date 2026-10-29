@@ -54,5 +54,7 @@ export function erroAmigavel(msg: string) {
   if (msg.includes("row-level security")) return "Seu perfil não tem permissão para esta ação.";
   if (msg.toLowerCase().includes("already been registered")) return "Já existe um usuário com este e-mail.";
   if (msg.includes("Invalid login credentials")) return "E-mail ou senha incorretos.";
+  if (msg.toLowerCase().includes("weak and easy to guess")) return "Senha muito fácil de adivinhar. Use letras, números e símbolos.";
+  if (msg.includes("outra clínica")) return "Esse registro pertence a outra clínica.";
   return msg;
 }
