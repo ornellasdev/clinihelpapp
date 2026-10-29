@@ -34,7 +34,7 @@ function Index() {
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <Logo />
         <Button asChild variant="secondary">
-          <Link to="/painel">Entrar</Link>
+          <Link to="/auth">Entrar</Link>
         </Button>
       </header>
       <main className="mx-auto max-w-6xl px-6 pb-20 pt-10 md:pt-20">
@@ -46,7 +46,7 @@ function Index() {
           Agenda, prontuário, documentos e financeiro da clínica — pensado para registrar evoluções direto do celular.
         </p>
         <Button asChild size="lg" className="mt-8 h-12 bg-gradient-brand px-8 font-semibold text-sidebar-primary-foreground hover:opacity-90">
-          <Link to="/painel">Acessar o sistema</Link>
+          <Link to="/auth">Acessar o sistema</Link>
         </Button>
 
         <div className="mt-20 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

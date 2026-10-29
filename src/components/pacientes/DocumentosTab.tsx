@@ -31,7 +31,7 @@ export function DocumentosTab({ pacienteId }: { pacienteId: string }) {
     setEnviando(true);
     for (const file of Array.from(files)) {
       const seguro = file.name.normalize("NFD").replace(/[^\w.-]+/g, "_");
-      const path = `${pacienteId}/${crypto.randomUUID()}-${seguro}`;
+      const path = `${me.clinica?.id}/${pacienteId}/${crypto.randomUUID()}-${seguro}`;
       const up = await supabase.storage.from(BUCKET).upload(path, file, { contentType: file.type });
       if (up.error) {
         toast.error(`${file.name}: ${erroAmigavel(up.error.message)}`);
