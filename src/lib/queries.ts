@@ -7,6 +7,8 @@ function ok<T>(res: { data: T | null; error: { message: string } | null }): T {
   return res.data as T;
 }
 
+export type ClinicaAtual = { id: string; nome: string; slug: string; ativa: boolean };
+
 export type Me = {
   id: string;
   nome: string;
@@ -15,30 +17,21 @@ export type Me = {
   registro: string | null;
   papeis: Papel[];
   especialidades: string[];
+  /** Desenvolvedor CliniHelp com verificação em duas etapas concluída. */
+  dev: boolean;
+  /** E-mail de desenvolvedor, mas ainda sem a verificação em duas etapas nesta sessão. */
+  dev_pendente: boolean;
+  clinica: ClinicaAtual | null;
 };
 
 export const meQuery = queryOptions({
   queryKey: ["me"],
   staleTime: 60_000,
   queryFn: async (): Promise<Me> => {
-    const { data: u } = await supabase.auth.getUser();
-    if (!u.user) throw new Error("Sessão expirada");
-    const id = u.user.id;
-    const [p, r, e] = await Promise.all([
-      supabase.from("profiles").select("*").eq("id", id).maybeSingle(),
-      supabase.from("user_roles").select("role").eq("user_id", id),
-      supabase.from("profissional_especialidades").select("especialidade_id").eq("user_id", id),
-    ]);
-    const profile = p.data;
-    return {
-      id,
-      nome: profile?.nome || u.user.email || "",
-      email: u.user.email ?? null,
-      conselho: profile?.conselho ?? null,
-      registro: profile?.registro_profissional ?? null,
-      papeis: profile?.ativo === false ? [] : ((r.data ?? []).map((x) => x.role) as Papel[]),
-      especialidades: (e.data ?? []).map((x) => x.especialidade_id),
-    };
+    const { data, error } = await supabase.rpc("meu_contexto");
+    if (error) throw new Error(error.message);
+    if (!data) throw new Error("Sessão expirada");
+    return data as unknown as Me;
   },
 });
 
