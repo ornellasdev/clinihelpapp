@@ -7,4 +7,4 @@
 - [x] Acesso desenvolvedor: Google + código do Google Authenticator, escolhe a clínica, permissão total
 - [x] Painel do desenvolvedor: criar clínica + master inicial, ativar/suspender clínica
 - [x] Equipe/auditoria/financeiro/documentos separados por clínica
-- [ ] Autorizar o e-mail Google do desenvolvedor (aguardando o e-mail do usuário)
+- [x] Autorizar o e-mail Google do desenvolvedor
