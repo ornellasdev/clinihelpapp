@@ -171,7 +171,6 @@ function ClinicLayout() {
             key={i.to}
             to={i.to}
             params={{ clinica: me.clinica?.slug ?? "" }}
-        params={{ clinica: me.clinica?.slug ?? "" }}
             className={cn("flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium text-muted-foreground")}
             activeProps={{ className: "!text-primary" }}
           >
