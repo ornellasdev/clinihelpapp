@@ -13,9 +13,9 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 
 export const Route = createFileRoute("/_authenticated/$clinica/salas")({
-  beforeLoad: async ({ context }) => {
+  beforeLoad: async ({ context, params }) => {
     const me = await context.queryClient.ensureQueryData(meQuery);
-    if (!ehGestor(me.papeis)) throw redirect({ to: "/painel" });
+    if (!ehGestor(me.papeis)) throw redirect({ to: "/$clinica/painel", params });
   },
   loader: ({ context }) => context.queryClient.ensureQueryData(salasQuery),
   head: () => ({ meta: [{ title: "Salas — CliniHelp" }] }),

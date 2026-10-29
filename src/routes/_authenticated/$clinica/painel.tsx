@@ -1,3 +1,4 @@
+import { useClinica } from "@/hooks/use-clinica";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { addDays, format, startOfDay } from "date-fns";
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/_authenticated/$clinica/painel")({
 });
 
 function Painel() {
+  const clinica = useClinica();
   const me = useMe();
   const [a, b] = hojeRange();
   const { data: hoje } = useSuspenseQuery(agendaQuery(a, b));
@@ -52,21 +54,21 @@ function Painel() {
         <div className="col-span-2 flex flex-wrap items-center gap-2 lg:col-span-1">
           {podeAgendar(me.papeis) && (
             <Button asChild className="flex-1">
-              <Link to="/agenda">
+              <Link to="/$clinica/agenda" params={{ clinica }}>
                 <CalendarDays /> Agenda
               </Link>
             </Button>
           )}
           {podeEditarPaciente(me.papeis) && (
             <Button asChild variant="secondary" className="flex-1">
-              <Link to="/pacientes/novo">
+              <Link to="/$clinica/pacientes/novo" params={{ clinica }}>
                 <Plus /> Paciente
               </Link>
             </Button>
           )}
           {!podeAgendar(me.papeis) && (
             <Button asChild variant="secondary" className="flex-1">
-              <Link to="/pacientes">
+              <Link to="/$clinica/pacientes" params={{ clinica }}>
                 <Users /> Pacientes
               </Link>
             </Button>
@@ -77,7 +79,7 @@ function Painel() {
       <section className="rounded-2xl border bg-card">
         <div className="flex items-center justify-between border-b p-4">
           <h2 className="font-semibold">{soProfissional ? "Minha agenda de hoje" : "Agenda de hoje"}</h2>
-          <Link to="/agenda" className="text-sm font-medium text-primary">
+          <Link to="/$clinica/agenda" params={{ clinica }} className="text-sm font-medium text-primary">
             Ver agenda
           </Link>
         </div>
@@ -89,7 +91,7 @@ function Painel() {
               <div key={i.id} className={cn("flex items-center gap-3 border-l-4 p-3", barraEsp(i.especialidade?.cor))}>
                 <div className="w-12 shrink-0 font-display font-semibold">{fmtHora(i.inicio)}</div>
                 <div className="min-w-0 flex-1">
-                  <Link to="/pacientes/$id" params={{ id: i.paciente_id }} className="block truncate font-medium hover:underline">
+                  <Link to="/$clinica/pacientes/$id" params={{ clinica, id: i.paciente_id }} className="block truncate font-medium hover:underline">
                     {i.paciente?.nome}
                   </Link>
                   <div className="truncate text-xs text-muted-foreground">
@@ -101,7 +103,7 @@ function Painel() {
                 </span>
                 {podeEscreverEvolucao(me.especialidades, i.especialidade_id) && i.profissional_id === me.id && (
                   <Button asChild size="sm" variant="outline">
-                    <Link to="/pacientes/$id" params={{ id: i.paciente_id }} search={{ aba: "prontuario", agendamento: i.id }}>
+                    <Link to="/$clinica/pacientes/$id" params={{ clinica, id: i.paciente_id }} search={{ aba: "prontuario", agendamento: i.id }}>
                       <FilePenLine /> <span className="hidden sm:inline">Evoluir</span>
                     </Link>
                   </Button>

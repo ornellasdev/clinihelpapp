@@ -1,3 +1,4 @@
+import { useClinica } from "@/hooks/use-clinica";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/_authenticated/$clinica/pacientes/")({
 });
 
 function PacientesPage() {
+  const clinica = useClinica();
   const me = useMe();
   const navigate = useNavigate();
   const [busca, setBusca] = useState("");
@@ -36,7 +38,7 @@ function PacientesPage() {
         acoes={
           podeEditarPaciente(me.papeis) && (
             <Button asChild>
-              <Link to="/pacientes/novo">
+              <Link to="/$clinica/pacientes/novo" params={{ clinica }}>
                 <Plus /> Novo paciente
               </Link>
             </Button>
@@ -59,7 +61,7 @@ function PacientesPage() {
           {pacientes.map((p) => (
             <button
               key={p.id}
-              onClick={() => navigate({ to: "/pacientes/$id", params: { id: p.id } })}
+              onClick={() => navigate({ to: "/$clinica/pacientes/$id", params: { clinica, id: p.id } })}
               className="flex items-start gap-3 rounded-2xl border bg-card p-4 text-left transition hover:border-primary/40 hover:shadow-sm"
             >
               <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-secondary font-display font-semibold text-secondary-foreground">

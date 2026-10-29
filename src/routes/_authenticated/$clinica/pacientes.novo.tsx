@@ -1,3 +1,4 @@
+import { useClinica } from "@/hooks/use-clinica";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
@@ -22,12 +23,13 @@ export const Route = createFileRoute("/_authenticated/$clinica/pacientes/novo")(
 });
 
 function NovoPaciente() {
+  const clinica = useClinica();
   const navigate = useNavigate();
   const qc = useQueryClient();
   return (
     <div>
       <Button asChild variant="ghost" size="sm" className="-ml-2 mb-2">
-        <Link to="/pacientes">
+        <Link to="/$clinica/pacientes" params={{ clinica }}>
           <ArrowLeft /> Pacientes
         </Link>
       </Button>
@@ -42,7 +44,7 @@ function NovoPaciente() {
           }
           toast.success("Paciente cadastrado.");
           qc.invalidateQueries({ queryKey: ["pacientes"] });
-          navigate({ to: "/pacientes/$id", params: { id: data.id }, search: { aba: "documentos" } });
+          navigate({ to: "/$clinica/pacientes/$id", params: { clinica, id: data.id }, search: { aba: "documentos" } });
         }}
       />
     </div>

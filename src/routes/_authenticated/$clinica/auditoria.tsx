@@ -51,9 +51,9 @@ export const Route = createFileRoute("/_authenticated/$clinica/auditoria")({
     area: search.area,
     acao: search.acao,
   }),
-  beforeLoad: async ({ context }) => {
+  beforeLoad: async ({ context, params }) => {
     const me = await context.queryClient.ensureQueryData(meQuery);
-    if (!podeVerAuditoria(me.papeis)) throw redirect({ to: "/painel" });
+    if (!podeVerAuditoria(me.papeis)) throw redirect({ to: "/$clinica/painel", params });
   },
   loader: async ({ context, deps }) => {
     await Promise.all([
