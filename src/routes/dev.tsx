@@ -310,7 +310,7 @@ function NovaClinica({ aberta, onClose, onCriada }: { aberta: boolean; onClose: 
 
   return (
     <Dialog open={aberta} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-h-[92vh] max-w-lg overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nova clínica</DialogTitle>
           <DialogDescription>Cria a clínica e a conta master que vai cadastrar o restante da equipe.</DialogDescription>
