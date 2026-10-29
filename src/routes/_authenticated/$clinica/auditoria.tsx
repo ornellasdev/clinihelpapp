@@ -36,7 +36,7 @@ const semanaPassada = () => format(subDays(new Date(), 6), "yyyy-MM-dd");
 const dia = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const TODOS = "todos";
 
-export const Route = createFileRoute("/_authenticated/_clinic/auditoria")({
+export const Route = createFileRoute("/_authenticated/$clinica/auditoria")({
   validateSearch: z.object({
     de: dia.optional(),
     ate: dia.optional(),

@@ -15,7 +15,7 @@ function hojeRange() {
   return [ini.toISOString(), addDays(ini, 1).toISOString()] as const;
 }
 
-export const Route = createFileRoute("/_authenticated/_clinic/painel")({
+export const Route = createFileRoute("/_authenticated/$clinica/painel")({
   loader: ({ context }) => {
     const [a, b] = hojeRange();
     return context.queryClient.ensureQueryData(agendaQuery(a, b));

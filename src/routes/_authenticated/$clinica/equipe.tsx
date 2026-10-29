@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/_authenticated/_clinic/equipe")({
+export const Route = createFileRoute("/_authenticated/$clinica/equipe")({
   beforeLoad: async ({ context }) => {
     const me = await context.queryClient.ensureQueryData(meQuery);
     if (!ehGestor(me.papeis)) throw redirect({ to: "/painel" });

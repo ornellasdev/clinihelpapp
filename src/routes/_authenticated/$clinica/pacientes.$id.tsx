@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 
 const ABAS = ["prontuario", "cadastro", "documentos", "atendimentos"] as const;
 
-export const Route = createFileRoute("/_authenticated/_clinic/pacientes/$id")({
+export const Route = createFileRoute("/_authenticated/$clinica/pacientes/$id")({
   validateSearch: z.object({
     aba: z.enum(ABAS).optional(),
     agendamento: z.string().optional(),

@@ -9,7 +9,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { PacienteForm } from "@/components/pacientes/PacienteForm";
 import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/_authenticated/_clinic/pacientes/novo")({
+export const Route = createFileRoute("/_authenticated/$clinica/pacientes/novo")({
   loader: ({ context }) => context.queryClient.ensureQueryData(conveniosQuery),
   head: () => ({ meta: [{ title: "Novo paciente — CliniHelp" }] }),
   component: NovoPaciente,

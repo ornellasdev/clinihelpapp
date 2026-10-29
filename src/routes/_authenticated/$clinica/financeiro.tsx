@@ -24,7 +24,7 @@ import { exportarCsv, exportarPdf, exportarXlsx, gerarCsv, montarLinhas } from "
 
 const mesAtual = () => format(new Date(), "yyyy-MM");
 
-export const Route = createFileRoute("/_authenticated/_clinic/financeiro")({
+export const Route = createFileRoute("/_authenticated/$clinica/financeiro")({
   validateSearch: z.object({
     mes: z.string().regex(/^\d{4}-\d{2}$/).optional(),
     prof: z.string().optional(),

@@ -29,7 +29,7 @@ function intervalo(data: string) {
   return [ini.toISOString(), addDays(ini, 1).toISOString()] as const;
 }
 
-export const Route = createFileRoute("/_authenticated/_clinic/agenda")({
+export const Route = createFileRoute("/_authenticated/$clinica/agenda")({
   validateSearch: searchSchema,
   loaderDeps: ({ search }) => ({ data: search.data ?? hoje() }),
   loader: ({ context, deps }) => {

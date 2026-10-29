@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export const Route = createFileRoute("/_authenticated/_clinic/pacientes/")({
+export const Route = createFileRoute("/_authenticated/$clinica/pacientes/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(pacientesQuery("")),
   head: () => ({ meta: [{ title: "Pacientes — CliniHelp" }] }),
   component: PacientesPage,

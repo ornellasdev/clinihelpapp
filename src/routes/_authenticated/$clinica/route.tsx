@@ -24,7 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/_authenticated/_clinic")({
+export const Route = createFileRoute("/_authenticated/$clinica")({
   loader: ({ context }) => context.queryClient.ensureQueryData(meQuery),
   component: ClinicLayout,
 });
