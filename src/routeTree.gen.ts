@@ -12,16 +12,16 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedClinicRouteImport } from './routes/_authenticated/_clinic'
-import { Route as AuthenticatedClinicAgendaRouteImport } from './routes/_authenticated/_clinic/agenda'
-import { Route as AuthenticatedClinicAuditoriaRouteImport } from './routes/_authenticated/_clinic/auditoria'
-import { Route as AuthenticatedClinicEquipeRouteImport } from './routes/_authenticated/_clinic/equipe'
-import { Route as AuthenticatedClinicFinanceiroRouteImport } from './routes/_authenticated/_clinic/financeiro'
-import { Route as AuthenticatedClinicPainelRouteImport } from './routes/_authenticated/_clinic/painel'
-import { Route as AuthenticatedClinicSalasRouteImport } from './routes/_authenticated/_clinic/salas'
-import { Route as AuthenticatedClinicPacientesIndexRouteImport } from './routes/_authenticated/_clinic/pacientes.index'
-import { Route as AuthenticatedClinicPacientesIdRouteImport } from './routes/_authenticated/_clinic/pacientes.$id'
-import { Route as AuthenticatedClinicPacientesNovoRouteImport } from './routes/_authenticated/_clinic/pacientes.novo'
+import { Route as AuthenticatedClinicaRouteRouteImport } from './routes/_authenticated/$clinica/route'
+import { Route as AuthenticatedClinicaAgendaRouteImport } from './routes/_authenticated/$clinica/agenda'
+import { Route as AuthenticatedClinicaAuditoriaRouteImport } from './routes/_authenticated/$clinica/auditoria'
+import { Route as AuthenticatedClinicaEquipeRouteImport } from './routes/_authenticated/$clinica/equipe'
+import { Route as AuthenticatedClinicaFinanceiroRouteImport } from './routes/_authenticated/$clinica/financeiro'
+import { Route as AuthenticatedClinicaPainelRouteImport } from './routes/_authenticated/$clinica/painel'
+import { Route as AuthenticatedClinicaSalasRouteImport } from './routes/_authenticated/$clinica/salas'
+import { Route as AuthenticatedClinicaPacientesIndexRouteImport } from './routes/_authenticated/$clinica/pacientes.index'
+import { Route as AuthenticatedClinicaPacientesIdRouteImport } from './routes/_authenticated/$clinica/pacientes.$id'
+import { Route as AuthenticatedClinicaPacientesNovoRouteImport } from './routes/_authenticated/$clinica/pacientes.novo'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -37,149 +37,155 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedClinicRoute = AuthenticatedClinicRouteImport.update({
-  id: '/_clinic',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedClinicAgendaRoute =
-  AuthenticatedClinicAgendaRouteImport.update({
+const AuthenticatedClinicaRouteRoute =
+  AuthenticatedClinicaRouteRouteImport.update({
+    id: '/$clinica',
+    path: '/$clinica',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedClinicaAgendaRoute =
+  AuthenticatedClinicaAgendaRouteImport.update({
     id: '/agenda',
     path: '/agenda',
-    getParentRoute: () => AuthenticatedClinicRoute,
+    getParentRoute: () => AuthenticatedClinicaRouteRoute,
   } as any)
-const AuthenticatedClinicAuditoriaRoute =
-  AuthenticatedClinicAuditoriaRouteImport.update({
+const AuthenticatedClinicaAuditoriaRoute =
+  AuthenticatedClinicaAuditoriaRouteImport.update({
     id: '/auditoria',
     path: '/auditoria',
-    getParentRoute: () => AuthenticatedClinicRoute,
+    getParentRoute: () => AuthenticatedClinicaRouteRoute,
   } as any)
-const AuthenticatedClinicEquipeRoute =
-  AuthenticatedClinicEquipeRouteImport.update({
+const AuthenticatedClinicaEquipeRoute =
+  AuthenticatedClinicaEquipeRouteImport.update({
     id: '/equipe',
     path: '/equipe',
-    getParentRoute: () => AuthenticatedClinicRoute,
+    getParentRoute: () => AuthenticatedClinicaRouteRoute,
   } as any)
-const AuthenticatedClinicFinanceiroRoute =
-  AuthenticatedClinicFinanceiroRouteImport.update({
+const AuthenticatedClinicaFinanceiroRoute =
+  AuthenticatedClinicaFinanceiroRouteImport.update({
     id: '/financeiro',
     path: '/financeiro',
-    getParentRoute: () => AuthenticatedClinicRoute,
+    getParentRoute: () => AuthenticatedClinicaRouteRoute,
   } as any)
-const AuthenticatedClinicPainelRoute =
-  AuthenticatedClinicPainelRouteImport.update({
+const AuthenticatedClinicaPainelRoute =
+  AuthenticatedClinicaPainelRouteImport.update({
     id: '/painel',
     path: '/painel',
-    getParentRoute: () => AuthenticatedClinicRoute,
+    getParentRoute: () => AuthenticatedClinicaRouteRoute,
   } as any)
-const AuthenticatedClinicSalasRoute =
-  AuthenticatedClinicSalasRouteImport.update({
+const AuthenticatedClinicaSalasRoute =
+  AuthenticatedClinicaSalasRouteImport.update({
     id: '/salas',
     path: '/salas',
-    getParentRoute: () => AuthenticatedClinicRoute,
+    getParentRoute: () => AuthenticatedClinicaRouteRoute,
   } as any)
-const AuthenticatedClinicPacientesIndexRoute =
-  AuthenticatedClinicPacientesIndexRouteImport.update({
+const AuthenticatedClinicaPacientesIndexRoute =
+  AuthenticatedClinicaPacientesIndexRouteImport.update({
     id: '/pacientes/',
     path: '/pacientes/',
-    getParentRoute: () => AuthenticatedClinicRoute,
+    getParentRoute: () => AuthenticatedClinicaRouteRoute,
   } as any)
-const AuthenticatedClinicPacientesIdRoute =
-  AuthenticatedClinicPacientesIdRouteImport.update({
+const AuthenticatedClinicaPacientesIdRoute =
+  AuthenticatedClinicaPacientesIdRouteImport.update({
     id: '/pacientes/$id',
     path: '/pacientes/$id',
-    getParentRoute: () => AuthenticatedClinicRoute,
+    getParentRoute: () => AuthenticatedClinicaRouteRoute,
   } as any)
-const AuthenticatedClinicPacientesNovoRoute =
-  AuthenticatedClinicPacientesNovoRouteImport.update({
+const AuthenticatedClinicaPacientesNovoRoute =
+  AuthenticatedClinicaPacientesNovoRouteImport.update({
     id: '/pacientes/novo',
     path: '/pacientes/novo',
-    getParentRoute: () => AuthenticatedClinicRoute,
+    getParentRoute: () => AuthenticatedClinicaRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/agenda': typeof AuthenticatedClinicAgendaRoute
-  '/auditoria': typeof AuthenticatedClinicAuditoriaRoute
-  '/equipe': typeof AuthenticatedClinicEquipeRoute
-  '/financeiro': typeof AuthenticatedClinicFinanceiroRoute
-  '/painel': typeof AuthenticatedClinicPainelRoute
-  '/salas': typeof AuthenticatedClinicSalasRoute
-  '/pacientes/$id': typeof AuthenticatedClinicPacientesIdRoute
-  '/pacientes/novo': typeof AuthenticatedClinicPacientesNovoRoute
-  '/pacientes/': typeof AuthenticatedClinicPacientesIndexRoute
+  '/$clinica': typeof AuthenticatedClinicaRouteRouteWithChildren
+  '/$clinica/agenda': typeof AuthenticatedClinicaAgendaRoute
+  '/$clinica/auditoria': typeof AuthenticatedClinicaAuditoriaRoute
+  '/$clinica/equipe': typeof AuthenticatedClinicaEquipeRoute
+  '/$clinica/financeiro': typeof AuthenticatedClinicaFinanceiroRoute
+  '/$clinica/painel': typeof AuthenticatedClinicaPainelRoute
+  '/$clinica/salas': typeof AuthenticatedClinicaSalasRoute
+  '/$clinica/pacientes/$id': typeof AuthenticatedClinicaPacientesIdRoute
+  '/$clinica/pacientes/novo': typeof AuthenticatedClinicaPacientesNovoRoute
+  '/$clinica/pacientes/': typeof AuthenticatedClinicaPacientesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/agenda': typeof AuthenticatedClinicAgendaRoute
-  '/auditoria': typeof AuthenticatedClinicAuditoriaRoute
-  '/equipe': typeof AuthenticatedClinicEquipeRoute
-  '/financeiro': typeof AuthenticatedClinicFinanceiroRoute
-  '/painel': typeof AuthenticatedClinicPainelRoute
-  '/salas': typeof AuthenticatedClinicSalasRoute
-  '/pacientes/$id': typeof AuthenticatedClinicPacientesIdRoute
-  '/pacientes/novo': typeof AuthenticatedClinicPacientesNovoRoute
-  '/pacientes': typeof AuthenticatedClinicPacientesIndexRoute
+  '/$clinica': typeof AuthenticatedClinicaRouteRouteWithChildren
+  '/$clinica/agenda': typeof AuthenticatedClinicaAgendaRoute
+  '/$clinica/auditoria': typeof AuthenticatedClinicaAuditoriaRoute
+  '/$clinica/equipe': typeof AuthenticatedClinicaEquipeRoute
+  '/$clinica/financeiro': typeof AuthenticatedClinicaFinanceiroRoute
+  '/$clinica/painel': typeof AuthenticatedClinicaPainelRoute
+  '/$clinica/salas': typeof AuthenticatedClinicaSalasRoute
+  '/$clinica/pacientes/$id': typeof AuthenticatedClinicaPacientesIdRoute
+  '/$clinica/pacientes/novo': typeof AuthenticatedClinicaPacientesNovoRoute
+  '/$clinica/pacientes': typeof AuthenticatedClinicaPacientesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/_authenticated/_clinic': typeof AuthenticatedClinicRouteWithChildren
-  '/_authenticated/_clinic/agenda': typeof AuthenticatedClinicAgendaRoute
-  '/_authenticated/_clinic/auditoria': typeof AuthenticatedClinicAuditoriaRoute
-  '/_authenticated/_clinic/equipe': typeof AuthenticatedClinicEquipeRoute
-  '/_authenticated/_clinic/financeiro': typeof AuthenticatedClinicFinanceiroRoute
-  '/_authenticated/_clinic/painel': typeof AuthenticatedClinicPainelRoute
-  '/_authenticated/_clinic/salas': typeof AuthenticatedClinicSalasRoute
-  '/_authenticated/_clinic/pacientes/$id': typeof AuthenticatedClinicPacientesIdRoute
-  '/_authenticated/_clinic/pacientes/novo': typeof AuthenticatedClinicPacientesNovoRoute
-  '/_authenticated/_clinic/pacientes/': typeof AuthenticatedClinicPacientesIndexRoute
+  '/_authenticated/$clinica': typeof AuthenticatedClinicaRouteRouteWithChildren
+  '/_authenticated/$clinica/agenda': typeof AuthenticatedClinicaAgendaRoute
+  '/_authenticated/$clinica/auditoria': typeof AuthenticatedClinicaAuditoriaRoute
+  '/_authenticated/$clinica/equipe': typeof AuthenticatedClinicaEquipeRoute
+  '/_authenticated/$clinica/financeiro': typeof AuthenticatedClinicaFinanceiroRoute
+  '/_authenticated/$clinica/painel': typeof AuthenticatedClinicaPainelRoute
+  '/_authenticated/$clinica/salas': typeof AuthenticatedClinicaSalasRoute
+  '/_authenticated/$clinica/pacientes/$id': typeof AuthenticatedClinicaPacientesIdRoute
+  '/_authenticated/$clinica/pacientes/novo': typeof AuthenticatedClinicaPacientesNovoRoute
+  '/_authenticated/$clinica/pacientes/': typeof AuthenticatedClinicaPacientesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/auth'
-    | '/agenda'
-    | '/auditoria'
-    | '/equipe'
-    | '/financeiro'
-    | '/painel'
-    | '/salas'
-    | '/pacientes/$id'
-    | '/pacientes/novo'
-    | '/pacientes/'
+    | '/$clinica'
+    | '/$clinica/agenda'
+    | '/$clinica/auditoria'
+    | '/$clinica/equipe'
+    | '/$clinica/financeiro'
+    | '/$clinica/painel'
+    | '/$clinica/salas'
+    | '/$clinica/pacientes/$id'
+    | '/$clinica/pacientes/novo'
+    | '/$clinica/pacientes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
-    | '/agenda'
-    | '/auditoria'
-    | '/equipe'
-    | '/financeiro'
-    | '/painel'
-    | '/salas'
-    | '/pacientes/$id'
-    | '/pacientes/novo'
-    | '/pacientes'
+    | '/$clinica'
+    | '/$clinica/agenda'
+    | '/$clinica/auditoria'
+    | '/$clinica/equipe'
+    | '/$clinica/financeiro'
+    | '/$clinica/painel'
+    | '/$clinica/salas'
+    | '/$clinica/pacientes/$id'
+    | '/$clinica/pacientes/novo'
+    | '/$clinica/pacientes'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
-    | '/_authenticated/_clinic'
-    | '/_authenticated/_clinic/agenda'
-    | '/_authenticated/_clinic/auditoria'
-    | '/_authenticated/_clinic/equipe'
-    | '/_authenticated/_clinic/financeiro'
-    | '/_authenticated/_clinic/painel'
-    | '/_authenticated/_clinic/salas'
-    | '/_authenticated/_clinic/pacientes/$id'
-    | '/_authenticated/_clinic/pacientes/novo'
-    | '/_authenticated/_clinic/pacientes/'
+    | '/_authenticated/$clinica'
+    | '/_authenticated/$clinica/agenda'
+    | '/_authenticated/$clinica/auditoria'
+    | '/_authenticated/$clinica/equipe'
+    | '/_authenticated/$clinica/financeiro'
+    | '/_authenticated/$clinica/painel'
+    | '/_authenticated/$clinica/salas'
+    | '/_authenticated/$clinica/pacientes/$id'
+    | '/_authenticated/$clinica/pacientes/novo'
+    | '/_authenticated/$clinica/pacientes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -211,113 +217,117 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/_clinic': {
-      id: '/_authenticated/_clinic'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedClinicRouteImport
+    '/_authenticated/$clinica': {
+      id: '/_authenticated/$clinica'
+      path: '/$clinica'
+      fullPath: '/$clinica'
+      preLoaderRoute: typeof AuthenticatedClinicaRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/_clinic/agenda': {
-      id: '/_authenticated/_clinic/agenda'
+    '/_authenticated/$clinica/agenda': {
+      id: '/_authenticated/$clinica/agenda'
       path: '/agenda'
-      fullPath: '/agenda'
-      preLoaderRoute: typeof AuthenticatedClinicAgendaRouteImport
-      parentRoute: typeof AuthenticatedClinicRoute
+      fullPath: '/$clinica/agenda'
+      preLoaderRoute: typeof AuthenticatedClinicaAgendaRouteImport
+      parentRoute: typeof AuthenticatedClinicaRouteRoute
     }
-    '/_authenticated/_clinic/auditoria': {
-      id: '/_authenticated/_clinic/auditoria'
+    '/_authenticated/$clinica/auditoria': {
+      id: '/_authenticated/$clinica/auditoria'
       path: '/auditoria'
-      fullPath: '/auditoria'
-      preLoaderRoute: typeof AuthenticatedClinicAuditoriaRouteImport
-      parentRoute: typeof AuthenticatedClinicRoute
+      fullPath: '/$clinica/auditoria'
+      preLoaderRoute: typeof AuthenticatedClinicaAuditoriaRouteImport
+      parentRoute: typeof AuthenticatedClinicaRouteRoute
     }
-    '/_authenticated/_clinic/equipe': {
-      id: '/_authenticated/_clinic/equipe'
+    '/_authenticated/$clinica/equipe': {
+      id: '/_authenticated/$clinica/equipe'
       path: '/equipe'
-      fullPath: '/equipe'
-      preLoaderRoute: typeof AuthenticatedClinicEquipeRouteImport
-      parentRoute: typeof AuthenticatedClinicRoute
+      fullPath: '/$clinica/equipe'
+      preLoaderRoute: typeof AuthenticatedClinicaEquipeRouteImport
+      parentRoute: typeof AuthenticatedClinicaRouteRoute
     }
-    '/_authenticated/_clinic/financeiro': {
-      id: '/_authenticated/_clinic/financeiro'
+    '/_authenticated/$clinica/financeiro': {
+      id: '/_authenticated/$clinica/financeiro'
       path: '/financeiro'
-      fullPath: '/financeiro'
-      preLoaderRoute: typeof AuthenticatedClinicFinanceiroRouteImport
-      parentRoute: typeof AuthenticatedClinicRoute
+      fullPath: '/$clinica/financeiro'
+      preLoaderRoute: typeof AuthenticatedClinicaFinanceiroRouteImport
+      parentRoute: typeof AuthenticatedClinicaRouteRoute
     }
-    '/_authenticated/_clinic/painel': {
-      id: '/_authenticated/_clinic/painel'
+    '/_authenticated/$clinica/painel': {
+      id: '/_authenticated/$clinica/painel'
       path: '/painel'
-      fullPath: '/painel'
-      preLoaderRoute: typeof AuthenticatedClinicPainelRouteImport
-      parentRoute: typeof AuthenticatedClinicRoute
+      fullPath: '/$clinica/painel'
+      preLoaderRoute: typeof AuthenticatedClinicaPainelRouteImport
+      parentRoute: typeof AuthenticatedClinicaRouteRoute
     }
-    '/_authenticated/_clinic/salas': {
-      id: '/_authenticated/_clinic/salas'
+    '/_authenticated/$clinica/salas': {
+      id: '/_authenticated/$clinica/salas'
       path: '/salas'
-      fullPath: '/salas'
-      preLoaderRoute: typeof AuthenticatedClinicSalasRouteImport
-      parentRoute: typeof AuthenticatedClinicRoute
+      fullPath: '/$clinica/salas'
+      preLoaderRoute: typeof AuthenticatedClinicaSalasRouteImport
+      parentRoute: typeof AuthenticatedClinicaRouteRoute
     }
-    '/_authenticated/_clinic/pacientes/': {
-      id: '/_authenticated/_clinic/pacientes/'
+    '/_authenticated/$clinica/pacientes/': {
+      id: '/_authenticated/$clinica/pacientes/'
       path: '/pacientes'
-      fullPath: '/pacientes/'
-      preLoaderRoute: typeof AuthenticatedClinicPacientesIndexRouteImport
-      parentRoute: typeof AuthenticatedClinicRoute
+      fullPath: '/$clinica/pacientes/'
+      preLoaderRoute: typeof AuthenticatedClinicaPacientesIndexRouteImport
+      parentRoute: typeof AuthenticatedClinicaRouteRoute
     }
-    '/_authenticated/_clinic/pacientes/$id': {
-      id: '/_authenticated/_clinic/pacientes/$id'
+    '/_authenticated/$clinica/pacientes/$id': {
+      id: '/_authenticated/$clinica/pacientes/$id'
       path: '/pacientes/$id'
-      fullPath: '/pacientes/$id'
-      preLoaderRoute: typeof AuthenticatedClinicPacientesIdRouteImport
-      parentRoute: typeof AuthenticatedClinicRoute
+      fullPath: '/$clinica/pacientes/$id'
+      preLoaderRoute: typeof AuthenticatedClinicaPacientesIdRouteImport
+      parentRoute: typeof AuthenticatedClinicaRouteRoute
     }
-    '/_authenticated/_clinic/pacientes/novo': {
-      id: '/_authenticated/_clinic/pacientes/novo'
+    '/_authenticated/$clinica/pacientes/novo': {
+      id: '/_authenticated/$clinica/pacientes/novo'
       path: '/pacientes/novo'
-      fullPath: '/pacientes/novo'
-      preLoaderRoute: typeof AuthenticatedClinicPacientesNovoRouteImport
-      parentRoute: typeof AuthenticatedClinicRoute
+      fullPath: '/$clinica/pacientes/novo'
+      preLoaderRoute: typeof AuthenticatedClinicaPacientesNovoRouteImport
+      parentRoute: typeof AuthenticatedClinicaRouteRoute
     }
   }
 }
 
-interface AuthenticatedClinicRouteChildren {
-  AuthenticatedClinicAgendaRoute: typeof AuthenticatedClinicAgendaRoute
-  AuthenticatedClinicAuditoriaRoute: typeof AuthenticatedClinicAuditoriaRoute
-  AuthenticatedClinicEquipeRoute: typeof AuthenticatedClinicEquipeRoute
-  AuthenticatedClinicFinanceiroRoute: typeof AuthenticatedClinicFinanceiroRoute
-  AuthenticatedClinicPainelRoute: typeof AuthenticatedClinicPainelRoute
-  AuthenticatedClinicSalasRoute: typeof AuthenticatedClinicSalasRoute
-  AuthenticatedClinicPacientesIdRoute: typeof AuthenticatedClinicPacientesIdRoute
-  AuthenticatedClinicPacientesNovoRoute: typeof AuthenticatedClinicPacientesNovoRoute
-  AuthenticatedClinicPacientesIndexRoute: typeof AuthenticatedClinicPacientesIndexRoute
+interface AuthenticatedClinicaRouteRouteChildren {
+  AuthenticatedClinicaAgendaRoute: typeof AuthenticatedClinicaAgendaRoute
+  AuthenticatedClinicaAuditoriaRoute: typeof AuthenticatedClinicaAuditoriaRoute
+  AuthenticatedClinicaEquipeRoute: typeof AuthenticatedClinicaEquipeRoute
+  AuthenticatedClinicaFinanceiroRoute: typeof AuthenticatedClinicaFinanceiroRoute
+  AuthenticatedClinicaPainelRoute: typeof AuthenticatedClinicaPainelRoute
+  AuthenticatedClinicaSalasRoute: typeof AuthenticatedClinicaSalasRoute
+  AuthenticatedClinicaPacientesIdRoute: typeof AuthenticatedClinicaPacientesIdRoute
+  AuthenticatedClinicaPacientesNovoRoute: typeof AuthenticatedClinicaPacientesNovoRoute
+  AuthenticatedClinicaPacientesIndexRoute: typeof AuthenticatedClinicaPacientesIndexRoute
 }
 
-const AuthenticatedClinicRouteChildren: AuthenticatedClinicRouteChildren = {
-  AuthenticatedClinicAgendaRoute: AuthenticatedClinicAgendaRoute,
-  AuthenticatedClinicAuditoriaRoute: AuthenticatedClinicAuditoriaRoute,
-  AuthenticatedClinicEquipeRoute: AuthenticatedClinicEquipeRoute,
-  AuthenticatedClinicFinanceiroRoute: AuthenticatedClinicFinanceiroRoute,
-  AuthenticatedClinicPainelRoute: AuthenticatedClinicPainelRoute,
-  AuthenticatedClinicSalasRoute: AuthenticatedClinicSalasRoute,
-  AuthenticatedClinicPacientesIdRoute: AuthenticatedClinicPacientesIdRoute,
-  AuthenticatedClinicPacientesNovoRoute: AuthenticatedClinicPacientesNovoRoute,
-  AuthenticatedClinicPacientesIndexRoute:
-    AuthenticatedClinicPacientesIndexRoute,
-}
+const AuthenticatedClinicaRouteRouteChildren: AuthenticatedClinicaRouteRouteChildren =
+  {
+    AuthenticatedClinicaAgendaRoute: AuthenticatedClinicaAgendaRoute,
+    AuthenticatedClinicaAuditoriaRoute: AuthenticatedClinicaAuditoriaRoute,
+    AuthenticatedClinicaEquipeRoute: AuthenticatedClinicaEquipeRoute,
+    AuthenticatedClinicaFinanceiroRoute: AuthenticatedClinicaFinanceiroRoute,
+    AuthenticatedClinicaPainelRoute: AuthenticatedClinicaPainelRoute,
+    AuthenticatedClinicaSalasRoute: AuthenticatedClinicaSalasRoute,
+    AuthenticatedClinicaPacientesIdRoute: AuthenticatedClinicaPacientesIdRoute,
+    AuthenticatedClinicaPacientesNovoRoute:
+      AuthenticatedClinicaPacientesNovoRoute,
+    AuthenticatedClinicaPacientesIndexRoute:
+      AuthenticatedClinicaPacientesIndexRoute,
+  }
 
-const AuthenticatedClinicRouteWithChildren =
-  AuthenticatedClinicRoute._addFileChildren(AuthenticatedClinicRouteChildren)
+const AuthenticatedClinicaRouteRouteWithChildren =
+  AuthenticatedClinicaRouteRoute._addFileChildren(
+    AuthenticatedClinicaRouteRouteChildren,
+  )
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedClinicRoute: typeof AuthenticatedClinicRouteWithChildren
+  AuthenticatedClinicaRouteRoute: typeof AuthenticatedClinicaRouteRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedClinicRoute: AuthenticatedClinicRouteWithChildren,
+  AuthenticatedClinicaRouteRoute: AuthenticatedClinicaRouteRouteWithChildren,
 }
 
 const AuthenticatedRouteRouteWithChildren =
