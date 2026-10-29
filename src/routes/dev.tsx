@@ -315,7 +315,7 @@ function NovaClinica({ aberta, onClose, onCriada }: { aberta: boolean; onClose: 
           <DialogTitle>Nova clínica</DialogTitle>
           <DialogDescription>Cria a clínica e a conta master que vai cadastrar o restante da equipe.</DialogDescription>
         </DialogHeader>
-        <form onSubmit={salvar} className="space-y-4">
+        <form onSubmit={salvar} className="min-w-0 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="c-nome">Nome da clínica</Label>
             <Input
@@ -325,18 +325,22 @@ function NovaClinica({ aberta, onClose, onCriada }: { aberta: boolean; onClose: 
               onChange={(e) => { setNome(e.target.value); if (!slugEditado) setSlug(gerarSlug(e.target.value)); }}
             />
           </div>
-          <div className="space-y-2">
+          <div className="min-w-0 space-y-2">
             <Label htmlFor="c-slug">Endereço</Label>
-            <div className="flex items-center rounded-md border bg-muted/40 pl-3 text-sm text-muted-foreground focus-within:ring-2 focus-within:ring-ring">
-              <span className="shrink-0 truncate">{typeof window !== "undefined" ? window.location.host : ""}/</span>
+            <div className="flex min-w-0 items-center rounded-md border bg-background pl-3 text-sm text-muted-foreground focus-within:ring-2 focus-within:ring-ring">
+              <span className="shrink-0">/</span>
               <input
                 id="c-slug"
                 required
                 value={slug}
+                placeholder="nome-da-clinica"
                 onChange={(e) => { setSlugEditado(true); setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "")); }}
-                className="h-10 min-w-0 flex-1 bg-transparent pr-3 font-mono text-foreground outline-none"
+                className="h-10 w-full min-w-0 flex-1 bg-transparent pr-3 font-mono text-foreground outline-none placeholder:text-muted-foreground/60"
               />
             </div>
+            <p className="break-all text-xs text-muted-foreground">
+              Link da clínica: {typeof window !== "undefined" ? window.location.origin : ""}/{slug || "nome-da-clinica"}
+            </p>
           </div>
           <div className="rounded-xl bg-muted/50 p-4">
             <div className="mb-3 flex items-center gap-2 text-sm font-medium"><KeyRound className="size-4" /> Conta master</div>
