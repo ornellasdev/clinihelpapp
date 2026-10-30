@@ -41,7 +41,7 @@ export function nomeArquivoRelatorio(paciente: string, de: string, ate: string) 
   return `relatorio-${slug || "paciente"}-${de}-a-${ate}.pdf`;
 }
 
-export async function gerarRelatorioPaciente(d: DadosRelatorio) {
+export async function gerarRelatorioPaciente(d: DadosRelatorio, modo: "baixar" | "arquivo" = "baixar") {
   const [{ jsPDF }, { default: autoTable }] = await Promise.all([import("jspdf"), import("jspdf-autotable")]);
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const W = doc.internal.pageSize.getWidth();
@@ -213,6 +213,8 @@ export async function gerarRelatorioPaciente(d: DadosRelatorio) {
     doc.text(`Página ${i} de ${total}`, W - M, H - 8, { align: "right" });
   }
 
-  doc.save(nomeArquivoRelatorio(d.paciente.nome, d.de, d.ate));
-  return { evolucoes: evs.length };
+  const nome = nomeArquivoRelatorio(d.paciente.nome, d.de, d.ate);
+  if (modo === "arquivo") return { evolucoes: evs.length, nome, arquivo: doc.output("blob") };
+  doc.save(nome);
+  return { evolucoes: evs.length, nome, arquivo: null };
 }

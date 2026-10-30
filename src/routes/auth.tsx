@@ -116,6 +116,9 @@ function AuthPage() {
               <p className="text-center text-xs text-muted-foreground">
                 Esqueceu a senha? Peça ao administrador (acesso master) para redefinir.
               </p>
+              <Button asChild variant="outline" className="h-11 w-full">
+                <Link to="/familia">Sou pai, mãe ou responsável</Link>
+              </Button>
               <p className="text-center text-xs">
                 <Link to="/dev" className="text-muted-foreground/70 hover:text-foreground">Acesso desenvolvedor</Link>
               </p>
@@ -125,8 +128,11 @@ function AuthPage() {
           {modo === "sem-clinica" && (
             <div className="space-y-4 text-center">
               <h2 className="text-xl font-semibold">Conta sem clínica</h2>
-              <p className="text-sm text-muted-foreground">Esta conta não está ligada a nenhuma clínica. Fale com o suporte CliniHelp.</p>
-              <Button variant="outline" onClick={sair}>Sair</Button>
+              <p className="text-sm text-muted-foreground">Esta conta não está ligada a nenhuma clínica. Se você é responsável por uma criança, use a Área da família.</p>
+              <div className="flex justify-center gap-2">
+                <Button asChild><Link to="/familia">Área da família</Link></Button>
+                <Button variant="outline" onClick={sair}>Sair</Button>
+              </div>
             </div>
           )}
         </div>

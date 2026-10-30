@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { format, startOfMonth, subMonths } from "date-fns";
-import { FileDown, Loader2 } from "lucide-react";
+import { FileDown, Loader2, Send } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 import { evolucoesQuery, metasQuery, pacienteQuery, progressoMetasQuery } from "@/lib/queries";
@@ -33,15 +34,16 @@ export function RelatorioPdfDialog({
   const [finalidade, setFinalidade] = useState("Escola");
   const [incluirMetas, setIncluirMetas] = useState(true);
   const [incluirEvolucoes, setIncluirEvolucoes] = useState(true);
-  const [gerando, setGerando] = useState(false);
+  const [gerando, setGerando] = useState<"" | "baixar" | "liberar">("");
+  const podeLiberar = me.papeis.includes("master") || me.especialidades.length > 0;
 
   const qtd = evolucoes.filter((e) => e.data_atendimento >= de && e.data_atendimento <= ate && esps.includes(e.especialidade_id)).length;
 
-  async function gerar() {
+  async function gerar(modo: "baixar" | "liberar") {
     if (!de || !ate || de > ate) { toast.error("Confira o período."); return; }
     if (!esps.length) { toast.error("Escolha ao menos uma especialidade."); return; }
     if (!incluirMetas && !incluirEvolucoes) { toast.error("Escolha o que incluir no relatório."); return; }
-    setGerando(true);
+    setGerando(modo);
     try {
       const [paciente, metas, progresso] = await Promise.all([
         qc.ensureQueryData(pacienteQuery(pacienteId)),
@@ -49,7 +51,7 @@ export function RelatorioPdfDialog({
         qc.ensureQueryData(progressoMetasQuery(pacienteId)),
       ]);
       const { gerarRelatorioPaciente } = await import("@/lib/relatorio-paciente");
-      await gerarRelatorioPaciente({
+      const r = await gerarRelatorioPaciente({
         clinica: me.clinica?.nome ?? "Clínica",
         finalidade,
         paciente,
@@ -61,13 +63,38 @@ export function RelatorioPdfDialog({
         progresso,
         incluirMetas,
         incluirEvolucoes,
-      });
+      }, modo === "liberar" ? "arquivo" : "baixar");
+      if (modo === "liberar" && r.arquivo) {
+        const clinicaId = me.clinica?.id;
+        if (!clinicaId) throw new Error("Clínica não identificada.");
+        const caminho = `${clinicaId}/${pacienteId}/${crypto.randomUUID()}.pdf`;
+        const up = await supabase.storage.from("relatorios-familia").upload(caminho, r.arquivo, { contentType: "application/pdf" });
+        if (up.error) throw new Error("Não foi possível enviar o relatório.");
+        const { error } = await supabase.from("relatorios_liberados").insert({
+          paciente_id: pacienteId,
+          titulo: `Relatório de evolução${finalidade ? ` — ${finalidade}` : ""}`,
+          finalidade,
+          periodo_de: de,
+          periodo_ate: ate,
+          storage_path: caminho,
+          tamanho: r.arquivo.size,
+          liberado_por_nome: me.nome,
+        });
+        if (error) {
+          await supabase.storage.from("relatorios-familia").remove([caminho]);
+          throw new Error("Não foi possível liberar o relatório.");
+        }
+        qc.invalidateQueries({ queryKey: ["relatorios_liberados", pacienteId] });
+        toast.success("Relatório liberado na Área da família.");
+        setAberto(false);
+        return;
+      }
       toast.success("Relatório gerado.");
       setAberto(false);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Não foi possível gerar o relatório.");
     } finally {
-      setGerando(false);
+      setGerando("");
     }
   }
 
@@ -130,9 +157,14 @@ export function RelatorioPdfDialog({
               </label>
             </div>
           </div>
-          <DialogFooter>
-            <Button onClick={gerar} disabled={gerando} className="w-full sm:w-auto">
-              {gerando ? <Loader2 className="animate-spin" /> : <FileDown />} Gerar PDF
+          <DialogFooter className="gap-2">
+            {podeLiberar && (
+              <Button variant="secondary" onClick={() => gerar("liberar")} disabled={!!gerando} className="w-full sm:w-auto">
+                {gerando === "liberar" ? <Loader2 className="animate-spin" /> : <Send />} Liberar para os responsáveis
+              </Button>
+            )}
+            <Button onClick={() => gerar("baixar")} disabled={!!gerando} className="w-full sm:w-auto">
+              {gerando === "baixar" ? <Loader2 className="animate-spin" /> : <FileDown />} Baixar PDF
             </Button>
           </DialogFooter>
         </DialogContent>

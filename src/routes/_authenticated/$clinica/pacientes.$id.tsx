@@ -14,13 +14,14 @@ import { STATUS_AGENDA, corEsp, erroAmigavel, fmtData, fmtHora, idade, iniciais 
 import { PacienteForm } from "@/components/pacientes/PacienteForm";
 import { ProntuarioTab } from "@/components/pacientes/ProntuarioTab";
 import { PlanoTerapeuticoTab } from "@/components/pacientes/PlanoTerapeuticoTab";
+import { FamiliaTab } from "@/components/pacientes/FamiliaTab";
 import { DocumentosTab } from "@/components/pacientes/DocumentosTab";
 import { AgendamentoDialog } from "@/components/agenda/AgendamentoDialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
-const ABAS = ["prontuario", "plano", "cadastro", "documentos", "atendimentos"] as const;
+const ABAS = ["prontuario", "plano", "cadastro", "documentos", "familia", "atendimentos"] as const;
 
 export const Route = createFileRoute("/_authenticated/$clinica/pacientes/$id")({
   validateSearch: z.object({
@@ -96,6 +97,7 @@ function PacientePage() {
           <TabsTrigger value="plano" className="px-4 py-2">Plano terapêutico</TabsTrigger>
           <TabsTrigger value="cadastro" className="px-4 py-2">Cadastro</TabsTrigger>
           <TabsTrigger value="documentos" className="px-4 py-2">Documentos</TabsTrigger>
+          <TabsTrigger value="familia" className="px-4 py-2">Família</TabsTrigger>
           <TabsTrigger value="atendimentos" className="px-4 py-2">Atendimentos</TabsTrigger>
         </TabsList>
 
@@ -126,6 +128,11 @@ function PacientePage() {
         <TabsContent value="documentos">
           <Suspense fallback={<Carregando />}>
             <DocumentosTab pacienteId={id} />
+          </Suspense>
+        </TabsContent>
+        <TabsContent value="familia">
+          <Suspense fallback={<Carregando />}>
+            <FamiliaTab pacienteId={id} />
           </Suspense>
         </TabsContent>
         <TabsContent value="atendimentos">
