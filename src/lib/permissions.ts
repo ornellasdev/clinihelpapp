@@ -29,6 +29,16 @@ export function podeEscreverEvolucao(minhasEspecialidades: readonly string[], es
   return minhasEspecialidades.includes(especialidadeId);
 }
 
+/**
+ * Dados clínicos do paciente (diagnóstico, CID, alergias, medicação): master ou profissional com especialidade.
+ * O banco ainda limita o profissional aos pacientes que atende; administrador e recepção não veem.
+ */
+export const podeVerDadosClinicos = (papeis: readonly Papel[], minhasEspecialidades: readonly string[]) =>
+  papeis.includes("master") || minhasEspecialidades.length > 0;
+
+/** Adendo: só quem é da especialidade da evolução (o mesmo critério de quem escreve evolução). */
+export const podeRegistrarAdendo = podeEscreverEvolucao;
+
 export const podeAgendar = (p: readonly Papel[]) => ehGestor(p) || temPapel(p, "recepcao");
 export const podeEditarPaciente = (p: readonly Papel[]) => ehGestor(p) || temPapel(p, "recepcao");
 export const podeGerirFinanceiro = (p: readonly Papel[]) => ehGestor(p) || temPapel(p, "financeiro");
