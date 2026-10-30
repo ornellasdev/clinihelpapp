@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { definirMinhaSenha } from "@/lib/seguranca.functions";
 import { MSG_SENHA_FRACA, SENHA_MAX, senhaForte } from "@/lib/senha";
 import { erroAmigavel } from "@/lib/ui-helpers";
@@ -25,7 +26,13 @@ export function DefinirSenha({ onOk }: { onOk: () => void | Promise<void> }) {
     if (!iguais) { toast.error("As duas senhas não são iguais."); return; }
     setEnviando(true);
     try {
-      await salvar({ data: { senha } });
+      const { data: sessao } = await supabase.auth.getSession();
+      const email = sessao.session?.user.email;
+      const r = await salvar({ data: { senha } });
+      if (r.relogin && email) {
+        const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
+        if (error) throw error;
+      }
       toast.success("Senha criada.");
       await onOk();
     } catch (err) {

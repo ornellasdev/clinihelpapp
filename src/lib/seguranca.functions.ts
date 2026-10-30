@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -26,6 +27,24 @@ async function igualSenhaAtual(email: string, senha: string): Promise<boolean> {
 }
 
 /**
+ * Troca a senha com a sessão da própria pessoa (mantém o login ativo e o servidor de login recusa repetir a senha atual).
+ * Retorna null quando deu certo ou o código de erro do servidor de login.
+ */
+async function trocarComSessao(senha: string): Promise<{ codigo: string; mensagem: string } | null> {
+  const url = process.env["SUPABASE_URL"]!;
+  const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
+  const authorization = getRequest()?.headers.get("authorization") ?? "";
+  const res = await fetch(`${url}/auth/v1/user`, {
+    method: "PUT",
+    headers: { apikey: key, Authorization: authorization, "Content-Type": "application/json" },
+    body: JSON.stringify({ password: senha }),
+  });
+  if (res.ok) return null;
+  const corpo = (await res.json().catch(() => ({}))) as { error_code?: string; code?: string | number; msg?: string; message?: string };
+  return { codigo: String(corpo.error_code ?? corpo.code ?? res.status), mensagem: corpo.msg ?? corpo.message ?? "" };
+}
+
+/**
  * Primeiro login (ou depois de uma redefinição): a pessoa troca a senha temporária pela própria.
  * Se ela já tem o autenticador cadastrado, precisa ter confirmado o código nesta sessão.
  */
@@ -46,14 +65,30 @@ export const definirMinhaSenha = createServerFn({ method: "POST" })
     const temAutenticador = (fatores?.factors ?? []).some((f) => f.status === "verified");
     if (temAutenticador && context.claims.aal !== "aal2") throw new Error("Confirme primeiro o código do aplicativo autenticador.");
 
-    const { data: u } = await supabaseAdmin.auth.admin.getUserById(context.userId);
-    const email = u.user?.email ?? perfil.email;
-    if (email && (await igualSenhaAtual(email, data.senha))) {
-      throw new Error("A nova senha precisa ser diferente da senha temporária.");
+    // relogin = a troca encerrou as sessões e o navegador precisa entrar de novo com a nova senha.
+    let relogin = false;
+    const falha = await trocarComSessao(data.senha);
+    if (falha) {
+      if (/same_password|different from the old/i.test(`${falha.codigo} ${falha.mensagem}`)) {
+        throw new Error("A nova senha precisa ser diferente da senha temporária.");
+      }
+      if (/weak_password|pwned|leak/i.test(`${falha.codigo} ${falha.mensagem}`)) {
+        throw new Error("Essa senha é muito comum ou já vazou na internet. Escolha outra.");
+      }
+      if (!/reauth|current_password|current password/i.test(`${falha.codigo} ${falha.mensagem}`)) {
+        console.error("[seguranca] troca de senha", falha.codigo, falha.mensagem);
+        throw new Error("Não foi possível salvar a senha agora. Tente novamente.");
+      }
+      // O servidor de login exige a senha atual: troca pelo acesso administrativo, conferindo antes que não repete a temporária.
+      const { data: u } = await supabaseAdmin.auth.admin.getUserById(context.userId);
+      const email = u.user?.email ?? perfil.email;
+      if (email && (await igualSenhaAtual(email, data.senha))) {
+        throw new Error("A nova senha precisa ser diferente da senha temporária.");
+      }
+      const { error } = await supabaseAdmin.auth.admin.updateUserById(context.userId, { password: data.senha });
+      if (error) throw new Error(error.message);
+      relogin = true;
     }
-
-    const { error } = await supabaseAdmin.auth.admin.updateUserById(context.userId, { password: data.senha });
-    if (error) throw new Error(/weak|pwned|leak/i.test(error.message) ? "Essa senha é muito comum ou já vazou na internet. Escolha outra." : error.message);
     await supabaseAdmin.from("profiles").update({ senha_temporaria: false }).eq("id", context.userId);
 
     const { registrarAuditoria } = await import("./auditoria.server");
@@ -65,5 +100,5 @@ export const definirMinhaSenha = createServerFn({ method: "POST" })
       registroId: context.userId,
       descricao: [perfil.nome, perfil.email].filter(Boolean).join(" · "),
     });
-    return { ok: true };
+    return { ok: true, relogin };
   });
