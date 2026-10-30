@@ -4,6 +4,9 @@ import { cpfValido, somenteDigitos } from "./cobrancas";
 
 export const VERSAO_ANAMNESE = 1;
 
+/** Rascunho do formulário guardado no aparelho dos pais (apagado ao enviar ou sair). */
+export const PREFIXO_RASCUNHO = "clinihelp:anamnese:";
+
 export type TipoCampo = "texto" | "longo" | "simnao" | "escolha" | "multipla" | "data";
 export type Formato = "email" | "telefone" | "cpf";
 export type Campo = {

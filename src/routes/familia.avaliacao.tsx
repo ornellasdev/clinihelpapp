@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { enviarAnamnese } from "@/lib/anamnese.functions";
 import {
   LIMITE_LONGO,
+  PREFIXO_RASCUNHO,
   LIMITE_TEXTO,
   SECOES_ANAMNESE,
   TEXTO_LGPD_ANAMNESE,
@@ -43,7 +44,6 @@ const avaliacaoQ = (p: string) =>
     },
   });
 
-export const PREFIXO_RASCUNHO = "clinihelp:anamnese:";
 const chaveRascunho = (p: string) => `${PREFIXO_RASCUNHO}v${VERSAO_ANAMNESE}:${p}`;
 
 export const Route = createFileRoute("/familia/avaliacao")({

@@ -5,7 +5,7 @@ import { Suspense, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { CalendarDays, CheckCircle2, ClipboardList, FileDown, FileSignature, Loader2, LogOut, Receipt, Wallet } from "lucide-react";
-import { PREFIXO_RASCUNHO } from "./familia.avaliacao";
+import { PREFIXO_RASCUNHO } from "@/lib/anamnese";
 import { supabase } from "@/integrations/supabase/client";
 import { baixarRelatorioFamilia, comprovanteTermoFamilia } from "@/lib/familia.functions";
 import { ROTULO_DECISAO, type Decisao } from "@/lib/familia";
