@@ -82,7 +82,8 @@ export function PlanoTerapeuticoTab({ pacienteId }: { pacienteId: string }) {
                     <Tooltip
                       labelFormatter={(d) => fmtData(String(d), "dd/MM/yyyy")}
                       formatter={(v, id) => [`${v} · ${rotuloNivel(Math.round(Number(v)))}`, doEsp.find((m) => m.id === id)?.titulo ?? ""]}
-                      contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12 }}
+                      wrapperStyle={{ maxWidth: "80%" }}
+                      contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12, whiteSpace: "normal" }}
                     />
                     {series.map((s) => (
                       <Line key={s.m.id} dataKey={s.m.id} stroke={s.cor} strokeWidth={2.5} dot={{ r: 3 }} connectNulls type="monotone" />

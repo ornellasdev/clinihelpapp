@@ -22,7 +22,7 @@
 - [x] Lista de espera: pacientes aguardando vaga por especialidade, dias e horário
 
 ## Prontuário mais completo
-- [ ] Plano terapêutico com metas por especialidade e gráfico de progresso a partir das evoluções
-- [ ] Modelos de evolução por especialidade (preenchimento rápido no celular)
-- [ ] Evolução por voz: grava no celular, IA escreve, profissional revisa antes de salvar
-- [ ] Relatório do paciente em PDF por período (escola, médico, convênio)
+- [x] Plano terapêutico com metas por especialidade e gráfico de progresso a partir das evoluções
+- [x] Modelos de evolução por especialidade (preenchimento rápido no celular)
+- [x] Evolução por voz: grava no celular, IA escreve, profissional revisa antes de salvar
+- [x] Relatório do paciente em PDF por período (escola, médico, convênio)
