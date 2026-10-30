@@ -78,6 +78,13 @@
       "when": 1793150919822,
       "tag": "0010_multi_clinicas",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793326848176,
+      "tag": "0011_migration",
+      "breakpoints": true
     }
   ]
 }
