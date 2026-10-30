@@ -77,11 +77,9 @@ export const definirMinhaSenha = createServerFn({ method: "POST" })
       if (/weak_password|pwned|leak/i.test(`${falha.codigo} ${falha.mensagem}`)) {
         throw new Error("Essa senha é muito comum ou já vazou na internet. Escolha outra.");
       }
-      if (!/reauth|current_password|current password/i.test(`${falha.codigo} ${falha.mensagem}`)) {
-        console.error("[seguranca] troca de senha", falha.codigo, falha.mensagem);
-        throw new Error("Não foi possível salvar a senha agora. Tente novamente.");
-      }
-      // O servidor de login exige a senha atual: troca pelo acesso administrativo, conferindo antes que não repete a temporária.
+      // Qualquer outra recusa (ex.: exige a senha atual): registra o motivo e usa o acesso administrativo.
+      console.warn("[seguranca] troca pela sessão recusada:", falha.codigo);
+      // Troca pelo acesso administrativo, conferindo antes que não repete a temporária.
       const { data: u } = await supabaseAdmin.auth.admin.getUserById(context.userId);
       const email = u.user?.email ?? perfil.email;
       if (email && (await igualSenhaAtual(email, data.senha))) {

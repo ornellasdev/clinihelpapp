@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 /** Troca da senha temporária (criada pelo master) por uma senha da própria pessoa. */
-export function DefinirSenha({ onOk, senhaAtual }: { onOk: () => void | Promise<void>; senhaAtual?: string }) {
+export function DefinirSenha({ onOk, senhaAtual }: { onOk: () => void | Promise<void>; senhaAtual?: string | undefined }) {
   const salvar = useServerFn(definirMinhaSenha);
   const [senha, setSenha] = useState("");
   const [confirma, setConfirma] = useState("");
@@ -28,7 +28,7 @@ export function DefinirSenha({ onOk, senhaAtual }: { onOk: () => void | Promise<
     try {
       const { data: sessao } = await supabase.auth.getSession();
       const email = sessao.session?.user.email;
-      const r = await salvar({ data: { senha, atual: senhaAtual } });
+      const r = await salvar({ data: senhaAtual ? { senha, atual: senhaAtual } : { senha } });
       if (r.relogin && email) {
         const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
         if (error) throw error;
