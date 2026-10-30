@@ -30,9 +30,11 @@ import { Route as AuthenticatedClinicaIndicadoresRouteImport } from './routes/_a
 import { Route as AuthenticatedClinicaLiminaresRouteImport } from './routes/_authenticated/$clinica/liminares'
 import { Route as AuthenticatedClinicaPainelRouteImport } from './routes/_authenticated/$clinica/painel'
 import { Route as AuthenticatedClinicaSalasRouteImport } from './routes/_authenticated/$clinica/salas'
+import { Route as AuthenticatedClinicaSegurancaRouteImport } from './routes/_authenticated/$clinica/seguranca'
 import { Route as AuthenticatedClinicaPacientesIndexRouteImport } from './routes/_authenticated/$clinica/pacientes.index'
 import { Route as AuthenticatedClinicaPacientesIdRouteImport } from './routes/_authenticated/$clinica/pacientes.$id'
 import { Route as AuthenticatedClinicaPacientesNovoRouteImport } from './routes/_authenticated/$clinica/pacientes.novo'
+import { Route as AuthenticatedClinicaSegurancaIndexRouteImport } from './routes/_authenticated/$clinica/seguranca.index'
 import { Route as AuthenticatedClinicaSegurancaAuditoriaRouteImport } from './routes/_authenticated/$clinica/seguranca.auditoria'
 import { Route as ApiPublicAsaasWebhookRouteImport } from './routes/api/public/asaas/webhook'
 
@@ -153,6 +155,12 @@ const AuthenticatedClinicaSalasRoute =
     path: '/salas',
     getParentRoute: () => AuthenticatedClinicaRouteRoute,
   } as any)
+const AuthenticatedClinicaSegurancaRoute =
+  AuthenticatedClinicaSegurancaRouteImport.update({
+    id: '/seguranca',
+    path: '/seguranca',
+    getParentRoute: () => AuthenticatedClinicaRouteRoute,
+  } as any)
 const AuthenticatedClinicaPacientesIndexRoute =
   AuthenticatedClinicaPacientesIndexRouteImport.update({
     id: '/pacientes/',
@@ -171,11 +179,17 @@ const AuthenticatedClinicaPacientesNovoRoute =
     path: '/pacientes/novo',
     getParentRoute: () => AuthenticatedClinicaRouteRoute,
   } as any)
+const AuthenticatedClinicaSegurancaIndexRoute =
+  AuthenticatedClinicaSegurancaIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedClinicaSegurancaRoute,
+  } as any)
 const AuthenticatedClinicaSegurancaAuditoriaRoute =
   AuthenticatedClinicaSegurancaAuditoriaRouteImport.update({
-    id: '/seguranca/auditoria',
-    path: '/seguranca/auditoria',
-    getParentRoute: () => AuthenticatedClinicaRouteRoute,
+    id: '/auditoria',
+    path: '/auditoria',
+    getParentRoute: () => AuthenticatedClinicaSegurancaRoute,
   } as any)
 const ApiPublicAsaasWebhookRoute = ApiPublicAsaasWebhookRouteImport.update({
   id: '/api/public/asaas/webhook',
@@ -203,12 +217,14 @@ export interface FileRoutesByFullPath {
   '/$clinica/liminares': typeof AuthenticatedClinicaLiminaresRoute
   '/$clinica/painel': typeof AuthenticatedClinicaPainelRoute
   '/$clinica/salas': typeof AuthenticatedClinicaSalasRoute
+  '/$clinica/seguranca': typeof AuthenticatedClinicaSegurancaRouteWithChildren
   '/$clinica/': typeof AuthenticatedClinicaIndexRoute
   '/$clinica/pacientes/$id': typeof AuthenticatedClinicaPacientesIdRoute
   '/$clinica/pacientes/novo': typeof AuthenticatedClinicaPacientesNovoRoute
   '/$clinica/seguranca/auditoria': typeof AuthenticatedClinicaSegurancaAuditoriaRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/$clinica/pacientes/': typeof AuthenticatedClinicaPacientesIndexRoute
+  '/$clinica/seguranca/': typeof AuthenticatedClinicaSegurancaIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -234,6 +250,7 @@ export interface FileRoutesByTo {
   '/$clinica/seguranca/auditoria': typeof AuthenticatedClinicaSegurancaAuditoriaRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/$clinica/pacientes': typeof AuthenticatedClinicaPacientesIndexRoute
+  '/$clinica/seguranca': typeof AuthenticatedClinicaSegurancaIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -257,12 +274,14 @@ export interface FileRoutesById {
   '/_authenticated/$clinica/liminares': typeof AuthenticatedClinicaLiminaresRoute
   '/_authenticated/$clinica/painel': typeof AuthenticatedClinicaPainelRoute
   '/_authenticated/$clinica/salas': typeof AuthenticatedClinicaSalasRoute
+  '/_authenticated/$clinica/seguranca': typeof AuthenticatedClinicaSegurancaRouteWithChildren
   '/_authenticated/$clinica/': typeof AuthenticatedClinicaIndexRoute
   '/_authenticated/$clinica/pacientes/$id': typeof AuthenticatedClinicaPacientesIdRoute
   '/_authenticated/$clinica/pacientes/novo': typeof AuthenticatedClinicaPacientesNovoRoute
   '/_authenticated/$clinica/seguranca/auditoria': typeof AuthenticatedClinicaSegurancaAuditoriaRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/_authenticated/$clinica/pacientes/': typeof AuthenticatedClinicaPacientesIndexRoute
+  '/_authenticated/$clinica/seguranca/': typeof AuthenticatedClinicaSegurancaIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -286,12 +305,14 @@ export interface FileRouteTypes {
     | '/$clinica/liminares'
     | '/$clinica/painel'
     | '/$clinica/salas'
+    | '/$clinica/seguranca'
     | '/$clinica/'
     | '/$clinica/pacientes/$id'
     | '/$clinica/pacientes/novo'
     | '/$clinica/seguranca/auditoria'
     | '/api/public/asaas/webhook'
     | '/$clinica/pacientes/'
+    | '/$clinica/seguranca/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -317,6 +338,7 @@ export interface FileRouteTypes {
     | '/$clinica/seguranca/auditoria'
     | '/api/public/asaas/webhook'
     | '/$clinica/pacientes'
+    | '/$clinica/seguranca'
   id:
     | '__root__'
     | '/'
@@ -339,12 +361,14 @@ export interface FileRouteTypes {
     | '/_authenticated/$clinica/liminares'
     | '/_authenticated/$clinica/painel'
     | '/_authenticated/$clinica/salas'
+    | '/_authenticated/$clinica/seguranca'
     | '/_authenticated/$clinica/'
     | '/_authenticated/$clinica/pacientes/$id'
     | '/_authenticated/$clinica/pacientes/novo'
     | '/_authenticated/$clinica/seguranca/auditoria'
     | '/api/public/asaas/webhook'
     | '/_authenticated/$clinica/pacientes/'
+    | '/_authenticated/$clinica/seguranca/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -507,6 +531,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClinicaSalasRouteImport
       parentRoute: typeof AuthenticatedClinicaRouteRoute
     }
+    '/_authenticated/$clinica/seguranca': {
+      id: '/_authenticated/$clinica/seguranca'
+      path: '/seguranca'
+      fullPath: '/$clinica/seguranca'
+      preLoaderRoute: typeof AuthenticatedClinicaSegurancaRouteImport
+      parentRoute: typeof AuthenticatedClinicaRouteRoute
+    }
     '/_authenticated/$clinica/pacientes/': {
       id: '/_authenticated/$clinica/pacientes/'
       path: '/pacientes'
@@ -528,12 +559,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClinicaPacientesNovoRouteImport
       parentRoute: typeof AuthenticatedClinicaRouteRoute
     }
+    '/_authenticated/$clinica/seguranca/': {
+      id: '/_authenticated/$clinica/seguranca/'
+      path: '/'
+      fullPath: '/$clinica/seguranca/'
+      preLoaderRoute: typeof AuthenticatedClinicaSegurancaIndexRouteImport
+      parentRoute: typeof AuthenticatedClinicaSegurancaRoute
+    }
     '/_authenticated/$clinica/seguranca/auditoria': {
       id: '/_authenticated/$clinica/seguranca/auditoria'
-      path: '/seguranca/auditoria'
+      path: '/auditoria'
       fullPath: '/$clinica/seguranca/auditoria'
       preLoaderRoute: typeof AuthenticatedClinicaSegurancaAuditoriaRouteImport
-      parentRoute: typeof AuthenticatedClinicaRouteRoute
+      parentRoute: typeof AuthenticatedClinicaSegurancaRoute
     }
     '/api/public/asaas/webhook': {
       id: '/api/public/asaas/webhook'
@@ -544,6 +582,24 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AuthenticatedClinicaSegurancaRouteChildren {
+  AuthenticatedClinicaSegurancaAuditoriaRoute: typeof AuthenticatedClinicaSegurancaAuditoriaRoute
+  AuthenticatedClinicaSegurancaIndexRoute: typeof AuthenticatedClinicaSegurancaIndexRoute
+}
+
+const AuthenticatedClinicaSegurancaRouteChildren: AuthenticatedClinicaSegurancaRouteChildren =
+  {
+    AuthenticatedClinicaSegurancaAuditoriaRoute:
+      AuthenticatedClinicaSegurancaAuditoriaRoute,
+    AuthenticatedClinicaSegurancaIndexRoute:
+      AuthenticatedClinicaSegurancaIndexRoute,
+  }
+
+const AuthenticatedClinicaSegurancaRouteWithChildren =
+  AuthenticatedClinicaSegurancaRoute._addFileChildren(
+    AuthenticatedClinicaSegurancaRouteChildren,
+  )
 
 interface AuthenticatedClinicaRouteRouteChildren {
   AuthenticatedClinicaAgendaRoute: typeof AuthenticatedClinicaAgendaRoute
@@ -557,10 +613,10 @@ interface AuthenticatedClinicaRouteRouteChildren {
   AuthenticatedClinicaLiminaresRoute: typeof AuthenticatedClinicaLiminaresRoute
   AuthenticatedClinicaPainelRoute: typeof AuthenticatedClinicaPainelRoute
   AuthenticatedClinicaSalasRoute: typeof AuthenticatedClinicaSalasRoute
+  AuthenticatedClinicaSegurancaRoute: typeof AuthenticatedClinicaSegurancaRouteWithChildren
   AuthenticatedClinicaIndexRoute: typeof AuthenticatedClinicaIndexRoute
   AuthenticatedClinicaPacientesIdRoute: typeof AuthenticatedClinicaPacientesIdRoute
   AuthenticatedClinicaPacientesNovoRoute: typeof AuthenticatedClinicaPacientesNovoRoute
-  AuthenticatedClinicaSegurancaAuditoriaRoute: typeof AuthenticatedClinicaSegurancaAuditoriaRoute
   AuthenticatedClinicaPacientesIndexRoute: typeof AuthenticatedClinicaPacientesIndexRoute
 }
 
@@ -577,12 +633,12 @@ const AuthenticatedClinicaRouteRouteChildren: AuthenticatedClinicaRouteRouteChil
     AuthenticatedClinicaLiminaresRoute: AuthenticatedClinicaLiminaresRoute,
     AuthenticatedClinicaPainelRoute: AuthenticatedClinicaPainelRoute,
     AuthenticatedClinicaSalasRoute: AuthenticatedClinicaSalasRoute,
+    AuthenticatedClinicaSegurancaRoute:
+      AuthenticatedClinicaSegurancaRouteWithChildren,
     AuthenticatedClinicaIndexRoute: AuthenticatedClinicaIndexRoute,
     AuthenticatedClinicaPacientesIdRoute: AuthenticatedClinicaPacientesIdRoute,
     AuthenticatedClinicaPacientesNovoRoute:
       AuthenticatedClinicaPacientesNovoRoute,
-    AuthenticatedClinicaSegurancaAuditoriaRoute:
-      AuthenticatedClinicaSegurancaAuditoriaRoute,
     AuthenticatedClinicaPacientesIndexRoute:
       AuthenticatedClinicaPacientesIndexRoute,
   }
