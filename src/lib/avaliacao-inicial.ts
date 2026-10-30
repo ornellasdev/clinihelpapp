@@ -46,3 +46,19 @@ export const ETAPAS_AVALIACAO = ["Pagamento da avaliação", "Formulário da fam
 
 /** Texto da descrição da cobrança que o responsável vê. */
 export const descricaoCobrancaAvaliacao = (paciente: string) => `Avaliação inicial — ${paciente}`;
+
+/** Endereço da Área da família (onde o formulário fica disponível). */
+export const URL_AREA_FAMILIA = "https://clinihelpsystem.lovable.app/familia";
+
+/** Mensagem pronta (WhatsApp) avisando que o formulário está disponível, com link e instruções de acesso. */
+export function mensagemFormularioDisponivel(p: { responsavel?: string | null; crianca: string; clinica: string; email?: string | null }): string {
+  const primeiro = (p.responsavel ?? "").trim().split(/\s+/)[0];
+  return [
+    `Olá${primeiro ? `, ${primeiro}` : ""}! Aqui é da ${p.clinica}.`,
+    `Recebemos o pagamento da avaliação de ${p.crianca}. Agora falta só o formulário de entrevista inicial.`,
+    `1. Acesse ${URL_AREA_FAMILIA}`,
+    `2. Digite ${p.email ? `o e-mail ${p.email}` : "o e-mail cadastrado na ficha da criança"} e o código que chegar por e-mail.`,
+    "3. Toque em “Preencher formulário de avaliação” e responda todas as perguntas com o máximo de detalhes.",
+    "Assim que o formulário for enviado, entramos em contato para agendar a primeira consulta.",
+  ].join("\n");
+}
