@@ -65,9 +65,9 @@
 - [x] Tópicos por cargo com aula e questionário (70% para concluir), progresso da equipe para a gestão e indicador no painel de conformidade
 
 ## Avaliação inicial (entrevista com os pais / anamnese)
-- [ ] Paciente novo só pode ter a 1ª consulta agendada depois do pagamento da avaliação e do formulário preenchido
-- [ ] Cobrança da avaliação (valor da sessão do convênio do paciente) ou confirmação manual do pagamento
-- [ ] Pagamento libera o formulário completo na Área da família; envio com aviso LGPD
-- [ ] Formulário preenchido marca "concluída" e avisa a equipe no Painel; parecer do profissional + PDF
+- [x] Paciente novo só pode ter a 1ª consulta agendada depois do pagamento da avaliação e do formulário preenchido
+- [x] Cobrança da avaliação (valor da sessão do convênio do paciente) ou confirmação manual do pagamento
+- [x] Pagamento libera o formulário completo na Área da família; envio com aviso LGPD
+- [x] Formulário preenchido marca "concluída" e avisa a equipe no Painel; parecer do profissional + PDF
 - [ ] E-mails aos pais (formulário disponível) e à gestão (formulário preenchido) — depende de domínio de e-mail próprio
-- [ ] Base de conhecimento, treinamento e testes
+- [x] Base de conhecimento, treinamento e testes
