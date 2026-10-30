@@ -5,7 +5,8 @@ import { addMonths, format, parseISO, startOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { z } from "zod";
 import { DoorOpen, Hourglass, UserX, Wallet, CircleDollarSign } from "lucide-react";
-import { aReceberQuery, indicadoresQuery, listaEsperaQuery, meQuery, salasQuery } from "@/lib/queries";
+import { aReceberQuery, glosasQuery, indicadoresQuery, listaEsperaQuery, meQuery, salasQuery } from "@/lib/queries";
+import { resumoGlosas } from "@/lib/guias";
 import { useClinica } from "@/hooks/use-clinica";
 import { useMe } from "@/hooks/use-me";
 import { podeGerirFinanceiro } from "@/lib/permissions";
@@ -38,6 +39,7 @@ export const Route = createFileRoute("/_authenticated/$clinica/indicadores")({
       context.queryClient.ensureQueryData(aReceberQuery(b)),
       context.queryClient.ensureQueryData(salasQuery),
       context.queryClient.ensureQueryData(listaEsperaQuery),
+      context.queryClient.ensureQueryData(glosasQuery),
     ]);
   },
   head: () => ({ meta: [{ title: "Indicadores (KPI) — CliniHelp" }] }),
@@ -78,6 +80,7 @@ function IndicadoresPage() {
   const { data: pendentes } = useSuspenseQuery(aReceberQuery(b));
   const { data: salas } = useSuspenseQuery(salasQuery);
   const { data: espera } = useSuspenseQuery(listaEsperaQuery);
+  const { data: glosas } = useSuspenseQuery(glosasQuery);
   const [horario, setHorario] = useHorario(`clinihelp:horario:${me.clinica?.id ?? clinica}`);
 
   const salasAtivas = salas.filter((s) => s.ativa);
@@ -127,6 +130,9 @@ function IndicadoresPage() {
     }
     return [...m.entries()].sort((x, y) => y[0].localeCompare(x[0])).slice(0, 6);
   }, [pendentes]);
+  // Retido = glosas ainda em aberto (de qualquer mês); o mês mostra o que foi glosado nele.
+  const glosasGeral = useMemo(() => resumoGlosas(glosas), [glosas]);
+  const glosasMes = useMemo(() => resumoGlosas(glosas.filter((g) => g.data_glosa.startsWith(mes))), [glosas, mes]);
   const aguardando = espera.filter((e) => e.status === "aguardando").length;
   const nomeMes = format(parseISO(`${mes}-01`), "MMMM 'de' yyyy", { locale: ptBR });
 
@@ -248,6 +254,37 @@ function IndicadoresPage() {
                 ))}
               </ul>
             )}
+          </div>
+        </Secao>
+
+        <Secao titulo="Glosas por convênio" className="lg:col-span-2">
+          <dl className="mb-4 grid grid-cols-2 gap-2 md:grid-cols-4">
+            <Valor label="Retido em glosa (em aberto)" v={glosasGeral.total.retido} />
+            <Valor label="Glosado neste mês" v={glosasMes.total.total} />
+            <Valor label="Recuperado (total)" v={glosasGeral.total.recuperado} />
+            <Valor label="Perda definitiva (total)" v={glosasGeral.total.perda} />
+          </dl>
+          {glosasGeral.porConvenio.length === 0 ? (
+            <Vazio>Nenhuma glosa registrada.</Vazio>
+          ) : (
+            <ul className="grid gap-3 md:grid-cols-2">
+              {glosasGeral.porConvenio.map((c) => (
+                <li key={c.nome}>
+                  <div className="mb-1 flex items-baseline justify-between gap-2 text-sm">
+                    <span className="truncate font-medium">{c.nome}</span>
+                    <span className="shrink-0 tabular-nums text-muted-foreground">
+                      retido <strong className="text-foreground">{formatarMoeda(c.retido)}</strong> · recuperado {formatarMoeda(c.recuperado)} · perda {formatarMoeda(c.perda)}
+                    </span>
+                  </div>
+                  <Barra pct={c.total > 0 ? (c.retido / c.total) * 100 : 0} tom="alerta" />
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="mt-4 text-right">
+            <Link to="/$clinica/guias" params={{ clinica }} search={{ aba: "glosas" }} className="text-sm font-medium text-primary">
+              Ver glosas
+            </Link>
           </div>
         </Secao>
 
