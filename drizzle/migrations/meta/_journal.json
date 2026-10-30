@@ -92,6 +92,13 @@
       "when": 1793328192692,
       "tag": "0012_conta_asaas_propria_da_clinica",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793357395152,
+      "tag": "0013_lista_espera",
+      "breakpoints": true
     }
   ]
 }
