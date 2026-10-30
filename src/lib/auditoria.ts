@@ -17,6 +17,7 @@ export const AREAS_AUDITORIA: Record<string, string> = {
   convenios: "Convênios",
   convenio_valores: "Valores de convênio",
   cobrancas: "Cobranças",
+  lista_espera: "Lista de espera",
 };
 
 /** Áreas que aparecem no filtro; o prontuário só para quem pode ver esses registros. */
@@ -86,6 +87,11 @@ const CAMPOS: Record<string, string> = {
   cor: "Cor",
   tamanho: "Tamanho",
   mime_type: "Tipo de arquivo",
+  dias_semana: "Dias da semana",
+  periodos: "Períodos",
+  horario_obs: "Horário preferido",
+  prioridade: "Prioridade",
+  encerrado_em: "Encerrado em",
 };
 
 /** Campos técnicos que não ajudam quem lê a auditoria. */
