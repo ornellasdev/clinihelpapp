@@ -68,8 +68,8 @@ export function lerData(v: string): string | null {
   const t = v.trim();
   let a: number, m: number, d: number;
   let r = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(t);
-  if (r) [d, m, a] = [+r[1], +r[2], +r[3]];
-  else if ((r = /^(\d{4})-(\d{2})-(\d{2})$/.exec(t))) [a, m, d] = [+r[1], +r[2], +r[3]];
+  if (r) [d, m, a] = [+r[1]!, +r[2]!, +r[3]!];
+  else if ((r = /^(\d{4})-(\d{2})-(\d{2})$/.exec(t))) [a, m, d] = [+r[1]!, +r[2]!, +r[3]!];
   else return null;
   const dt = new Date(Date.UTC(a, m - 1, d));
   if (dt.getUTCFullYear() !== a || dt.getUTCMonth() !== m - 1 || dt.getUTCDate() !== d) return null;
@@ -84,7 +84,7 @@ const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) && v.length 
 
 export function validarPlanilha(tipo: TipoMigracao, tabela: string[][]): { linhas: LinhaValidada[]; erroGeral?: string } {
   if (tabela.length < 2) return { linhas: [], erroGeral: "A planilha não tem linhas de dados." };
-  const cab = tabela[0].map(normCab);
+  const cab = tabela[0]!.map(normCab);
   if (!cab.includes("nome")) return { linhas: [], erroGeral: "Falta a coluna \"nome\". Use o modelo oficial." };
   if (tabela.length - 1 > MAX_LINHAS) return { linhas: [], erroGeral: `Máximo de ${MAX_LINHAS} linhas por arquivo.` };
   const conhecidas = new Set(COLUNAS[tipo]);
