@@ -6,7 +6,12 @@ import { CalendarSearch, FilePenLine, Loader2, Lock, Pencil, Plus, X } from "luc
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
-import { agendaPacienteQuery, especialidadesQuery, evolucoesQuery } from "@/lib/queries";
+import { agendaPacienteQuery, especialidadesQuery, evolucoesQuery, metasQuery, progressoMetasQuery } from "@/lib/queries";
+import { aplicarModelo } from "@/lib/plano-terapeutico";
+import { ModelosEvolucao } from "./ModelosEvolucao";
+import { MetasNaEvolucao } from "./MetasNaEvolucao";
+import { VozEvolucao } from "./VozEvolucao";
+import { RelatorioPdfDialog } from "./RelatorioPdfDialog";
 import { useMe } from "@/hooks/use-me";
 import { podeVerProntuario } from "@/lib/permissions";
 import { corEsp, erroAmigavel, fmtData, fmtHora } from "@/lib/ui-helpers";
@@ -143,8 +148,9 @@ export function ProntuarioTab({ pacienteId, agendamentoId }: { pacienteId: strin
               <X />
             </Button>
           )}
+          <RelatorioPdfDialog pacienteId={pacienteId} especialidades={visiveis} />
           {me.especialidades.length > 0 && !form && (
-            <Button onClick={() => setForm({})} className="w-full sm:ml-auto sm:w-auto">
+            <Button onClick={() => setForm({})} className="w-full sm:w-auto">
               <Plus /> Nova evolução
             </Button>
           )}
@@ -208,6 +214,8 @@ function EvolucaoForm({
   const me = useMe();
   const qc = useQueryClient();
   const { data: especialidades } = useSuspenseQuery(especialidadesQuery);
+  const { data: metas } = useSuspenseQuery(metasQuery(pacienteId));
+  const { data: progresso } = useSuspenseQuery(progressoMetasQuery(pacienteId));
   const { data: agenda = [] } = useQuery(agendaPacienteQuery(pacienteId));
   const minhas = especialidades.filter((e) => me.especialidades.includes(e.id));
   const meusAtend = agenda.filter((a) => a.profissional_id === me.id && a.status !== "cancelado");
@@ -216,7 +224,16 @@ function EvolucaoForm({
   const [data, setData] = useState(editar?.data_atendimento ?? format(new Date(), "yyyy-MM-dd"));
   const [agId, setAgId] = useState(editar?.agendamento_id ?? agendamentoId ?? "");
   const [texto, setTexto] = useState(editar?.conteudo ?? "");
+  const [modeloUsado, setModeloUsado] = useState("");
+  const [niveis, setNiveis] = useState<Record<string, number>>(() =>
+    editar ? Object.fromEntries(progresso.filter((p) => p.evolucao_id === editar.id).map((p) => [p.meta_id, p.nivel])) : {},
+  );
   const [salvando, setSalvando] = useState(false);
+
+  const metasDaEsp = metas.filter(
+    (m) => m.especialidade_id === espId && (m.status === "ativa" || niveis[m.id] !== undefined),
+  );
+  const espNome = especialidades.find((e) => e.id === espId)?.nome ?? "";
 
   useEffect(() => {
     if (!agId || editar) return;
@@ -231,22 +248,49 @@ function EvolucaoForm({
     if (!espId || !texto.trim()) { toast.error("Escolha a especialidade e escreva a evolução."); return; }
     setSalvando(true);
     const payload = { data_atendimento: data, conteudo: texto.trim(), agendamento_id: agId || null };
-    const { error } = editar
-      ? await supabase.from("evolucoes").update(payload).eq("id", editar.id)
-      : await supabase.from("evolucoes").insert({ ...payload, paciente_id: pacienteId, especialidade_id: espId });
+    const res = editar
+      ? await supabase.from("evolucoes").update(payload).eq("id", editar.id).select("id").single()
+      : await supabase.from("evolucoes").insert({ ...payload, paciente_id: pacienteId, especialidade_id: espId }).select("id").single();
+    const error = res.error;
+    const evolucaoId = res.data?.id;
+    let erroMetas: string | null = null;
+    if (!error && evolucaoId) {
+      const marcadas = metasDaEsp.filter((m) => niveis[m.id] !== undefined);
+      const desmarcadas = editar
+        ? progresso.filter((p) => p.evolucao_id === evolucaoId && niveis[p.meta_id] === undefined).map((p) => p.id)
+        : [];
+      if (marcadas.length) {
+        const { error: e1 } = await supabase.from("evolucao_metas").upsert(
+          marcadas.map((m) => ({
+            evolucao_id: evolucaoId,
+            meta_id: m.id,
+            paciente_id: pacienteId,
+            especialidade_id: espId,
+            nivel: niveis[m.id]!,
+          })),
+          { onConflict: "evolucao_id,meta_id" },
+        );
+        if (e1) erroMetas = e1.message;
+      }
+      if (desmarcadas.length) {
+        const { error: e2 } = await supabase.from("evolucao_metas").delete().in("id", desmarcadas);
+        if (e2) erroMetas = e2.message;
+      }
+    }
     if (!error && agId && !editar) {
       await supabase.from("agendamentos").update({ status: "realizado" }).eq("id", agId).in("status", ["agendado", "confirmado"]);
       qc.invalidateQueries({ queryKey: ["agenda"] });
     }
     setSalvando(false);
     if (error) { toast.error(erroAmigavel(error.message)); return; }
-    toast.success(editar ? "Evolução atualizada." : "Evolução registrada.");
+    if (erroMetas) toast.error(`Evolução salva, mas o progresso das metas não: ${erroAmigavel(erroMetas)}`);
+    else toast.success(editar ? "Evolução atualizada." : "Evolução registrada.");
     qc.invalidateQueries({ queryKey: ["evolucoes", pacienteId] });
     onClose();
   }
 
   return (
-    <div className="rounded-2xl border-2 border-primary/30 bg-card p-5 shadow-sm">
+    <div className="rounded-2xl border-2 border-primary/30 bg-card p-4 shadow-sm sm:p-5">
       <div className="mb-4 flex items-center gap-2">
         <FilePenLine className="size-5 text-primary" />
         <h3 className="font-semibold">{editar ? "Editar evolução" : "Nova evolução"}</h3>
@@ -291,12 +335,45 @@ function EvolucaoForm({
           </Select>
         </div>
       </div>
+
+      <ModelosEvolucao
+        especialidadeId={espId}
+        especialidadeNome={espNome}
+        onUsar={(c) => {
+          setModeloUsado(c);
+          setTexto((t) => aplicarModelo(t, c));
+        }}
+      />
+
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <VozEvolucao
+          especialidadeId={espId}
+          modelo={modeloUsado}
+          onTexto={(t) => setTexto((atual) => (atual.trim() && atual.trim() !== modeloUsado.trim() ? `${atual.trimEnd()}\n\n${t}` : t))}
+        />
+        <p className="text-xs text-muted-foreground">Fale sobre a sessão; a IA escreve o texto e você revisa antes de salvar.</p>
+      </div>
+
       <Textarea
-        className="mt-4 min-h-52 text-[15px] leading-relaxed"
+        className="mt-3 min-h-52 text-[15px] leading-relaxed"
         placeholder="Descreva a sessão: objetivos trabalhados, estratégias, resposta da criança, orientações à família..."
         value={texto}
         onChange={(e) => setTexto(e.target.value)}
       />
+
+      <MetasNaEvolucao
+        metas={metasDaEsp}
+        niveis={niveis}
+        onChange={(id, n) =>
+          setNiveis((cur) => {
+            const novo = { ...cur };
+            if (n === null) delete novo[id];
+            else novo[id] = n;
+            return novo;
+          })
+        }
+      />
+
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <p className="text-xs text-muted-foreground">
           Assinatura: <span className="font-medium text-foreground">{me.nome}</span>
