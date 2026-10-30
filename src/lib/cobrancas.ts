@@ -13,8 +13,8 @@ export const URL_WEBHOOK_ASAAS = `${URL_PUBLICA}/api/public/asaas/webhook`;
 export const VALOR_MINIMO_COBRANCA = 5;
 
 export const STATUS_COBRANCA: Record<StatusCobranca, { label: string; className: string }> = {
-  pendente: { label: "Aguardando", className: "bg-warning/15 text-warning-foreground" },
-  em_analise: { label: "Em análise", className: "bg-info/15 text-info" },
+  pendente: { label: "Aguardando", className: "bg-warning/25 text-warning-foreground" },
+  em_analise: { label: "Em análise", className: "bg-secondary text-secondary-foreground" },
   pago: { label: "Pago", className: "bg-success/15 text-success" },
   vencido: { label: "Vencido", className: "bg-destructive/15 text-destructive" },
   estornado: { label: "Estornado", className: "bg-muted text-muted-foreground" },
