@@ -13,25 +13,8 @@ const ESPECIALIDADES_PADRAO = [
   ["Psicopedagogia", "chart-2"],
 ] as const;
 
-/**
- * Garante que cada e-mail de desenvolvedor autorizado tenha uma conta, para que o login com Google funcione
- * (o cadastro público está desligado). Não recebe dados e não devolve nada: só prepara contas já autorizadas.
- */
-export const prepararAcessoDev = createServerFn({ method: "POST" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: devs } = await supabaseAdmin.from("desenvolvedores").select("email");
-  for (const d of devs ?? []) {
-    const { data: existe } = await supabaseAdmin.from("profiles").select("id").ilike("email", d.email).maybeSingle();
-    if (existe) continue;
-    await supabaseAdmin.auth.admin.createUser({
-      email: d.email,
-      email_confirm: true,
-      password: crypto.randomUUID() + crypto.randomUUID(),
-      user_metadata: { nome: "Desenvolvedor CliniHelp" },
-    });
-  }
-  return { ok: true };
-});
+// Contas de desenvolvedor são criadas pela equipe CliniHelp ao autorizar o e-mail (fora do app);
+// nenhuma função pública cria contas.
 
 async function exigirDev(supabase: any) {
   const { data } = await supabase.rpc("eh_dev");
