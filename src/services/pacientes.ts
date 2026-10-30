@@ -87,7 +87,9 @@ export function errosDoCadastro(dados: CadastroPaciente): Record<string, string>
 
 export async function criarPaciente(dados: CadastroPaciente): Promise<string> {
   const valido = validar(pacienteSchema, dados);
-  return garantir(await supabase.from("pacientes").insert(valido).select("id").single()).id;
+  const { data, error } = await supabase.from("pacientes").insert(valido).select("id").single();
+  garantir({ data, error });
+  return data!.id;
 }
 
 export async function atualizarPaciente(id: string, dados: CadastroPaciente): Promise<void> {
@@ -116,14 +118,15 @@ export type DadosClinicos = z.input<typeof dadosClinicosSchema>;
 export const dadosClinicosQuery = (pacienteId: string) =>
   queryOptions({
     queryKey: ["dados_clinicos", pacienteId],
-    queryFn: async () =>
-      garantir(
-        await supabase
-          .from("paciente_dados_clinicos")
-          .select("diagnostico, cid, alergias, medicamentos, updated_at, atualizado_por")
-          .eq("paciente_id", pacienteId)
-          .maybeSingle(),
-      ),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("paciente_dados_clinicos")
+        .select("diagnostico, cid, alergias, medicamentos, updated_at, atualizado_por")
+        .eq("paciente_id", pacienteId)
+        .maybeSingle();
+      garantir({ data, error });
+      return data;
+    },
   });
 
 export async function salvarDadosClinicos(pacienteId: string, dados: DadosClinicos): Promise<void> {

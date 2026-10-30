@@ -51,16 +51,16 @@ export function DadosClinicosCard({ pacienteId }: { pacienteId: string }) {
         {data?.updated_at && <span className="ml-auto text-xs text-muted-foreground">Atualizado em {fmtData(data.updated_at, "dd/MM/yyyy HH:mm")}</span>}
       </div>
       <div className="grid gap-4 sm:grid-cols-3">
-        <Campo label="Diagnóstico" className="sm:col-span-2" erro={erros.diagnostico}>
-          <Input value={v("diagnostico")} onChange={set("diagnostico")} placeholder="Ex.: TEA nível 1, TDAH..." aria-invalid={!!erros.diagnostico} />
+        <Campo label="Diagnóstico" className="sm:col-span-2" erro={erros["diagnostico"]}>
+          <Input value={v("diagnostico")} onChange={set("diagnostico")} placeholder="Ex.: TEA nível 1, TDAH..." aria-invalid={!!erros["diagnostico"]} />
         </Campo>
-        <Campo label="CID" erro={erros.cid}>
-          <Input value={v("cid")} onChange={set("cid")} placeholder="Ex.: F84.0" aria-invalid={!!erros.cid} />
+        <Campo label="CID" erro={erros["cid"]}>
+          <Input value={v("cid")} onChange={set("cid")} placeholder="Ex.: F84.0" aria-invalid={!!erros["cid"]} />
         </Campo>
-        <Campo label="Alergias" className="sm:col-span-3 lg:col-span-1" erro={erros.alergias}>
+        <Campo label="Alergias" className="sm:col-span-3 lg:col-span-1" erro={erros["alergias"]}>
           <Textarea rows={2} value={v("alergias")} onChange={set("alergias")} />
         </Campo>
-        <Campo label="Medicamentos em uso" className="sm:col-span-3 lg:col-span-2" erro={erros.medicamentos}>
+        <Campo label="Medicamentos em uso" className="sm:col-span-3 lg:col-span-2" erro={erros["medicamentos"]}>
           <Textarea rows={2} value={v("medicamentos")} onChange={set("medicamentos")} />
         </Campo>
       </div>

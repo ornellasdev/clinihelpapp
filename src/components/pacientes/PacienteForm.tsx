@@ -130,7 +130,7 @@ export function PacienteForm({
         <Secao titulo="Dados da criança">
           {campo("nome", "Nome completo *", { required: true }, "sm:col-span-2")}
           {campo("data_nascimento", "Data de nascimento", { type: "date" })}
-          <Campo label="Sexo" erro={erros.sexo}>
+          <Campo label="Sexo" erro={erros["sexo"]}>
             <Select value={v("sexo")} onValueChange={(x) => mudar("sexo", x)} disabled={!!somenteLeitura}>
               <SelectTrigger name="sexo">
                 <SelectValue placeholder="Selecione" />
@@ -170,9 +170,9 @@ export function PacienteForm({
         </Secao>
 
         <Secao titulo="Endereço e convênio">
-          <Campo label="CEP" erro={erros.cep}>
+          <Campo label="CEP" erro={erros["cep"]}>
             <div className="relative">
-              <Input name="cep" value={v("cep")} onChange={mudarCep} inputMode="numeric" placeholder="00000-000" maxLength={9} aria-invalid={!!erros.cep} />
+              <Input name="cep" value={v("cep")} onChange={mudarCep} inputMode="numeric" placeholder="00000-000" maxLength={9} aria-invalid={!!erros["cep"]} />
               {buscandoCep && (
                 <Loader2 className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground" />
               )}
@@ -180,24 +180,24 @@ export function PacienteForm({
             {avisoCep && <p className="text-xs text-destructive">{avisoCep}</p>}
           </Campo>
           {campo("endereco", "Endereço (rua, avenida...)", {}, "sm:col-span-2")}
-          <Campo label="Número" erro={erros.numero}>
+          <Campo label="Número" erro={erros["numero"]}>
             <Input ref={numeroRef} name="numero" value={v("numero")} onChange={set("numero")} />
           </Campo>
           {campo("complemento", "Complemento", { placeholder: "Apto, bloco, casa..." }, "sm:col-span-2")}
           {campo("cidade", "Município")}
           {campo("estado", "Estado", { placeholder: "Ex.: São Paulo" })}
-          <Campo label="UF" erro={erros.uf}>
+          <Campo label="UF" erro={erros["uf"]}>
             <Input
               name="uf"
               value={v("uf")}
               onChange={(e) => mudar("uf", e.target.value.toUpperCase().slice(0, 2))}
               placeholder="Ex.: SP"
               maxLength={2}
-              aria-invalid={!!erros.uf}
+              aria-invalid={!!erros["uf"]}
             />
           </Campo>
           {campo("pais", "País")}
-          <Campo label="Convênio / particular / liminar" erro={erros.convenio_id}>
+          <Campo label="Convênio / particular / liminar" erro={erros["convenio_id"]}>
             <Select
               value={d.convenio_id ?? NENHUM}
               onValueChange={(x) => {
@@ -231,7 +231,7 @@ export function PacienteForm({
         </Secao>
 
         <Secao titulo="Observações administrativas">
-          <Campo label="Observações gerais" className="sm:col-span-2" erro={erros.observacoes}>
+          <Campo label="Observações gerais" className="sm:col-span-2" erro={erros["observacoes"]}>
             <Textarea name="observacoes" rows={3} value={v("observacoes")} onChange={set("observacoes")} placeholder="Horários preferidos, transporte, contatos extras..." />
           </Campo>
           <div className="flex items-center gap-3">
