@@ -15,4 +15,4 @@
 - [x] Página Cobranças: por sessão, mensal (soma do mês) e avulsa; Pix, boleto, cartão ou à escolha
 - [x] Página pública de pagamento CliniHelp (Pix QR, boleto, cartão)
 - [x] Aviso automático de pagamento (webhook) marca a sessão como paga
-- [ ] Chave da conta-mãe Asaas do desenvolvedor (aguarda o usuário)
+- [x] Chave da conta-mãe Asaas do desenvolvedor
