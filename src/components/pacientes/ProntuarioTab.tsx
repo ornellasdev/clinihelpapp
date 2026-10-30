@@ -302,7 +302,11 @@ function EvolucaoForm({
     setSalvando(false);
     if (error) { toast.error(erroAmigavel(error.message)); return; }
     if (erroMetas) toast.error(`Evolução salva, mas o progresso das metas não: ${erroAmigavel(erroMetas)}`);
-    else toast.success(editar ? "Evolução atualizada." : agId ? "Evolução registrada e atendimento finalizado." : "Evolução registrada.");
+    else {
+      const sessao = agenda.find((x) => x.id === agId);
+      const finalizou = !editar && !!sessao && (sessao.status === "agendado" || sessao.status === "aguardando" || sessao.status === "em_atendimento");
+      toast.success(editar ? "Evolução atualizada." : finalizou ? "Evolução registrada e atendimento finalizado." : "Evolução registrada.");
+    }
     qc.invalidateQueries({ queryKey: ["evolucoes", pacienteId] });
     onClose();
   }
