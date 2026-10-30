@@ -60,6 +60,8 @@ export type Membro = {
   conselho: string | null;
   registro_profissional: string | null;
   ativo: boolean;
+  /** Ainda com a senha temporária (não fez o primeiro acesso depois da criação/redefinição). */
+  senha_temporaria: boolean;
   papeis: Papel[];
   especialidades: string[];
 };

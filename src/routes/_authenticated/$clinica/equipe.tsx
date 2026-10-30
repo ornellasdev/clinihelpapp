@@ -2,18 +2,21 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { KeyRound, Loader2, Pencil, Plus, UserCheck, UserX } from "lucide-react";
+import { Copy, KeyRound, Loader2, Pencil, Plus, Smartphone, UserCheck, UserX } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { configFinanceiraQuery, equipeQuery, especialidadesQuery, meQuery, type Membro } from "@/lib/queries";
-import { criarMembro, definirAtivo, redefinirSenha } from "@/lib/equipe.functions";
+import { criarMembro, definirAtivo, redefinirDuasEtapas, redefinirSenha } from "@/lib/equipe.functions";
+import { MSG_SENHA_FRACA, gerarSenhaTemporaria, senhaForte } from "@/lib/senha";
+import { RequisitosSenha } from "@/components/seguranca/RequisitosSenha";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { PAPEIS, ehGestor, papeisAtribuiveis, podeAlterarMembro, type Papel } from "@/lib/permissions";
 import { useMe } from "@/hooks/use-me";
 import { corEsp, erroAmigavel, iniciais } from "@/lib/ui-helpers";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -40,8 +43,10 @@ function EquipePage() {
   const { data: configs } = useSuspenseQuery(configFinanceiraQuery);
   const qc = useQueryClient();
   const ativar = useServerFn(definirAtivo);
-  const senhaFn = useServerFn(redefinirSenha);
+  const doisFatoresFn = useServerFn(redefinirDuasEtapas);
   const [editando, setEditando] = useState<Membro | "novo" | null>(null);
+  const [senhaPara, setSenhaPara] = useState<Membro | null>(null);
+  const [doisFatoresPara, setDoisFatoresPara] = useState<Membro | null>(null);
 
   async function alternarAtivo(m: Membro) {
     try {
@@ -53,12 +58,13 @@ function EquipePage() {
     }
   }
 
-  async function novaSenha(m: Membro) {
-    const s = prompt(`Nova senha para ${m.nome} (mínimo 8 caracteres):`);
-    if (!s) return;
+  async function apagarDoisFatores() {
+    const m = doisFatoresPara;
+    setDoisFatoresPara(null);
+    if (!m) return;
     try {
-      await senhaFn({ data: { userId: m.id, password: s } });
-      toast.success("Senha redefinida.");
+      await doisFatoresFn({ data: { userId: m.id } });
+      toast.success(`Verificação em duas etapas de ${m.nome} redefinida. No próximo login a pessoa cadastra o celular de novo.`);
     } catch (e) {
       toast.error(erroAmigavel((e as Error).message));
     }
@@ -97,6 +103,9 @@ function EquipePage() {
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-medium">{m.nome}</span>
                   {!m.ativo && <span className="rounded bg-destructive/10 px-1.5 text-[10px] uppercase text-destructive">inativo</span>}
+                  {m.ativo && m.senha_temporaria && (
+                    <span className="rounded bg-warning/15 px-1.5 text-[10px] uppercase text-warning-foreground">senha temporária</span>
+                  )}
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {m.email}
@@ -128,9 +137,20 @@ function EquipePage() {
                 <Button size="icon" variant="ghost" onClick={() => setEditando(m)} aria-label="Editar">
                   <Pencil />
                 </Button>
-                <Button size="icon" variant="ghost" onClick={() => novaSenha(m)} aria-label="Redefinir senha">
+                <Button size="icon" variant="ghost" onClick={() => setSenhaPara(m)} aria-label="Criar senha temporária" title="Criar senha temporária">
                   <KeyRound />
                 </Button>
+                {m.id !== me.id && (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => setDoisFatoresPara(m)}
+                    aria-label="Redefinir verificação em duas etapas"
+                    title="Redefinir verificação em duas etapas (celular perdido ou trocado)"
+                  >
+                    <Smartphone />
+                  </Button>
+                )}
                 <Button size="icon" variant="ghost" onClick={() => alternarAtivo(m)} aria-label={m.ativo ? "Desativar" : "Reativar"}>
                   {m.ativo ? <UserX /> : <UserCheck />}
                 </Button>
@@ -150,7 +170,93 @@ function EquipePage() {
           onClose={() => setEditando(null)}
         />
       )}
+      {senhaPara && <SenhaTemporariaDialog membro={senhaPara} onClose={() => setSenhaPara(null)} />}
+
+      <AlertDialog open={!!doisFatoresPara} onOpenChange={(v) => !v && setDoisFatoresPara(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Redefinir a verificação em duas etapas de {doisFatoresPara?.nome}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Use quando a pessoa perdeu ou trocou de celular. O código atual deixa de valer e, no próximo login, ela lê um novo QR code no
+              Google Authenticator.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Voltar</AlertDialogCancel>
+            <AlertDialogAction onClick={apagarDoisFatores}>Redefinir</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
+  );
+}
+
+function copiarTexto(texto: string) {
+  navigator.clipboard.writeText(texto).then(
+    () => toast.success("Copiado"),
+    () => toast.error("Não foi possível copiar"),
+  );
+}
+
+/** Campo de senha temporária com botão de gerar, copiar e a lista de regras. */
+function CampoSenhaTemporaria({ id, valor, onChange }: { id: string; valor: string; onChange: (v: string) => void }) {
+  return (
+    <div className="grid gap-1.5">
+      <div className="flex gap-2">
+        <Input id={id} type="text" value={valor} onChange={(e) => onChange(e.target.value)} className="font-mono" autoComplete="off" />
+        <Button type="button" variant="outline" onClick={() => onChange(gerarSenhaTemporaria())}>
+          Gerar
+        </Button>
+        <Button type="button" variant="ghost" size="icon" disabled={!valor} onClick={() => copiarTexto(valor)} aria-label="Copiar senha">
+          <Copy />
+        </Button>
+      </div>
+      <RequisitosSenha senha={valor} />
+    </div>
+  );
+}
+
+function SenhaTemporariaDialog({ membro, onClose }: { membro: Membro; onClose: () => void }) {
+  const qc = useQueryClient();
+  const senhaFn = useServerFn(redefinirSenha);
+  const [senha, setSenha] = useState(() => gerarSenhaTemporaria());
+  const [salvando, setSalvando] = useState(false);
+
+  async function salvar() {
+    if (!senhaForte(senha)) { toast.error(MSG_SENHA_FRACA); return; }
+    setSalvando(true);
+    try {
+      await senhaFn({ data: { userId: membro.id, password: senha } });
+      toast.success("Senha temporária criada. Envie para a pessoa: no próximo login ela cria a própria senha.");
+      qc.invalidateQueries({ queryKey: ["equipe"] });
+      onClose();
+    } catch (e) {
+      toast.error(erroAmigavel((e as Error).message));
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  return (
+    <Dialog open onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Senha temporária para {membro.nome}</DialogTitle>
+          <DialogDescription>
+            A senha atual deixa de funcionar. No próximo login, {membro.nome.split(" ")[0]} entra com esta senha e é obrigado(a) a criar uma nova.
+          </DialogDescription>
+        </DialogHeader>
+        <CampoSenhaTemporaria id="senha-temp" valor={senha} onChange={setSenha} />
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button onClick={salvar} disabled={salvando || !senhaForte(senha)}>
+            {salvando && <Loader2 className="animate-spin" />} Salvar senha temporária
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -172,7 +278,7 @@ function MembroDialog({
   const criar = useServerFn(criarMembro);
   const [nome, setNome] = useState(membro?.nome ?? "");
   const [email, setEmail] = useState(membro?.email ?? "");
-  const [senha, setSenha] = useState("");
+  const [senha, setSenha] = useState(() => (membro ? "" : gerarSenhaTemporaria()));
   const [telefone, setTelefone] = useState(membro?.telefone ?? "");
   const [conselho, setConselho] = useState(membro?.conselho ?? "");
   const [registro, setRegistro] = useState(membro?.registro_profissional ?? "");
@@ -188,6 +294,7 @@ function MembroDialog({
   async function salvar() {
     if (!nome.trim() || papeis.length === 0) { toast.error("Informe o nome e ao menos um papel."); return; }
     if (isProf && esps.length === 0) { toast.error("Profissionais precisam de ao menos uma especialidade."); return; }
+    if (!membro && !senhaForte(senha)) { toast.error(MSG_SENHA_FRACA); return; }
     setSalvando(true);
     try {
       if (!membro) {
@@ -231,7 +338,7 @@ function MembroDialog({
         });
         if (c.error) throw c.error;
       }
-      toast.success(membro ? "Dados atualizados." : "Membro criado. Envie o e-mail e a senha para a pessoa.");
+      toast.success(membro ? "Dados atualizados." : "Membro criado. Envie o e-mail e a senha temporária: no primeiro login a pessoa cria a própria senha e ativa a verificação em duas etapas.");
       qc.invalidateQueries({ queryKey: ["equipe"] });
       qc.invalidateQueries({ queryKey: ["profissional_config"] });
       qc.invalidateQueries({ queryKey: ["me"] });
@@ -261,9 +368,9 @@ function MembroDialog({
                   <Label>E-mail de acesso</Label>
                   <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
-                <div className="grid gap-1.5">
-                  <Label>Senha inicial</Label>
-                  <Input type="text" value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="mín. 8 caracteres" />
+                <div className="grid gap-1.5 sm:col-span-2">
+                  <Label htmlFor="senha-nova-conta">Senha temporária</Label>
+                  <CampoSenhaTemporaria id="senha-nova-conta" valor={senha} onChange={setSenha} />
                 </div>
               </>
             )}
