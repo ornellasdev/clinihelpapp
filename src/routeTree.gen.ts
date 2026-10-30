@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DevRouteImport } from './routes/dev'
 import { Route as AuthenticatedClinicaRouteRouteImport } from './routes/_authenticated/$clinica/route'
+import { Route as ApiEvolucaoVozRouteImport } from './routes/api/evolucao-voz'
 import { Route as PagarTokenRouteImport } from './routes/pagar.$token'
 import { Route as AuthenticatedClinicaIndexRouteImport } from './routes/_authenticated/$clinica/index'
 import { Route as AuthenticatedClinicaAgendaRouteImport } from './routes/_authenticated/$clinica/agenda'
@@ -55,6 +56,11 @@ const AuthenticatedClinicaRouteRoute =
     path: '/$clinica',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiEvolucaoVozRoute = ApiEvolucaoVozRouteImport.update({
+  id: '/api/evolucao-voz',
+  path: '/api/evolucao-voz',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PagarTokenRoute = PagarTokenRouteImport.update({
   id: '/pagar/$token',
   path: '/pagar/$token',
@@ -149,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/dev': typeof DevRoute
   '/$clinica': typeof AuthenticatedClinicaRouteRouteWithChildren
+  '/api/evolucao-voz': typeof ApiEvolucaoVozRoute
   '/pagar/$token': typeof PagarTokenRoute
   '/$clinica/agenda': typeof AuthenticatedClinicaAgendaRoute
   '/$clinica/auditoria': typeof AuthenticatedClinicaAuditoriaRoute
@@ -169,6 +176,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dev': typeof DevRoute
+  '/api/evolucao-voz': typeof ApiEvolucaoVozRoute
   '/pagar/$token': typeof PagarTokenRoute
   '/$clinica/agenda': typeof AuthenticatedClinicaAgendaRoute
   '/$clinica/auditoria': typeof AuthenticatedClinicaAuditoriaRoute
@@ -192,6 +200,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/dev': typeof DevRoute
   '/_authenticated/$clinica': typeof AuthenticatedClinicaRouteRouteWithChildren
+  '/api/evolucao-voz': typeof ApiEvolucaoVozRoute
   '/pagar/$token': typeof PagarTokenRoute
   '/_authenticated/$clinica/agenda': typeof AuthenticatedClinicaAgendaRoute
   '/_authenticated/$clinica/auditoria': typeof AuthenticatedClinicaAuditoriaRoute
@@ -215,6 +224,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dev'
     | '/$clinica'
+    | '/api/evolucao-voz'
     | '/pagar/$token'
     | '/$clinica/agenda'
     | '/$clinica/auditoria'
@@ -235,6 +245,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dev'
+    | '/api/evolucao-voz'
     | '/pagar/$token'
     | '/$clinica/agenda'
     | '/$clinica/auditoria'
@@ -257,6 +268,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dev'
     | '/_authenticated/$clinica'
+    | '/api/evolucao-voz'
     | '/pagar/$token'
     | '/_authenticated/$clinica/agenda'
     | '/_authenticated/$clinica/auditoria'
@@ -279,6 +291,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   DevRoute: typeof DevRoute
+  ApiEvolucaoVozRoute: typeof ApiEvolucaoVozRoute
   PagarTokenRoute: typeof PagarTokenRoute
   ApiPublicAsaasWebhookRoute: typeof ApiPublicAsaasWebhookRoute
 }
@@ -319,6 +332,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/$clinica'
       preLoaderRoute: typeof AuthenticatedClinicaRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/evolucao-voz': {
+      id: '/api/evolucao-voz'
+      path: '/api/evolucao-voz'
+      fullPath: '/api/evolucao-voz'
+      preLoaderRoute: typeof ApiEvolucaoVozRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/pagar/$token': {
       id: '/pagar/$token'
@@ -484,6 +504,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   DevRoute: DevRoute,
+  ApiEvolucaoVozRoute: ApiEvolucaoVozRoute,
   PagarTokenRoute: PagarTokenRoute,
   ApiPublicAsaasWebhookRoute: ApiPublicAsaasWebhookRoute,
 }
