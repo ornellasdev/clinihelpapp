@@ -163,7 +163,7 @@ function FinanceiroPage() {
       <div className="mb-5 flex flex-wrap gap-2">
         <Input type="month" value={mes} onChange={(e) => e.target.value && navigate({ search: (s) => ({ ...s, mes: e.target.value }) })} className="w-auto" />
         <Select value={status} onValueChange={(v) => navigate({ search: (s) => ({ ...s, status: v }) })}>
-          <SelectTrigger className="w-full sm:w-72">
+          <SelectTrigger className="w-full sm:w-80">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
