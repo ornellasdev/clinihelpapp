@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { pacienteQuery, sessoesParaCobrarQuery } from "@/lib/queries";
 import { criarCobranca } from "@/lib/cobrancas.functions";
+import { novaCobrancaSchema } from "@/lib/cobranca-schema";
+import { errosPorCampo, mensagemDeErro } from "@/services/resultado";
 import {
   FORMAS_COBRANCA,
   STATUS_QUE_PRENDEM_SESSAO,
@@ -45,6 +47,7 @@ export function NovaCobrancaDialog({ aberta, onClose, onCriada }: { aberta: bool
   const [vencimento, setVencimento] = useState(format(addDays(new Date(), 3), "yyyy-MM-dd"));
   const [forma, setForma] = useState<FormaCobranca>("todas");
   const [enviando, setEnviando] = useState(false);
+  const [erros, setErros] = useState<Record<string, string>>({});
 
   const ini = startOfMonth(parseISO(`${mes}-01`));
   const { data: paciente } = useQuery({ ...pacienteQuery(pacienteId), enabled: !!pacienteId });
@@ -98,22 +101,26 @@ export function NovaCobrancaDialog({ aberta, onClose, onCriada }: { aberta: bool
 
   async function salvar(e: React.FormEvent) {
     e.preventDefault();
-    const v = Number(valor.replace(",", "."));
     if (!pacienteId) { toast.error("Escolha o paciente."); return; }
     if (modo === "sessoes" && marcadas.size === 0) { toast.error("Marque ao menos uma sessão, ou use “Valor livre”."); return; }
-    if (!Number.isFinite(v) || v < VALOR_MINIMO_COBRANCA) { toast.error(`O valor mínimo é ${formatarMoeda(VALOR_MINIMO_COBRANCA)}.`); return; }
+    const r0 = novaCobrancaSchema.safeParse({ pacienteId, sessoes: modo === "sessoes" ? [...marcadas] : [], valor, vencimento, descricao, forma });
+    if (!r0.success) {
+      const campos = errosPorCampo(r0.error.issues);
+      setErros(campos);
+      toast.error(Object.values(campos)[0] ?? "Confira os dados da cobrança.");
+      return;
+    }
+    setErros({});
     setEnviando(true);
     try {
-      const r = await criar({
-        data: { pacienteId, sessoes: modo === "sessoes" ? [...marcadas] : [], valor: Math.round(v * 100) / 100, vencimento, descricao, forma },
-      });
+      const r = await criar({ data: r0.data });
       toast.success("Cobrança gerada!");
       qc.invalidateQueries({ queryKey: ["cobrancas"] });
       limpar();
       onCriada(r.id);
       onClose();
     } catch (err) {
-      toast.error(erroAmigavel((err as Error).message));
+      toast.error(mensagemDeErro(err));
     } finally {
       setEnviando(false);
     }
