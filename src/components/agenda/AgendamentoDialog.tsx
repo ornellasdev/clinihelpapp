@@ -14,16 +14,26 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-export type NovoAgendamentoPadrao = { data: string; hora?: string; salaId?: string; pacienteId?: string; profissionalId?: string };
+export type NovoAgendamentoPadrao = {
+  data: string;
+  hora?: string;
+  salaId?: string;
+  pacienteId?: string;
+  profissionalId?: string;
+  especialidadeId?: string;
+};
 
 export function AgendamentoDialog({
   open,
   onOpenChange,
   padrao,
+  onCriado,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   padrao: NovoAgendamentoPadrao;
+  /** Chamado quando ao menos um atendimento foi criado. */
+  onCriado?: () => void;
 }) {
   const qc = useQueryClient();
   const { data: equipe = [] } = useQuery(equipeQuery);
@@ -45,7 +55,7 @@ export function AgendamentoDialog({
     if (!open) return;
     setPacienteId(padrao.pacienteId ?? "");
     setProfissionalId(padrao.profissionalId ?? "");
-    setEspecialidadeId("");
+    setEspecialidadeId(padrao.especialidadeId ?? "");
     setSalaId(padrao.salaId ?? "");
     setData(padrao.data);
     setHora(padrao.hora ?? "08:00");
@@ -93,7 +103,10 @@ export function AgendamentoDialog({
     }
     setSalvando(false);
     qc.invalidateQueries({ queryKey: ["agenda"] });
-    if (criados) toast.success(criados === 1 ? "Atendimento agendado." : `${criados} atendimentos agendados.`);
+    if (criados) {
+      toast.success(criados === 1 ? "Atendimento agendado." : `${criados} atendimentos agendados.`);
+      onCriado?.();
+    }
     if (falhas.length) toast.error(falhas.slice(0, 4).join("\n"), { duration: 8000 });
     if (!falhas.length) onOpenChange(false);
   }
