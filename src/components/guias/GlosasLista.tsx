@@ -4,7 +4,7 @@ import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { conveniosQuery, glosasQuery, type Glosa } from "@/lib/queries";
-import { STATUS_GLOSA, resumoGlosas, rotuloMotivo, type StatusGlosa } from "@/lib/guias";
+import { STATUS_GLOSA, resumoGlosas, rotuloMotivo, type StatusGlosa, exigeGuia } from "@/lib/guias";
 import { formatarMoeda } from "@/lib/financeiro";
 import { erroAmigavel, fmtData } from "@/lib/ui-helpers";
 import { Button } from "@/components/ui/button";
@@ -93,7 +93,7 @@ export function GlosasLista({ onEditar }: { onEditar: (g: Glosa) => void }) {
           <SelectContent>
             <SelectItem value={TODOS}>Todos os convênios</SelectItem>
             {convenios
-              .filter((c) => c.tipo !== "particular")
+              .filter((c) => exigeGuia(c.tipo))
               .map((c) => (
                 <SelectItem key={c.id} value={c.id}>
                   {c.nome}
