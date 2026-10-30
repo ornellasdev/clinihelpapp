@@ -1,9 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Building2, ExternalLink, KeyRound, Loader2, LogOut, Plus, ShieldX, Wallet } from "lucide-react";
+import { BookOpen, Building2, ExternalLink, KeyRound, Loader2, LogOut, Plus, ShieldX, Wallet } from "lucide-react";
+
+const BaseConhecimento = lazy(() => import("@/components/dev/BaseConhecimento"));
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { meQuery, type Me } from "@/lib/queries";
@@ -66,6 +68,7 @@ function DevPage() {
   const qc = useQueryClient();
   const [etapa, setEtapa] = useState<Etapa>("carregando");
   const [email, setEmail] = useState<string | null>(null);
+  const [aba, setAba] = useState<"clinicas" | "docs">("clinicas");
 
   async function avaliar() {
     const erroUrl = await lerErroDaUrl();
@@ -133,7 +136,29 @@ function DevPage() {
           </div>
         )}
         {etapa === "verificar" && <Verificar onOk={avaliar} />}
-        {etapa === "painel" && <PainelClinicas />}
+        {etapa === "painel" && (
+          <>
+            <div className="mb-6 inline-flex rounded-xl border bg-card p-1">
+              {([["clinicas", "Clínicas", Building2], ["docs", "Base de conhecimento", BookOpen]] as const).map(([k, rotulo, Icone]) => (
+                <button
+                  key={k}
+                  type="button"
+                  onClick={() => setAba(k)}
+                  className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium ${aba === k ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+                >
+                  <Icone className="size-4" /> {rotulo}
+                </button>
+              ))}
+            </div>
+            {aba === "clinicas" ? (
+              <PainelClinicas />
+            ) : (
+              <Suspense fallback={<Loader2 className="mx-auto mt-16 size-6 animate-spin text-muted-foreground" />}>
+                <BaseConhecimento />
+              </Suspense>
+            )}
+          </>
+        )}
       </main>
     </div>
   );
