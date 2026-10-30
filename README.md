@@ -1,40 +1,110 @@
-# Clinihelp
+# CliniHelp — Sistema de Gestão de Clínicas
 
-Quero construir uma aplicação para clinícas para crianças  com necessidades especiais e que deve possui as seguintes features:
+> "Cada evolução registrada é um passo da criança."
 
-Agenda, prontuário pra evolução constando nome do profissional e registro dele, informações sobre valor de tratamento e repasse
+## 📋 Sobre o Projeto
 
- Agenda vinculando sala x profissional
+O **CliniHelp** é uma plataforma web moderna e responsiva voltada para a gestão integrada de clínicas multidisciplinares e de desenvolvimento infantil (como Fonoaudiologia, Terapia Ocupacional, Psicologia, Fisioterapia, Psicopedagogia, entre outras).
 
-Cadastro completo de paciência com aba pra anexar documentos
+Nosso objetivo é descomplicar a rotina administrativa e clínica, oferecendo um ambiente seguro e intuitivo para que os terapeutas foquem no que realmente importa: a evolução de cada paciente.
 
-Sumário de data pra busca de informações do  prontuário por data
+🔗 **Acesse a aplicação:** [clinihelpsystem.lovable.app](https://clinihelpsystem.lovable.app)
 
-Versão web e app pq facilita pra eles usarem no celular pra fazer evoluções
+## ✨ Principais Funcionalidades
 
- Niveis de acesso baseado em SOD 
+### 📅 Agenda Inteligente
+- Visualização clara e filtragem por sala de atendimento e por profissional.
+- Controle de horários, confirmações, faltas e reposições sem conflito de espaço físico.
 
- Exemplo: psicologia é restrito apenas as psicologas e o acesso master podem ber
+### 📁 Prontuário Eletrônico por Especialidade
+- Registro detalhado de evoluções diárias, anamneses e planos terapêuticos adaptados para cada área de atuação.
+- Histórico centralizado do desenvolvimento da criança com controle de acesso.
 
-This project was built with [Lovable](https://lovable.dev).
+### 💰 Gestão Financeira e Repasses
+- Organização transparente e automatizada de comissões e repasses para os profissionais da equipe.
+- Controle de atendimentos realizados vs. faturamento.
 
-**Live app**: https://clinihelpapp.lovable.app
+### 📱 Experiência Multiplataforma (Responsivo)
+- Interface otimizada para uso rápido tanto no computador (recepção/administração) quanto no celular ou tablet (terapeutas em sala de atendimento).
 
-## Build with Lovable
+### 🔒 Controle de Acesso e Segurança
+- Ambiente restrito à equipe da clínica, com permissões personalizadas por perfil (Administrador, Recepção, Profissional de Saúde).
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/3775f6f7-5bd2-472f-9123-f33c27052747).
+## 🚀 Tecnologias Utilizadas
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+Este projeto foi construído utilizando o que há de mais moderno no ecossistema de desenvolvimento web para garantir performance, escalabilidade e uma excelente experiência de usuário (UX/UI):
 
-## Development
+- **Frontend:** React + TypeScript (TanStack Start / TanStack Router)
+- **Build Tool:** Vite
+- **Estilização:** Tailwind CSS + shadcn/ui
+- **Ícones:** Lucide React
+- **Backend / Banco de Dados / Autenticação:** Supabase (PostgreSQL, Auth, Row Level Security)
+- **Plataforma de Desenvolvimento:** Lovable
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+## 💻 Como Executar o Projeto Localmente
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+### Pré-requisitos
+- Node.js (versão 18 ou superior)
+- Gerenciador de pacotes (npm, yarn ou bun)
+
+### Passo a passo
+
+1. **Clone o repositório:**
+   ```sh
+   git clone https://github.com/SEU-USUARIO/clinihelp.git
+   cd clinihelp
+   ```
+
+2. **Instale as dependências:**
+   ```sh
+   npm install
+   ```
+
+3. **Configure as variáveis de ambiente:**
+   Crie um arquivo `.env` na raiz do projeto e adicione as credenciais do seu backend:
+   ```env
+   VITE_SUPABASE_URL=sua_url_do_supabase
+   VITE_SUPABASE_PUBLISHABLE_KEY=sua_chave_publica_do_supabase
+   VITE_SUPABASE_PROJECT_ID=id_do_projeto
+   ```
+
+4. **Inicie o servidor de desenvolvimento:**
+   ```sh
+   npm run dev
+   ```
+
+5. **Acesse no navegador:**
+   Abra [http://localhost:8080](http://localhost:8080) (ou a porta indicada no seu terminal).
+
+## 🗂️ Estrutura Básica do Projeto
+
+```text
+├── public/              # Arquivos estáticos e ícones
+├── src/
+│   ├── assets/          # Imagens e logotipos
+│   ├── components/      # Componentes reutilizáveis e UI (shadcn)
+│   ├── hooks/           # Custom hooks do React
+│   ├── integrations/    # Configuração do cliente do backend (Supabase)
+│   ├── lib/             # Regras de negócio, consultas, permissões e funções de servidor
+│   ├── routes/          # Telas do sistema (Auth, Agenda, Pacientes, Financeiro, Auditoria...)
+│   └── styles.css       # Tema e cores do CliniHelp (Tailwind CSS v4)
+├── supabase/            # Migrações do banco de dados
+├── package.json         # Dependências e scripts
+└── vite.config.ts       # Configuração do Vite
 ```
+
+## 🛡️ Segurança e Privacidade (LGPD)
+
+Por lidar com dados sensíveis de saúde e de menores de idade, o CliniHelp adota práticas rigorosas de segurança:
+
+- Autenticação segura e criptografada.
+- Acesso restrito exclusivamente a profissionais autorizados pela administração da clínica.
+- Isolamento de dados por clínica e por nível de permissão.
+
+## 📞 Suporte e Contato
+
+Para dúvidas, suporte técnico ou solicitação de acesso à plataforma:
+
+- **Sistema Web:** [clinihelpsystem.lovable.app](https://clinihelpsystem.lovable.app)
+- **Desenvolvedor / Responsável:** Yurivillar Ornelas Faria (Ornellas)
+- **LinkedIn:** [linkedin.com/in/yurivillarornelas](https://www.linkedin.com/in/yurivillarornelas/)
