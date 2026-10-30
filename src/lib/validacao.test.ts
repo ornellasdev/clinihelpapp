@@ -90,3 +90,43 @@ describe("CID e links temporários", () => {
     expect(validadeLinkTemporario(3600)).toBe(300);
   });
 });
+
+describe("valores em reais, repasse e vencimento", () => {
+  it("lê valores digitados no formato brasileiro", async () => {
+    const { lerValorReais } = await import("./validacao");
+    expect(lerValorReais("150")).toBe(150);
+    expect(lerValorReais("150,5")).toBe(150.5);
+    expect(lerValorReais("1.234,56")).toBe(1234.56);
+    expect(lerValorReais("1.234")).toBe(1234);
+    expect(lerValorReais("1234.56")).toBe(1234.56);
+    expect(lerValorReais("R$ 80,00")).toBe(80);
+    expect(lerValorReais("abc")).toBeNull();
+  });
+  it("valor da sessão não pode ser negativo nem ter 3 casas", async () => {
+    const { valorReais } = await import("./validacao");
+    expect(valorReais().safeParse("-10").success).toBe(false);
+    expect(valorReais().safeParse("10,123").success).toBe(false);
+    const ok = valorReais().safeParse("180,50");
+    expect(ok.success && ok.data).toBe(180.5);
+  });
+  it("cobrança tem mínimo de R$ 5,00", async () => {
+    const { valorReais } = await import("./validacao");
+    expect(valorReais("Valor", 5).safeParse("4,99").success).toBe(false);
+    expect(valorReais("Valor", 5).safeParse("5").success).toBe(true);
+  });
+  it("repasse vai de 0 a 100%", async () => {
+    const { percentualRepasse } = await import("./validacao");
+    expect(percentualRepasse().safeParse("50").success).toBe(true);
+    expect(percentualRepasse().safeParse("100,5").success).toBe(false);
+    expect(percentualRepasse().safeParse(-1).success).toBe(false);
+    expect(percentualRepasse().safeParse("abc").success).toBe(false);
+  });
+  it("vencimento: de hoje até 1 ano", async () => {
+    const { vencimentoValido } = await import("./validacao");
+    const hoje = new Date("2026-10-30T12:00:00");
+    expect(vencimentoValido("2026-10-30", hoje)).toBe(true);
+    expect(vencimentoValido("2026-10-29", hoje)).toBe(false);
+    expect(vencimentoValido("2027-10-30", hoje)).toBe(true);
+    expect(vencimentoValido("2027-10-31", hoje)).toBe(false);
+  });
+});
