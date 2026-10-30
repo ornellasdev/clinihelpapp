@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { conveniosQuery, guiasQuery, guiasUsoQuery, type Guia } from "@/lib/queries";
 import { useMe } from "@/hooks/use-me";
 import { podeGerirGlosas, podeRemoverGuia } from "@/lib/permissions";
-import { SITUACAO_GUIA, saldoGuia, situacaoGuia, type SituacaoGuia } from "@/lib/guias";
+import { exigeGuia, SITUACAO_GUIA, saldoGuia, situacaoGuia, type SituacaoGuia } from "@/lib/guias";
 import { erroAmigavel, fmtData } from "@/lib/ui-helpers";
 import { abrirAnexoGuia, BUCKET_GUIAS } from "@/components/guias/GuiaDialog";
 import { Button } from "@/components/ui/button";
