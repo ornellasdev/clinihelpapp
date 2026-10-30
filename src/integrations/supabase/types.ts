@@ -2101,6 +2101,59 @@ export type Database = {
       }
     }
     Views: {
+      audit_logs: {
+        Row: {
+          action: string | null
+          changed_fields: string[] | null
+          clinica_id: string | null
+          created_at: string | null
+          description: string | null
+          id: number | null
+          new_data: Json | null
+          old_data: Json | null
+          record_id: string | null
+          table_name: string | null
+          user_id: string | null
+          user_name: string | null
+        }
+        Insert: {
+          action?: string | null
+          changed_fields?: string[] | null
+          clinica_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: number | null
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id?: string | null
+          table_name?: string | null
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Update: {
+          action?: string | null
+          changed_fields?: string[] | null
+          clinica_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: number | null
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id?: string | null
+          table_name?: string | null
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auditoria_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guias_uso: {
         Row: {
           guia_id: string | null
@@ -2113,6 +2166,133 @@ export type Database = {
             columns: ["guia_id"]
             isOneToOne: false
             referencedRelation: "guias_convenio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vw_conformidade_lgpd: {
+        Row: {
+          clinica_id: string | null
+          com_consentimento: number | null
+          consentimento_revogado: number | null
+          pacientes_ativos: number | null
+          sem_consentimento: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pacientes_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vw_kpi_financeiro_mes: {
+        Row: {
+          a_receber: number | null
+          clinica_id: string | null
+          especialidade_id: string | null
+          faturado: number | null
+          mes: string | null
+          profissional_id: string | null
+          recebido: number | null
+          repasse_devido: number | null
+          repasse_pago: number | null
+          sessoes_cobradas: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agendamentos_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agendamentos_especialidade_id_fkey"
+            columns: ["especialidade_id"]
+            isOneToOne: false
+            referencedRelation: "especialidades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agendamentos_profissional_id_fkey"
+            columns: ["profissional_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vw_kpi_glosas: {
+        Row: {
+          clinica_id: string | null
+          convenio_id: string | null
+          mes: string | null
+          quantidade: number | null
+          status: string | null
+          valor: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "glosas_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "glosas_convenio_id_fkey"
+            columns: ["convenio_id"]
+            isOneToOne: false
+            referencedRelation: "convenios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vw_kpi_sessoes_mes: {
+        Row: {
+          canceladas: number | null
+          clinica_id: string | null
+          especialidade_id: string | null
+          faltas_cobradas: number | null
+          faltas_justificadas: number | null
+          faltas_terapeuta: number | null
+          finalizadas: number | null
+          horas_reservadas: number | null
+          mes: string | null
+          profissional_id: string | null
+          sala_id: string | null
+          total: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agendamentos_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agendamentos_especialidade_id_fkey"
+            columns: ["especialidade_id"]
+            isOneToOne: false
+            referencedRelation: "especialidades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agendamentos_profissional_id_fkey"
+            columns: ["profissional_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agendamentos_sala_id_fkey"
+            columns: ["sala_id"]
+            isOneToOne: false
+            referencedRelation: "salas"
             referencedColumns: ["id"]
           },
         ]
