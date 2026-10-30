@@ -1962,6 +1962,10 @@ export type Database = {
       meu_contexto: { Args: never; Returns: Json }
       minha_clinica: { Args: never; Returns: string }
       nome_auditoria: { Args: never; Returns: string }
+      recalcular_faturas_liminar: {
+        Args: { _ids: string[] }
+        Returns: undefined
+      }
       registrar_acesso: { Args: { _acao: string }; Returns: undefined }
       responsavel_de: { Args: { _paciente: string }; Returns: boolean }
       tem_especialidade: { Args: { _user_id: string }; Returns: boolean }
