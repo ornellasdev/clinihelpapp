@@ -33,6 +33,8 @@ export const Route = createFileRoute("/_authenticated/$clinica")({
   beforeLoad: async ({ context, params, location }) => {
     let me = await context.queryClient.ensureQueryData(meQuery);
     if (me.dev_pendente) throw redirect({ to: "/dev" });
+    // Senha temporária ou verificação em duas etapas pendente: termina o login antes de entrar.
+    if (me.pendencia) throw redirect({ to: "/auth" });
     if (me.dev && me.clinica?.slug !== params.clinica) {
       // Desenvolvedor abrindo outra clínica: troca a clínica ativa e descarta dados da anterior.
       const { error } = await supabase.rpc("dev_entrar_clinica", { _slug: params.clinica });
