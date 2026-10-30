@@ -13,13 +13,14 @@ import { podeAgendar, podeEditarPaciente } from "@/lib/permissions";
 import { STATUS_AGENDA, corEsp, erroAmigavel, fmtData, fmtHora, idade, iniciais } from "@/lib/ui-helpers";
 import { PacienteForm } from "@/components/pacientes/PacienteForm";
 import { ProntuarioTab } from "@/components/pacientes/ProntuarioTab";
+import { PlanoTerapeuticoTab } from "@/components/pacientes/PlanoTerapeuticoTab";
 import { DocumentosTab } from "@/components/pacientes/DocumentosTab";
 import { AgendamentoDialog } from "@/components/agenda/AgendamentoDialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
-const ABAS = ["prontuario", "cadastro", "documentos", "atendimentos"] as const;
+const ABAS = ["prontuario", "plano", "cadastro", "documentos", "atendimentos"] as const;
 
 export const Route = createFileRoute("/_authenticated/$clinica/pacientes/$id")({
   validateSearch: z.object({
@@ -92,6 +93,7 @@ function PacientePage() {
       <Tabs value={aba} onValueChange={(v) => navigate({ search: { aba: v as (typeof ABAS)[number] } })}>
         <TabsList className="mb-5 h-auto w-full justify-start overflow-x-auto bg-surface p-1 sm:w-auto">
           <TabsTrigger value="prontuario" className="px-4 py-2">Prontuário</TabsTrigger>
+          <TabsTrigger value="plano" className="px-4 py-2">Plano terapêutico</TabsTrigger>
           <TabsTrigger value="cadastro" className="px-4 py-2">Cadastro</TabsTrigger>
           <TabsTrigger value="documentos" className="px-4 py-2">Documentos</TabsTrigger>
           <TabsTrigger value="atendimentos" className="px-4 py-2">Atendimentos</TabsTrigger>
@@ -100,6 +102,11 @@ function PacientePage() {
         <TabsContent value="prontuario">
           <Suspense fallback={<Carregando />}>
             <ProntuarioTab pacienteId={id} agendamentoId={search.agendamento} />
+          </Suspense>
+        </TabsContent>
+        <TabsContent value="plano">
+          <Suspense fallback={<Carregando />}>
+            <PlanoTerapeuticoTab pacienteId={id} />
           </Suspense>
         </TabsContent>
         <TabsContent value="cadastro">
