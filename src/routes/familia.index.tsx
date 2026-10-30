@@ -69,8 +69,8 @@ function PortalFamilia() {
         <div className="rounded-2xl border bg-card p-8 text-center">
           <h1 className="text-xl font-semibold">Nenhuma criança encontrada</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            O e-mail <span className="font-medium text-foreground">{familiaEmail}</span> não está na ficha de nenhuma criança, ou você entrou com senha
-            de equipe. Saia e entre com o código enviado ao e-mail cadastrado na clínica.
+            O e-mail <span className="font-medium text-foreground">{familiaEmail}</span> não está na ficha de nenhuma criança ativa. Contas da equipe
+            da clínica não acessam a Área da família — use o e-mail pessoal cadastrado na ficha.
           </p>
           <Button className="mt-5" onClick={sair}>
             Sair e entrar com o código
