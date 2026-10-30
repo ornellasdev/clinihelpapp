@@ -1,3 +1,4 @@
+import type { StatusAgenda } from "./agenda-status";
 import { differenceInMonths, differenceInYears, format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -19,7 +20,6 @@ export const corEsp = (cor?: string | null) => COR_ESPECIALIDADE[cor ?? "chart-1
 export const barraEsp = (cor?: string | null) => BARRA_ESPECIALIDADE[cor ?? "chart-1"] ?? BARRA_ESPECIALIDADE["chart-1"];
 
 export type { StatusAgenda } from "./agenda-status";
-import type { StatusAgenda } from "./agenda-status";
 
 /**
  * Cores por status: azul = agendado, laranja = aguardando, roxo = em atendimento, verde = finalizado,

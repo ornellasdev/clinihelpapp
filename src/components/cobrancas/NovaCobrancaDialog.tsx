@@ -17,6 +17,7 @@ import {
   type StatusCobranca,
 } from "@/lib/cobrancas";
 import { formatarMoeda } from "@/lib/financeiro";
+import { ehFaturavel } from "@/lib/agenda-status";
 import { STATUS_AGENDA, erroAmigavel, fmtData, fmtHora } from "@/lib/ui-helpers";
 import { PacienteCombobox } from "@/components/PacienteCombobox";
 import { Button } from "@/components/ui/button";
@@ -61,9 +62,9 @@ export function NovaCobrancaDialog({ aberta, onClose, onCriada }: { aberta: bool
     [sessoes],
   );
 
-  // Ao trocar paciente/mês, marca as sessões realizadas ainda não cobradas.
+  // Ao trocar paciente/mês, marca as sessões finalizadas e faltas cobradas ainda não cobradas.
   useEffect(() => {
-    setMarcadas(new Set(disponiveis.filter((s) => !s.presa && !s.pagaNoFinanceiro && s.status === "realizado").map((s) => s.id)));
+    setMarcadas(new Set(disponiveis.filter((s) => !s.presa && !s.pagaNoFinanceiro && ehFaturavel(s.status)).map((s) => s.id)));
   }, [disponiveis]);
 
   const soma = disponiveis.filter((s) => marcadas.has(s.id)).reduce((t, s) => t + Number(s.fin?.valor ?? 0), 0);

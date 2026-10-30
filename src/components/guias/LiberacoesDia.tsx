@@ -19,6 +19,7 @@ import {
   usoPorGuia,
   type StatusLiberacao,
 } from "@/lib/guias";
+import { ehFalta } from "@/lib/agenda-status";
 import { STATUS_AGENDA, barraEsp, erroAmigavel, fmtData, fmtHora } from "@/lib/ui-helpers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,7 +45,7 @@ export function useSessoesConvenio(itens: readonly AgendaItem[], data: string, a
     const tipo = new Map(convenios.map((c) => [c.id, c]));
     const sessoes = ativo && convenios.length
       ? itens
-          .filter((i) => i.status !== "cancelado" && exigeGuia(tipo.get(i.paciente?.convenio_id ?? "")?.tipo))
+          .filter((i) => i.status !== "cancelado" && !ehFalta(i.status) && exigeGuia(tipo.get(i.paciente?.convenio_id ?? "")?.tipo))
           .map((i) => {
             const s = { paciente_id: i.paciente_id, especialidade_id: i.especialidade_id, data, guia_id: i.liberacao?.guia_id ?? null };
             const vinculada = s.guia_id ? (guias.find((g) => g.id === s.guia_id) ?? null) : null;
