@@ -59,7 +59,6 @@ export function GuiasLista({ onEditar, onGlosar }: { onEditar: (g: Guia) => void
   async function remover(g: Guia) {
     const { error } = await supabase.from("guias_convenio").delete().eq("id", g.id);
     if (error) return void toast.error(erroAmigavel(error.message));
-    if (g.anexo_path) await supabase.storage.from(BUCKET_GUIAS).remove([g.anexo_path]);
     toast.success("Guia excluída.");
     qc.invalidateQueries({ queryKey: ["guias"] });
     qc.invalidateQueries({ queryKey: ["agenda"] });
