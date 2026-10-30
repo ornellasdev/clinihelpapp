@@ -73,7 +73,11 @@ const numBR = (n: number) => n.toFixed(2).replace(".", ",");
 
 /** CSV no padrão brasileiro: separador ";" e vírgula decimal, para abrir direto no Excel. */
 export function gerarCsv(linhas: LinhaExportacao[]): string {
-  const esc = (v: string) => (/[";\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+  const esc = (bruto: string) => {
+    // Impede que textos começando com = + - @ (ou tab/CR) virem fórmulas ao abrir no Excel.
+    const v = /^[=+\-@\t\r]/.test(bruto) ? `'${bruto}` : bruto;
+    return /[";\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+  };
   const cab = COLUNAS.map((c) => esc(c.titulo)).join(";");
   const corpo = linhas.map((l) =>
     COLUNAS.map((c) => {

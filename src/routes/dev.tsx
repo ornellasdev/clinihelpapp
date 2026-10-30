@@ -7,7 +7,7 @@ import { Building2, ExternalLink, KeyRound, Loader2, LogOut, Plus, ShieldCheck }
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { meQuery, type Me } from "@/lib/queries";
-import { criarClinica, definirClinicaAtiva, listarClinicas, prepararAcessoDev } from "@/lib/dev.functions";
+import { criarClinica, definirClinicaAtiva, listarClinicas } from "@/lib/dev.functions";
 import { gerarSlug, slugValido } from "@/lib/clinica-slug";
 import { erroAmigavel } from "@/lib/ui-helpers";
 import { Logo } from "@/components/Logo";
@@ -37,7 +37,6 @@ function DevPage() {
   const qc = useQueryClient();
   const [etapa, setEtapa] = useState<Etapa>("carregando");
   const [email, setEmail] = useState<string | null>(null);
-  const preparar = useServerFn(prepararAcessoDev);
 
   async function avaliar() {
     const { data: u } = await supabase.auth.getUser();
@@ -52,7 +51,7 @@ function DevPage() {
   }
 
   useEffect(() => {
-    preparar().catch(() => undefined).finally(() => void avaliar());
+    void avaliar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
