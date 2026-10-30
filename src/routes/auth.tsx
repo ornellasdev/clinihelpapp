@@ -33,8 +33,8 @@ function AuthPage() {
 
   /** Leva cada pessoa para o endereço da própria clínica (ou para a área do desenvolvedor). */
   async function irParaClinica(): Promise<boolean> {
-    qc.removeQueries({ queryKey: ["me"] });
-    const me = await qc.fetchQuery(meQuery);
+    // staleTime 0 força dados novos sem descartar uma busca já em andamento (evita CancelledError).
+    const me = await qc.fetchQuery({ ...meQuery, staleTime: 0 });
     if (me.dev || me.dev_pendente) {
       navigate({ to: "/dev", replace: true });
       return true;

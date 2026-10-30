@@ -45,8 +45,8 @@ function DevPage() {
       return;
     }
     setEmail(u.user.email ?? null);
-    qc.removeQueries({ queryKey: ["me"] });
-    const me: Me = await qc.fetchQuery(meQuery);
+    // staleTime 0 força dados novos sem descartar uma busca já em andamento (evita CancelledError).
+    const me: Me = await qc.fetchQuery({ ...meQuery, staleTime: 0 });
     setEtapa(me.dev ? "painel" : me.dev_pendente ? "verificar" : "negado");
   }
 
