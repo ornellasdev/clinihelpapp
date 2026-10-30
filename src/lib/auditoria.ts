@@ -8,6 +8,9 @@ export const AREAS_AUDITORIA: Record<string, string> = {
   agendamentos: "Agenda",
   atendimento_financeiro: "Financeiro das sessões",
   evolucoes: "Prontuário",
+  evolucao_adendos: "Adendos do prontuário",
+  paciente_dados_clinicos: "Dados clínicos",
+  termos_assinaturas: "Termos e consentimentos",
   profiles: "Perfis da equipe",
   user_roles: "Papéis de acesso",
   profissional_especialidades: "Especialidades do profissional",
@@ -24,9 +27,12 @@ export const AREAS_AUDITORIA: Record<string, string> = {
   faturas_liminar: "Liminares",
 };
 
+/** Registros que só o master vê na auditoria (o banco aplica a mesma regra). */
+export const AREAS_DO_PRONTUARIO = new Set(["evolucoes", "evolucao_adendos", "paciente_dados_clinicos", "plano_metas", "evolucao_metas"]);
+
 /** Áreas que aparecem no filtro; o prontuário só para quem pode ver esses registros. */
 export function areasVisiveis(veProntuario: boolean) {
-  return Object.entries(AREAS_AUDITORIA).filter(([k]) => veProntuario || k !== "evolucoes");
+  return Object.entries(AREAS_AUDITORIA).filter(([k]) => veProntuario || !AREAS_DO_PRONTUARIO.has(k));
 }
 
 export const ACOES_AUDITORIA: Record<string, { label: string; tom: "criou" | "alterou" | "removeu" | "neutro" }> = {
@@ -35,6 +41,7 @@ export const ACOES_AUDITORIA: Record<string, { label: string; tom: "criou" | "al
   removeu: { label: "Removeu", tom: "removeu" },
   login: { label: "Entrou", tom: "neutro" },
   logout: { label: "Saiu", tom: "neutro" },
+  logout_inatividade: { label: "Saiu por inatividade (15 min)", tom: "neutro" },
   desativou: { label: "Desativou conta", tom: "removeu" },
   reativou: { label: "Reativou conta", tom: "criou" },
   redefiniu_senha: { label: "Criou senha temporária", tom: "alterou" },
@@ -49,6 +56,10 @@ const CAMPOS: Record<string, string> = {
   cpf: "CPF",
   diagnostico: "Diagnóstico",
   cid: "CID",
+  alergias: "Alergias",
+  medicamentos: "Medicamentos",
+  excluido_em: "Excluído em",
+  lgpd_consentimento_status: "Consentimento LGPD",
   escola: "Escola",
   ativo: "Ativo",
   ativa: "Ativa",

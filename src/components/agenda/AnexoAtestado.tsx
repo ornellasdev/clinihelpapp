@@ -1,28 +1,11 @@
 import { Paperclip } from "lucide-react";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { BUCKETS, abrirArquivoPrivado } from "@/services/arquivos";
 import { cn } from "@/lib/utils";
-
-export const BUCKET_DOCUMENTOS = "documentos-pacientes";
 
 type Doc = { id: string; nome: string; storage_path: string };
 
-/** Abre o arquivo numa nova aba (a aba abre antes do link assinado para não ser barrada pelo navegador). */
-export async function abrirDocumento(path: string) {
-  const aba = window.open("", "_blank");
-  const { data, error } = await supabase.storage.from(BUCKET_DOCUMENTOS).createSignedUrl(path, 120);
-  if (error || !data) {
-    aba?.close();
-    toast.error("Não foi possível abrir o arquivo.");
-    return;
-  }
-  if (aba) {
-    aba.opener = null;
-    aba.location.href = data.signedUrl;
-  } else {
-    window.location.assign(data.signedUrl);
-  }
-}
+/** Abre o atestado/documento por link temporário (2 min), gerado só na hora do clique. */
+export const abrirDocumento = (path: string) => abrirArquivoPrivado(BUCKETS.documentos, path);
 
 /** Clipe na agenda para abrir rápido o atestado/comprovante da falta justificada. */
 export function ClipeAtestado({ docs, className }: { docs: readonly Doc[] | null | undefined; className?: string }) {

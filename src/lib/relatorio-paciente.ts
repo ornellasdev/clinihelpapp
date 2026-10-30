@@ -9,6 +9,7 @@ export type DadosRelatorio = {
   ate: string;
   especialidades: { id: string; nome: string }[];
   evolucoes: {
+    id: string;
     data_atendimento: string;
     especialidade_id: string;
     conteudo: string;
@@ -17,6 +18,15 @@ export type DadosRelatorio = {
   }[];
   metas: { id: string; especialidade_id: string; titulo: string; descricao: string | null; status: string }[];
   progresso: RegistroProgresso[];
+  /** Adendos (erratas) ligados às evoluções: saem logo abaixo da evolução original. */
+  adendos?: {
+    evolucao_id: string;
+    conteudo: string;
+    motivo: string | null;
+    profissional_nome: string | null;
+    profissional_registro: string | null;
+    created_at: string;
+  }[];
   incluirMetas: boolean;
   incluirEvolucoes: boolean;
 };
@@ -197,6 +207,22 @@ export async function gerarRelatorioPaciente(d: DadosRelatorio, modo: "baixar" |
       doc.setFontSize(8.5).setTextColor(100, 100, 100);
       doc.text(`${e.profissional_nome ?? ""}${e.profissional_registro ? ` — ${e.profissional_registro}` : ""}`, M, y);
       y += 3;
+      for (const a of (d.adendos ?? []).filter((x) => x.evolucao_id === e.id)) {
+        garantir(14);
+        y += 3;
+        doc.setFont("helvetica", "bold").setFontSize(8.5).setTextColor(20, 150, 140);
+        doc.text(`ADENDO${a.motivo ? ` · ${a.motivo}` : ""} · ${br(a.created_at)}`, M + 4, y);
+        y += 4.5;
+        doc.setFont("helvetica", "normal").setFontSize(9).setTextColor(30, 30, 30);
+        for (const linha of doc.splitTextToSize(a.conteudo, L - 4) as string[]) {
+          garantir(5);
+          doc.text(linha, M + 4, y);
+          y += 4.4;
+        }
+        doc.setFontSize(8).setTextColor(100, 100, 100);
+        doc.text(`${a.profissional_nome ?? ""}${a.profissional_registro ? ` — ${a.profissional_registro}` : ""}`, M + 4, y);
+        y += 3;
+      }
       doc.setDrawColor(230, 230, 230).setLineWidth(0.2).line(M, y, M + L, y);
       y += 6;
     }

@@ -133,7 +133,7 @@ export const pacientesQuery = (busca: string) =>
     queryFn: async () => {
       let q = supabase
         .from("pacientes")
-        .select("id, nome, data_nascimento, diagnostico, responsavel_nome, responsavel_telefone, ativo, convenio")
+        .select("id, nome, data_nascimento, responsavel_nome, responsavel_telefone, ativo, convenio")
         .order("nome")
         .limit(500);
       if (busca.trim()) q = q.ilike("nome", `%${busca.trim()}%`);

@@ -3,6 +3,7 @@ import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { CheckCircle2, Copy, FileDown, FileSignature, Loader2, Mail, Pencil, Plus, Settings2, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { BUCKETS, abrirArquivoPrivado } from "@/services/arquivos";
 import type { Tables } from "@/integrations/supabase/types";
 import { pacienteQuery, relatoriosLiberadosQuery, termosModelosQuery, termosPacienteQuery } from "@/lib/queries";
 import { useMe } from "@/hooks/use-me";
@@ -323,16 +324,12 @@ function RelatoriosLiberadosSecao({ pacienteId }: { pacienteId: string }) {
   async function revogar(r: Tables<"relatorios_liberados">) {
     const { error } = await supabase.from("relatorios_liberados").delete().eq("id", r.id);
     if (error) return void toast.error(erroAmigavel(error.message));
-    await supabase.storage.from("relatorios-familia").remove([r.storage_path]);
+    // O PDF fica guardado (registro do que foi compartilhado); só deixa de aparecer para a família.
     toast.success("Relatório retirado da Área da família.");
     qc.invalidateQueries({ queryKey: ["relatorios_liberados", pacienteId] });
   }
 
-  async function abrir(r: Tables<"relatorios_liberados">) {
-    const { data: s, error } = await supabase.storage.from("relatorios-familia").createSignedUrl(r.storage_path, 120);
-    if (error || !s) return void toast.error("Não foi possível abrir o relatório.");
-    window.open(s.signedUrl, "_blank", "noopener");
-  }
+  const abrir = (r: Tables<"relatorios_liberados">) => abrirArquivoPrivado(BUCKETS.relatorios, r.storage_path);
 
   return (
     <section className="rounded-2xl border bg-card p-4 sm:p-5">

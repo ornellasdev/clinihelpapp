@@ -6,16 +6,18 @@ import { supabase } from "@/integrations/supabase/client";
 import type { AgendaItem } from "@/lib/queries";
 import { useMe } from "@/hooks/use-me";
 import type { StatusFalta } from "@/lib/agenda-status";
-import { STATUS_AGENDA, erroAmigavel, fmtData, fmtHora } from "@/lib/ui-helpers";
-import { BUCKET_DOCUMENTOS, abrirDocumento } from "./AnexoAtestado";
+import { STATUS_AGENDA, fmtData, fmtHora } from "@/lib/ui-helpers";
+import { abrirDocumento } from "./AnexoAtestado";
+import { REGRA_ATESTADO, problemaNoArquivo } from "@/lib/validacao";
+import { BUCKETS, caminhoArquivo, desfazerEnvio, enviarArquivo } from "@/services/arquivos";
+import { mensagemDeErro } from "@/services/resultado";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
-const TIPOS_ACEITOS = ["application/pdf", "image/jpeg", "image/png"];
-const LIMITE_MB = 15;
+const LIMITE_MB = REGRA_ATESTADO.maxMB;
 
 const EXPLICACAO: Record<StatusFalta, string> = {
   falta_justificada: "Não gera cobrança para a família/convênio, não desconta a guia e não gera repasse.",
@@ -47,12 +49,9 @@ export function FaltaDialog({
 
   function escolher(f: File | undefined) {
     if (!f) return;
-    if (!TIPOS_ACEITOS.includes(f.type)) {
-      toast.error("Envie o atestado em PDF, JPG ou PNG.");
-      return;
-    }
-    if (f.size > LIMITE_MB * 1024 * 1024) {
-      toast.error(`O arquivo passa de ${LIMITE_MB} MB.`);
+    const problema = problemaNoArquivo(f, REGRA_ATESTADO);
+    if (problema) {
+      toast.error(problema);
       return;
     }
     setArquivo(f);
@@ -62,10 +61,8 @@ export function FaltaDialog({
     setSalvando(true);
     try {
       if (arquivo) {
-        const seguro = arquivo.name.normalize("NFD").replace(/[^\w.-]+/g, "_");
-        const path = `${me.clinica?.id}/${item.paciente_id}/atestado-${crypto.randomUUID()}-${seguro}`;
-        const up = await supabase.storage.from(BUCKET_DOCUMENTOS).upload(path, arquivo, { contentType: arquivo.type });
-        if (up.error) throw new Error(up.error.message);
+        const path = caminhoArquivo(me.clinica?.id, item.paciente_id, arquivo.name, "atestado-");
+        await enviarArquivo(BUCKETS.documentos, path, arquivo, REGRA_ATESTADO);
         const { error } = await supabase.from("paciente_documentos").insert({
           paciente_id: item.paciente_id,
           agendamento_id: item.id,
@@ -77,7 +74,7 @@ export function FaltaDialog({
           enviado_por: me.id,
         });
         if (error) {
-          await supabase.storage.from(BUCKET_DOCUMENTOS).remove([path]);
+          await desfazerEnvio(BUCKETS.documentos, path);
           throw new Error(error.message);
         }
       }
@@ -97,7 +94,7 @@ export function FaltaDialog({
       }
       onSalvo();
     } catch (e) {
-      toast.error(erroAmigavel(e instanceof Error ? e.message : String(e)));
+      toast.error(mensagemDeErro(e));
     } finally {
       setSalvando(false);
     }

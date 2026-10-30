@@ -56,5 +56,6 @@
 
 ## Segurança e conformidade (LGPD / ISO 27001 / HIPAA / SOC 2)
 - [x] Etapa 1: banco — vínculos que preservam histórico, exclusão lógica, índices, dados clínicos separados, consentimento LGPD, adendos, auditoria imutável, acesso por papel, views de indicadores
-- [ ] Etapa 2: ficha do paciente grava dados clínicos na tabela própria (e limpar os campos antigos); agenda/lista sem diagnóstico para recepção; tela de adendo + bloquear edição de evolução finalizada; saída automática após 15 min parado; serviços/hooks com validação Zod
+- [x] Etapa 2: ficha padronizada com validação, dados clínicos só para a equipe terapêutica, prontuário assinado + adendo, links temporários para anexos, saída automática em 15 min
+- [ ] Etapa 2b: levar a mesma validação aos formulários de valores (convênios, cobranças, repasses) e às demais telas que ainda gravam direto
 - [ ] Etapa 3: painel de Segurança, Banco e Auditoria (filtros, pacientes sem termo LGPD, integridade)

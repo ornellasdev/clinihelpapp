@@ -1,23 +1,46 @@
 import { useRef, useState, type ReactNode } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import type { Tables, TablesInsert } from "@/integrations/supabase/types";
+import type { Tables } from "@/integrations/supabase/types";
 import { buscarCep, formatarCep } from "@/lib/cep";
 import { conveniosQuery } from "@/lib/queries";
 import { rotuloTipoConvenio } from "@/lib/convenios";
-
-const NENHUM = "__nenhum";
+import { formatarCpf } from "@/lib/validacao";
+import { errosDoCadastro, type CadastroPaciente } from "@/services/pacientes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
-type Dados = TablesInsert<"pacientes">;
+const NENHUM = "__nenhum";
+const VAZIO: CadastroPaciente = { nome: "", ativo: true, pais: "Brasil" };
 
-const VAZIO: Dados = { nome: "", ativo: true, pais: "Brasil" };
+/** Copia só os campos do cadastro administrativo (sem dados clínicos, consentimento ou metadados). */
+function doRegistro(p: Tables<"pacientes">): CadastroPaciente {
+  const {
+    id: _id,
+    created_at: _c,
+    updated_at: _u,
+    criado_por: _cp,
+    clinica_id: _cl,
+    diagnostico: _d,
+    cid: _ci,
+    alergias: _a,
+    medicamentos: _m,
+    lgpd_consentimento_status: _l1,
+    lgpd_consentimento_em: _l2,
+    lgpd_consentimento_termo_id: _l3,
+    lgpd_consentimento_documento_id: _l4,
+    lgpd_consentimento_cpf: _l5,
+    ...resto
+  } = p;
+  return resto;
+}
 
+/** Ficha administrativa do paciente (recepção). Dados clínicos ficam em outro bloco, só para a equipe terapêutica. */
 export function PacienteForm({
   inicial,
   somenteLeitura,
@@ -26,26 +49,37 @@ export function PacienteForm({
 }: {
   inicial?: Tables<"pacientes">;
   somenteLeitura?: boolean;
-  onSalvar: (d: Dados) => Promise<void>;
+  onSalvar: (d: CadastroPaciente) => Promise<void>;
   textoBotao?: string;
 }) {
-  const [d, setD] = useState<Dados>(() => {
-    if (!inicial) return VAZIO;
-    const { id: _id, created_at: _c, updated_at: _u, ...resto } = inicial;
-    return resto;
-  });
+  const [d, setD] = useState<CadastroPaciente>(() => (inicial ? doRegistro(inicial) : VAZIO));
+  const [erros, setErros] = useState<Record<string, string>>({});
   const { data: convenios } = useSuspenseQuery(conveniosQuery);
   const [salvando, setSalvando] = useState(false);
   const [buscandoCep, setBuscandoCep] = useState(false);
   const [avisoCep, setAvisoCep] = useState<string | null>(null);
   const consultaCep = useRef<AbortController | null>(null);
   const numeroRef = useRef<HTMLInputElement>(null);
-  const set = (k: keyof Dados) => (e: { target: { value: string } }) => setD((x) => ({ ...x, [k]: e.target.value }));
-  const v = (k: keyof Dados) => (d[k] as string | null | undefined) ?? "";
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const mudar = (k: keyof CadastroPaciente, valor: unknown) => {
+    setD((x) => ({ ...x, [k]: valor }));
+    if (erros[k]) setErros(({ [k]: _, ...resto }) => resto);
+  };
+  const set = (k: keyof CadastroPaciente) => (e: { target: { value: string } }) => mudar(k, e.target.value);
+  const v = (k: keyof CadastroPaciente) => (d[k] as string | null | undefined) ?? "";
+  const cpfAoSair = (k: keyof CadastroPaciente) => () => v(k) && mudar(k, formatarCpf(v(k)));
+
+  /** Campo de texto padronizado, já com mensagem de erro e destaque. */
+  const campo = (k: keyof CadastroPaciente, label: string, extra: Partial<React.ComponentProps<typeof Input>> = {}, className?: string) => (
+    <Campo label={label} erro={erros[k]} className={className}>
+      <Input value={v(k)} onChange={set(k)} aria-invalid={!!erros[k]} name={k} {...extra} />
+    </Campo>
+  );
 
   async function mudarCep(e: { target: { value: string } }) {
     const cep = formatarCep(e.target.value);
-    setD((x) => ({ ...x, cep }));
+    mudar("cep", cep);
     setAvisoCep(null);
     consultaCep.current?.abort();
     if (cep.replace(/\D/g, "").length !== 8) {
@@ -73,31 +107,32 @@ export function PacienteForm({
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    const problemas = errosDoCadastro(d);
+    setErros(problemas);
+    const primeiro = Object.keys(problemas)[0];
+    if (primeiro) {
+      formRef.current?.querySelector<HTMLElement>(`[name="${primeiro}"]`)?.focus();
+      return;
+    }
     setSalvando(true);
     try {
-      const limpo = Object.fromEntries(
-        Object.entries(d).map(([k, val]) => [k, typeof val === "string" && val.trim() === "" ? null : val]),
-      ) as Dados;
-      limpo.nome = d.nome.trim();
-      await onSalvar(limpo);
+      await onSalvar(d);
     } finally {
       setSalvando(false);
     }
   }
 
+  const qtdErros = Object.keys(erros).length;
+
   return (
-    <form onSubmit={submit}>
+    <form ref={formRef} onSubmit={submit} noValidate>
       <fieldset disabled={somenteLeitura} className="space-y-6">
         <Secao titulo="Dados da criança">
-          <Campo label="Nome completo *" className="sm:col-span-2">
-            <Input required value={v("nome")} onChange={set("nome")} />
-          </Campo>
-          <Campo label="Data de nascimento">
-            <Input type="date" value={v("data_nascimento")} onChange={set("data_nascimento")} />
-          </Campo>
-          <Campo label="Sexo">
-            <Select value={v("sexo")} onValueChange={(x) => setD((p) => ({ ...p, sexo: x }))} disabled={!!somenteLeitura}>
-              <SelectTrigger>
+          {campo("nome", "Nome completo *", { required: true }, "sm:col-span-2")}
+          {campo("data_nascimento", "Data de nascimento", { type: "date" })}
+          <Campo label="Sexo" erro={erros["sexo"]}>
+            <Select value={v("sexo")} onValueChange={(x) => mudar("sexo", x)} disabled={!!somenteLeitura}>
+              <SelectTrigger name="sexo">
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
               <SelectContent>
@@ -107,102 +142,62 @@ export function PacienteForm({
               </SelectContent>
             </Select>
           </Campo>
-          <Campo label="CPF">
-            <Input value={v("cpf")} onChange={set("cpf")} inputMode="numeric" />
-          </Campo>
-          <Campo label="Escola">
-            <Input value={v("escola")} onChange={set("escola")} />
-          </Campo>
-          <Campo label="Diagnóstico" className="sm:col-span-2">
-            <Input value={v("diagnostico")} onChange={set("diagnostico")} placeholder="Ex.: TEA nível 1, TDAH..." />
-          </Campo>
-          <Campo label="CID">
-            <Input value={v("cid")} onChange={set("cid")} placeholder="Ex.: F84.0" />
-          </Campo>
+          {campo("cpf", "CPF", { inputMode: "numeric", onBlur: cpfAoSair("cpf"), placeholder: "000.000.000-00" })}
+          {campo("escola", "Escola")}
         </Secao>
 
         <Secao titulo="Filiação">
-          <Campo label="Responsável principal">
-            <Input value={v("responsavel_nome")} onChange={set("responsavel_nome")} />
-          </Campo>
-          <Campo label="Parentesco">
-            <Input value={v("responsavel_parentesco")} onChange={set("responsavel_parentesco")} placeholder="Mãe, pai, avó..." />
-          </Campo>
-          <Campo label="CPF do responsável principal">
-            <Input value={v("responsavel_cpf")} onChange={set("responsavel_cpf")} inputMode="numeric" />
-          </Campo>
-          <Campo label="Telefone">
-            <Input type="tel" value={v("responsavel_telefone")} onChange={set("responsavel_telefone")} />
-          </Campo>
-          <Campo label="E-mail">
-            <Input type="email" value={v("responsavel_email")} onChange={set("responsavel_email")} />
-          </Campo>
+          {campo("responsavel_nome", "Responsável principal")}
+          {campo("responsavel_parentesco", "Parentesco", { placeholder: "Mãe, pai, avó..." })}
+          {campo("responsavel_cpf", "CPF do responsável principal", { inputMode: "numeric", onBlur: cpfAoSair("responsavel_cpf") })}
+          {campo("responsavel_telefone", "Telefone", { type: "tel", placeholder: "(11) 98765-4321" })}
+          {campo("responsavel_email", "E-mail", { type: "email" })}
           <div className="hidden lg:block" />
-          <Campo label="Segundo responsável">
-            <Input value={v("responsavel2_nome")} onChange={set("responsavel2_nome")} />
-          </Campo>
-          <Campo label="Parentesco do segundo responsável">
-            <Input value={v("responsavel2_parentesco")} onChange={set("responsavel2_parentesco")} placeholder="Mãe, pai, avó..." />
-          </Campo>
-          <Campo label="CPF do segundo responsável">
-            <Input value={v("responsavel2_cpf")} onChange={set("responsavel2_cpf")} inputMode="numeric" />
-          </Campo>
-          <Campo label="Telefone do segundo responsável">
-            <Input type="tel" value={v("responsavel2_telefone")} onChange={set("responsavel2_telefone")} />
-          </Campo>
-          <Campo label="E-mail do segundo responsável">
-            <Input type="email" value={v("responsavel2_email")} onChange={set("responsavel2_email")} />
-          </Campo>
+          {campo("responsavel2_nome", "Segundo responsável")}
+          {campo("responsavel2_parentesco", "Parentesco do segundo responsável", { placeholder: "Mãe, pai, avó..." })}
+          {campo("responsavel2_cpf", "CPF do segundo responsável", { inputMode: "numeric", onBlur: cpfAoSair("responsavel2_cpf") })}
+          {campo("responsavel2_telefone", "Telefone do segundo responsável", { type: "tel" })}
+          {campo("responsavel2_email", "E-mail do segundo responsável", { type: "email" })}
           <div className="hidden lg:block" />
-          <Campo label="Responsável financeiro">
-            <Input value={v("responsavel_financeiro_nome")} onChange={set("responsavel_financeiro_nome")} />
-          </Campo>
-          <Campo label="Parentesco do responsável financeiro">
-            <Input value={v("responsavel_financeiro_parentesco")} onChange={set("responsavel_financeiro_parentesco")} placeholder="Mãe, pai, avó..." />
-          </Campo>
-          <Campo label="CPF do responsável financeiro">
-            <Input value={v("responsavel_financeiro_cpf")} onChange={set("responsavel_financeiro_cpf")} inputMode="numeric" />
-          </Campo>
-          <Campo label="Telefone do responsável financeiro">
-            <Input type="tel" value={v("responsavel_financeiro_telefone")} onChange={set("responsavel_financeiro_telefone")} />
-          </Campo>
-          <Campo label="E-mail do responsável financeiro">
-            <Input type="email" value={v("responsavel_financeiro_email")} onChange={set("responsavel_financeiro_email")} />
-          </Campo>
+          {campo("responsavel_financeiro_nome", "Responsável financeiro")}
+          {campo("responsavel_financeiro_parentesco", "Parentesco do responsável financeiro", { placeholder: "Mãe, pai, avó..." })}
+          {campo("responsavel_financeiro_cpf", "CPF do responsável financeiro", {
+            inputMode: "numeric",
+            onBlur: cpfAoSair("responsavel_financeiro_cpf"),
+          })}
+          {campo("responsavel_financeiro_telefone", "Telefone do responsável financeiro", { type: "tel" })}
+          {campo("responsavel_financeiro_email", "E-mail do responsável financeiro", { type: "email" })}
         </Secao>
 
         <Secao titulo="Endereço e convênio">
-          <Campo label="CEP">
+          <Campo label="CEP" erro={erros["cep"]}>
             <div className="relative">
-              <Input value={v("cep")} onChange={mudarCep} inputMode="numeric" placeholder="00000-000" maxLength={9} />
+              <Input name="cep" value={v("cep")} onChange={mudarCep} inputMode="numeric" placeholder="00000-000" maxLength={9} aria-invalid={!!erros["cep"]} />
               {buscandoCep && (
                 <Loader2 className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground" />
               )}
             </div>
             {avisoCep && <p className="text-xs text-destructive">{avisoCep}</p>}
           </Campo>
-          <Campo label="Endereço (rua, avenida...)" className="sm:col-span-2">
-            <Input value={v("endereco")} onChange={set("endereco")} />
+          {campo("endereco", "Endereço (rua, avenida...)", {}, "sm:col-span-2")}
+          <Campo label="Número" erro={erros["numero"]}>
+            <Input ref={numeroRef} name="numero" value={v("numero")} onChange={set("numero")} />
           </Campo>
-          <Campo label="Número">
-            <Input ref={numeroRef} value={v("numero")} onChange={set("numero")} />
+          {campo("complemento", "Complemento", { placeholder: "Apto, bloco, casa..." }, "sm:col-span-2")}
+          {campo("cidade", "Município")}
+          {campo("estado", "Estado", { placeholder: "Ex.: São Paulo" })}
+          <Campo label="UF" erro={erros["uf"]}>
+            <Input
+              name="uf"
+              value={v("uf")}
+              onChange={(e) => mudar("uf", e.target.value.toUpperCase().slice(0, 2))}
+              placeholder="Ex.: SP"
+              maxLength={2}
+              aria-invalid={!!erros["uf"]}
+            />
           </Campo>
-          <Campo label="Complemento" className="sm:col-span-2">
-            <Input value={v("complemento")} onChange={set("complemento")} placeholder="Apto, bloco, casa..." />
-          </Campo>
-          <Campo label="Município">
-            <Input value={v("cidade")} onChange={set("cidade")} />
-          </Campo>
-          <Campo label="Estado">
-            <Input value={v("estado")} onChange={set("estado")} placeholder="Ex.: São Paulo" />
-          </Campo>
-          <Campo label="UF">
-            <Input value={v("uf")} onChange={(e) => setD((x) => ({ ...x, uf: e.target.value.toUpperCase().slice(0, 2) }))} placeholder="Ex.: SP" maxLength={2} />
-          </Campo>
-          <Campo label="País">
-            <Input value={v("pais")} onChange={set("pais")} />
-          </Campo>
-          <Campo label="Convênio / particular / liminar">
+          {campo("pais", "País")}
+          <Campo label="Convênio / particular / liminar" erro={erros["convenio_id"]}>
             <Select
               value={d.convenio_id ?? NENHUM}
               onValueChange={(x) => {
@@ -232,29 +227,29 @@ export function PacienteForm({
               <p className="text-xs text-muted-foreground">Nenhum convênio cadastrado. O financeiro cadastra na tela Financeiro.</p>
             )}
           </Campo>
-          <Campo label="Nº da carteirinha">
-            <Input value={v("carteirinha")} onChange={set("carteirinha")} />
-          </Campo>
+          {campo("carteirinha", "Nº da carteirinha")}
         </Secao>
 
-        <Secao titulo="Saúde">
-          <Campo label="Alergias">
-            <Textarea rows={2} value={v("alergias")} onChange={set("alergias")} />
-          </Campo>
-          <Campo label="Medicamentos em uso">
-            <Textarea rows={2} value={v("medicamentos")} onChange={set("medicamentos")} />
-          </Campo>
-          <Campo label="Observações gerais" className="sm:col-span-2">
-            <Textarea rows={3} value={v("observacoes")} onChange={set("observacoes")} />
+        <Secao titulo="Observações administrativas">
+          <Campo label="Observações gerais" className="sm:col-span-2" erro={erros["observacoes"]}>
+            <Textarea name="observacoes" rows={3} value={v("observacoes")} onChange={set("observacoes")} placeholder="Horários preferidos, transporte, contatos extras..." />
           </Campo>
           <div className="flex items-center gap-3">
-            <Switch checked={d.ativo ?? true} onCheckedChange={(x) => setD((p) => ({ ...p, ativo: x }))} disabled={!!somenteLeitura} />
+            <Switch checked={d.ativo ?? true} onCheckedChange={(x) => mudar("ativo", x)} disabled={!!somenteLeitura} />
             <Label>Paciente ativo</Label>
           </div>
+          <p className="text-xs text-muted-foreground sm:col-span-2 lg:col-span-3">
+            Diagnóstico, CID, alergias e medicação ficam nos dados clínicos, visíveis só para a equipe terapêutica.
+          </p>
         </Secao>
       </fieldset>
       {!somenteLeitura && (
-        <div className="sticky bottom-20 mt-6 flex justify-end md:bottom-4">
+        <div className="sticky bottom-20 mt-6 flex flex-wrap items-center justify-end gap-3 md:bottom-4">
+          {qtdErros > 0 && (
+            <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
+              Confira {qtdErros === 1 ? "o campo destacado" : `os ${qtdErros} campos destacados`}.
+            </p>
+          )}
           <Button type="submit" size="lg" disabled={salvando} className="shadow-lg">
             {salvando && <Loader2 className="animate-spin" />} {textoBotao}
           </Button>
@@ -273,11 +268,12 @@ function Secao({ titulo, children }: { titulo: string; children: ReactNode }) {
   );
 }
 
-function Campo({ label, className, children }: { label: string; className?: string; children: ReactNode }) {
+export function Campo({ label, className, erro, children }: { label: string; className?: string | undefined; erro?: string | undefined; children: ReactNode }) {
   return (
-    <div className={`grid gap-1.5 ${className ?? ""}`}>
-      <Label className="text-xs text-muted-foreground">{label}</Label>
+    <div className={cn("grid gap-1.5", className)}>
+      <Label className={cn("text-xs text-muted-foreground", erro && "text-destructive")}>{label}</Label>
       {children}
+      {erro && <p className="text-xs font-medium text-destructive">{erro}</p>}
     </div>
   );
 }

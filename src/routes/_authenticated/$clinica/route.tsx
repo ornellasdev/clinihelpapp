@@ -19,7 +19,10 @@ import {
   Wallet,
   type LucideIcon,
 } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useLogoffInatividade } from "@/hooks/use-logoff-inatividade";
+import { AvisoInatividade } from "@/components/seguranca/AvisoInatividade";
 import { meQuery } from "@/lib/queries";
 import { useMe } from "@/hooks/use-me";
 import { PAPEIS, temPapel, type Papel } from "@/lib/permissions";
@@ -88,19 +91,23 @@ function ClinicLayout() {
   const queryClient = useQueryClient();
   const [menuAberto, setMenuAberto] = useState(false);
 
-  async function sair() {
-    if (me.dev) {
+  async function sair(motivo?: "inatividade") {
+    if (me.dev && !motivo) {
       await queryClient.cancelQueries();
       queryClient.clear();
       navigate({ to: "/dev", replace: true });
       return;
     }
-    await supabase.rpc("registrar_acesso", { _acao: "logout" });
+    if (!me.dev) await supabase.rpc("registrar_acesso", { _acao: motivo === "inatividade" ? "logout_inatividade" : "logout" });
     await queryClient.cancelQueries();
     queryClient.clear();
     await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
+    if (motivo === "inatividade") toast.info("Por segurança, a sessão foi encerrada após 15 minutos sem uso. Entre novamente.");
+    navigate({ to: me.dev ? "/dev" : "/auth", replace: true });
   }
+
+  // Saída automática após 15 minutos sem uso (vale para todas as abas abertas).
+  const { restante, continuar } = useLogoffInatividade(() => void sair("inatividade"));
 
   if (me.papeis.length === 0 || !me.clinica) {
     return (
@@ -113,7 +120,7 @@ function ClinicLayout() {
               ? "O acesso desta clínica está suspenso. Entre em contato com o suporte CliniHelp."
               : "Sua conta ainda não tem um perfil de acesso ativo. Fale com o administrador da clínica."}
           </p>
-          <Button className="mt-6" variant="outline" onClick={sair}>
+          <Button className="mt-6" variant="outline" onClick={() => void sair()}>
             Sair
           </Button>
         </div>
@@ -151,7 +158,7 @@ function ClinicLayout() {
         <div className="truncate text-sm font-medium">{me.nome}</div>
         <div className="truncate text-xs text-sidebar-foreground/60">{papelLabel}</div>
       </div>
-      <button onClick={sair} className="rounded-lg p-2 text-sidebar-foreground/70 hover:bg-sidebar hover:text-sidebar-foreground" aria-label={me.dev ? "Trocar de clínica" : "Sair"} title={me.dev ? "Trocar de clínica" : "Sair"}>
+      <button onClick={() => void sair()} className="rounded-lg p-2 text-sidebar-foreground/70 hover:bg-sidebar hover:text-sidebar-foreground" aria-label={me.dev ? "Trocar de clínica" : "Sair"} title={me.dev ? "Trocar de clínica" : "Sair"}>
         {me.dev ? <ArrowLeftRight className="size-4" /> : <LogOut className="size-4" />}
       </button>
     </div>
@@ -205,6 +212,7 @@ function ClinicLayout() {
           </Link>
         ))}
       </nav>
+      <AvisoInatividade segundos={restante} onContinuar={continuar} onSair={() => void sair("inatividade")} />
     </div>
   );
 }
