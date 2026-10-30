@@ -19,7 +19,10 @@ import {
   Wallet,
   type LucideIcon,
 } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useLogoffInatividade } from "@/hooks/use-logoff-inatividade";
+import { AvisoInatividade } from "@/components/seguranca/AvisoInatividade";
 import { meQuery } from "@/lib/queries";
 import { useMe } from "@/hooks/use-me";
 import { PAPEIS, temPapel, type Papel } from "@/lib/permissions";
@@ -117,7 +120,7 @@ function ClinicLayout() {
               ? "O acesso desta clínica está suspenso. Entre em contato com o suporte CliniHelp."
               : "Sua conta ainda não tem um perfil de acesso ativo. Fale com o administrador da clínica."}
           </p>
-          <Button className="mt-6" variant="outline" onClick={sair}>
+          <Button className="mt-6" variant="outline" onClick={() => void sair()}>
             Sair
           </Button>
         </div>
@@ -155,7 +158,7 @@ function ClinicLayout() {
         <div className="truncate text-sm font-medium">{me.nome}</div>
         <div className="truncate text-xs text-sidebar-foreground/60">{papelLabel}</div>
       </div>
-      <button onClick={sair} className="rounded-lg p-2 text-sidebar-foreground/70 hover:bg-sidebar hover:text-sidebar-foreground" aria-label={me.dev ? "Trocar de clínica" : "Sair"} title={me.dev ? "Trocar de clínica" : "Sair"}>
+      <button onClick={() => void sair()} className="rounded-lg p-2 text-sidebar-foreground/70 hover:bg-sidebar hover:text-sidebar-foreground" aria-label={me.dev ? "Trocar de clínica" : "Sair"} title={me.dev ? "Trocar de clínica" : "Sair"}>
         {me.dev ? <ArrowLeftRight className="size-4" /> : <LogOut className="size-4" />}
       </button>
     </div>
@@ -209,6 +212,7 @@ function ClinicLayout() {
           </Link>
         ))}
       </nav>
+      <AvisoInatividade segundos={restante} onContinuar={continuar} onSair={() => void sair("inatividade")} />
     </div>
   );
 }
