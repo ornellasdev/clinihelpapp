@@ -631,6 +631,128 @@ export type Database = {
           },
         ]
       }
+      fatura_liminar_itens: {
+        Row: {
+          agendamento_id: string
+          clinica_id: string
+          fatura_id: string
+        }
+        Insert: {
+          agendamento_id: string
+          clinica_id?: string
+          fatura_id: string
+        }
+        Update: {
+          agendamento_id?: string
+          clinica_id?: string
+          fatura_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fatura_liminar_itens_agendamento_id_fkey"
+            columns: ["agendamento_id"]
+            isOneToOne: true
+            referencedRelation: "agendamentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fatura_liminar_itens_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fatura_liminar_itens_fatura_id_fkey"
+            columns: ["fatura_id"]
+            isOneToOne: false
+            referencedRelation: "faturas_liminar"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      faturas_liminar: {
+        Row: {
+          clinica_id: string
+          competencia: string
+          convenio_id: string
+          created_at: string
+          criado_por: string | null
+          id: string
+          nf_emissao: string | null
+          nf_numero: string | null
+          observacoes: string | null
+          paciente_id: string
+          pago_em: string | null
+          quantidade_sessoes: number
+          status: string
+          updated_at: string
+          valor: number
+          valor_pago: number | null
+          vencimento: string | null
+        }
+        Insert: {
+          clinica_id?: string
+          competencia: string
+          convenio_id: string
+          created_at?: string
+          criado_por?: string | null
+          id?: string
+          nf_emissao?: string | null
+          nf_numero?: string | null
+          observacoes?: string | null
+          paciente_id: string
+          pago_em?: string | null
+          quantidade_sessoes?: number
+          status?: string
+          updated_at?: string
+          valor?: number
+          valor_pago?: number | null
+          vencimento?: string | null
+        }
+        Update: {
+          clinica_id?: string
+          competencia?: string
+          convenio_id?: string
+          created_at?: string
+          criado_por?: string | null
+          id?: string
+          nf_emissao?: string | null
+          nf_numero?: string | null
+          observacoes?: string | null
+          paciente_id?: string
+          pago_em?: string | null
+          quantidade_sessoes?: number
+          status?: string
+          updated_at?: string
+          valor?: number
+          valor_pago?: number | null
+          vencimento?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "faturas_liminar_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "faturas_liminar_convenio_id_fkey"
+            columns: ["convenio_id"]
+            isOneToOne: false
+            referencedRelation: "convenios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "faturas_liminar_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "pacientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       glosas: {
         Row: {
           agendamento_id: string | null
