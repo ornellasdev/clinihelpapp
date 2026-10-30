@@ -30,14 +30,14 @@ async function igualSenhaAtual(email: string, senha: string): Promise<boolean> {
  * Troca a senha com a sessão da própria pessoa (mantém o login ativo e o servidor de login recusa repetir a senha atual).
  * Retorna null quando deu certo ou o código de erro do servidor de login.
  */
-async function trocarComSessao(senha: string): Promise<{ codigo: string; mensagem: string } | null> {
+async function trocarComSessao(senha: string, atual?: string): Promise<{ codigo: string; mensagem: string } | null> {
   const url = process.env["SUPABASE_URL"]!;
   const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
   const authorization = getRequest()?.headers.get("authorization") ?? "";
   const res = await fetch(`${url}/auth/v1/user`, {
     method: "PUT",
     headers: { apikey: key, Authorization: authorization, "Content-Type": "application/json" },
-    body: JSON.stringify({ password: senha }),
+    body: JSON.stringify(atual ? { password: senha, current_password: atual } : { password: senha }),
   });
   if (res.ok) return null;
   const corpo = (await res.json().catch(() => ({}))) as { error_code?: string; code?: string | number; msg?: string; message?: string };
@@ -50,7 +50,9 @@ async function trocarComSessao(senha: string): Promise<{ codigo: string; mensage
  */
 export const definirMinhaSenha = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { senha: string }) => z.object({ senha: z.string().refine(senhaForte, MSG_SENHA_FRACA) }).parse(input))
+  .inputValidator((input: { senha: string; atual?: string }) =>
+    z.object({ senha: z.string().refine(senhaForte, MSG_SENHA_FRACA), atual: z.string().max(200).optional() }).parse(input),
+  )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: perfil } = await supabaseAdmin
@@ -67,9 +69,8 @@ export const definirMinhaSenha = createServerFn({ method: "POST" })
 
     // relogin = a troca encerrou as sessões e o navegador precisa entrar de novo com a nova senha.
     let relogin = false;
-    const falha = await trocarComSessao(data.senha);
+    const falha = await trocarComSessao(data.senha, data.atual);
     if (falha) {
-      console.warn("[seguranca] troca com sessão recusada:", falha.codigo, falha.mensagem);
       if (/same_password|different from the old/i.test(`${falha.codigo} ${falha.mensagem}`)) {
         throw new Error("A nova senha precisa ser diferente da senha temporária.");
       }

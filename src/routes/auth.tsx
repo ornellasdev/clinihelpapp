@@ -34,6 +34,8 @@ function AuthPage() {
   const [primeiroAcesso, setPrimeiroAcesso] = useState(false);
   // Quem já confirmou o código nesta sessão está só trocando a senha (redefinição), não no primeiro acesso.
   const passouPeloCodigo = useRef(false);
+  // Senha temporária digitada no login, só em memória: confirma a troca sem encerrar a sessão.
+  const senhaDigitada = useRef<string | undefined>(undefined);
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -73,6 +75,7 @@ function AuthPage() {
     setEnviando(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
     if (error) { setEnviando(false); toast.error(erroAmigavel(error.message)); return; }
+    senhaDigitada.current = senha;
     setSenha("");
     await irParaClinica().catch((err) => toast.error(erroAmigavel((err as Error).message)));
     setEnviando(false);
@@ -90,6 +93,7 @@ function AuthPage() {
     await supabase.auth.signOut();
     setPrimeiroAcesso(false);
     passouPeloCodigo.current = false;
+    senhaDigitada.current = undefined;
     setModo("login");
   }
 
@@ -177,7 +181,7 @@ function AuthPage() {
               1,
               "Crie sua senha",
               "Por segurança, troque a senha temporária que você recebeu por uma senha só sua.",
-              <DefinirSenha onOk={async () => { await irParaClinica(); }} />,
+              <DefinirSenha senhaAtual={senhaDigitada.current} onOk={async () => { senhaDigitada.current = undefined; await irParaClinica(); }} />,
             )}
 
           {modo === "cadastro_2fa" &&
