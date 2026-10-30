@@ -485,6 +485,78 @@ export type Database = {
           },
         ]
       }
+      evolucao_metas: {
+        Row: {
+          clinica_id: string
+          created_at: string
+          especialidade_id: string
+          evolucao_id: string
+          id: string
+          meta_id: string
+          nivel: number
+          paciente_id: string
+          updated_at: string
+        }
+        Insert: {
+          clinica_id?: string
+          created_at?: string
+          especialidade_id: string
+          evolucao_id: string
+          id?: string
+          meta_id: string
+          nivel: number
+          paciente_id: string
+          updated_at?: string
+        }
+        Update: {
+          clinica_id?: string
+          created_at?: string
+          especialidade_id?: string
+          evolucao_id?: string
+          id?: string
+          meta_id?: string
+          nivel?: number
+          paciente_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evolucao_metas_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evolucao_metas_especialidade_id_fkey"
+            columns: ["especialidade_id"]
+            isOneToOne: false
+            referencedRelation: "especialidades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evolucao_metas_evolucao_id_fkey"
+            columns: ["evolucao_id"]
+            isOneToOne: false
+            referencedRelation: "evolucoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evolucao_metas_meta_id_fkey"
+            columns: ["meta_id"]
+            isOneToOne: false
+            referencedRelation: "plano_metas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evolucao_metas_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "pacientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       evolucoes: {
         Row: {
           agendamento_id: string | null
@@ -638,6 +710,54 @@ export type Database = {
             columns: ["profissional_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modelos_evolucao: {
+        Row: {
+          clinica_id: string
+          conteudo: string
+          created_at: string
+          criado_por: string | null
+          especialidade_id: string
+          id: string
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          clinica_id?: string
+          conteudo: string
+          created_at?: string
+          criado_por?: string | null
+          especialidade_id: string
+          id?: string
+          nome: string
+          updated_at?: string
+        }
+        Update: {
+          clinica_id?: string
+          conteudo?: string
+          created_at?: string
+          criado_por?: string | null
+          especialidade_id?: string
+          id?: string
+          nome?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modelos_evolucao_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "modelos_evolucao_especialidade_id_fkey"
+            columns: ["especialidade_id"]
+            isOneToOne: false
+            referencedRelation: "especialidades"
             referencedColumns: ["id"]
           },
         ]
@@ -889,6 +1009,73 @@ export type Database = {
             columns: ["clinica_id"]
             isOneToOne: true
             referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plano_metas: {
+        Row: {
+          clinica_id: string
+          created_at: string
+          criado_por: string | null
+          data_inicio: string
+          descricao: string | null
+          especialidade_id: string
+          id: string
+          paciente_id: string
+          prazo: string | null
+          status: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          clinica_id?: string
+          created_at?: string
+          criado_por?: string | null
+          data_inicio?: string
+          descricao?: string | null
+          especialidade_id: string
+          id?: string
+          paciente_id: string
+          prazo?: string | null
+          status?: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          clinica_id?: string
+          created_at?: string
+          criado_por?: string | null
+          data_inicio?: string
+          descricao?: string | null
+          especialidade_id?: string
+          id?: string
+          paciente_id?: string
+          prazo?: string | null
+          status?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plano_metas_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plano_metas_especialidade_id_fkey"
+            columns: ["especialidade_id"]
+            isOneToOne: false
+            referencedRelation: "especialidades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plano_metas_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "pacientes"
             referencedColumns: ["id"]
           },
         ]
