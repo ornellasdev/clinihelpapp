@@ -6,7 +6,7 @@ import { CalendarSearch, FilePenLine, Loader2, Lock, Pencil, Plus, X } from "luc
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
-import { agendaPacienteQuery, especialidadesQuery, evolucoesQuery, metasQuery, modelosEvolucaoQuery, progressoMetasQuery } from "@/lib/queries";
+import { agendaPacienteQuery, especialidadesQuery, evolucoesQuery, metasQuery, progressoMetasQuery } from "@/lib/queries";
 import { aplicarModelo } from "@/lib/plano-terapeutico";
 import { ModelosEvolucao } from "./ModelosEvolucao";
 import { MetasNaEvolucao } from "./MetasNaEvolucao";
@@ -148,8 +148,9 @@ export function ProntuarioTab({ pacienteId, agendamentoId }: { pacienteId: strin
               <X />
             </Button>
           )}
+          <RelatorioPdfDialog pacienteId={pacienteId} especialidades={visiveis} />
           {me.especialidades.length > 0 && !form && (
-            <Button onClick={() => setForm({})} className="w-full sm:ml-auto sm:w-auto">
+            <Button onClick={() => setForm({})} className="w-full sm:w-auto">
               <Plus /> Nova evolução
             </Button>
           )}
