@@ -7,6 +7,9 @@ import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 import { evolucoesQuery, metasQuery, pacienteQuery, progressoMetasQuery } from "@/lib/queries";
 import { useMe } from "@/hooks/use-me";
+import { dadosClinicosQuery } from "@/services/pacientes";
+import { adendosQuery } from "@/services/prontuario";
+import { BUCKETS, desfazerEnvio } from "@/services/arquivos";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -45,22 +48,25 @@ export function RelatorioPdfDialog({
     if (!incluirMetas && !incluirEvolucoes) { toast.error("Escolha o que incluir no relatório."); return; }
     setGerando(modo);
     try {
-      const [paciente, metas, progresso] = await Promise.all([
+      const [paciente, metas, progresso, adendos, clinico] = await Promise.all([
         qc.ensureQueryData(pacienteQuery(pacienteId)),
         qc.ensureQueryData(metasQuery(pacienteId)),
         qc.ensureQueryData(progressoMetasQuery(pacienteId)),
+        qc.fetchQuery(adendosQuery(pacienteId)),
+        qc.fetchQuery(dadosClinicosQuery(pacienteId)).catch(() => null),
       ]);
       const { gerarRelatorioPaciente } = await import("@/lib/relatorio-paciente");
       const r = await gerarRelatorioPaciente({
         clinica: me.clinica?.nome ?? "Clínica",
         finalidade,
-        paciente,
+        paciente: { nome: paciente.nome, data_nascimento: paciente.data_nascimento, diagnostico: clinico?.diagnostico ?? null },
         de,
         ate,
         especialidades: especialidades.filter((e) => esps.includes(e.id)),
         evolucoes,
         metas,
         progresso,
+        adendos,
         incluirMetas,
         incluirEvolucoes,
       }, modo === "liberar" ? "arquivo" : "baixar");
@@ -81,7 +87,7 @@ export function RelatorioPdfDialog({
           liberado_por_nome: me.nome,
         });
         if (error) {
-          await supabase.storage.from("relatorios-familia").remove([caminho]);
+          await desfazerEnvio(BUCKETS.relatorios, caminho);
           throw new Error("Não foi possível liberar o relatório.");
         }
         qc.invalidateQueries({ queryKey: ["relatorios_liberados", pacienteId] });
