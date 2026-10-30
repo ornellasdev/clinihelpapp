@@ -1,10 +1,11 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { addMinutes, addWeeks } from "date-fns";
-import { Loader2 } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { equipeQuery, especialidadesQuery, salasQuery } from "@/lib/queries";
+import { avaliacaoInicialQuery, equipeQuery, especialidadesQuery, salasQuery } from "@/lib/queries";
+import { bloqueiaAgendamento, STATUS_AVALIACAO, type StatusAvaliacao } from "@/lib/avaliacao-inicial";
 import { erroAmigavel } from "@/lib/ui-helpers";
 import { PacienteCombobox } from "@/components/PacienteCombobox";
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,9 @@ export function AgendamentoDialog({
   const [semanas, setSemanas] = useState("1");
   const [obs, setObs] = useState("");
   const [salvando, setSalvando] = useState(false);
+  const { data: avaliacao } = useQuery({ ...avaliacaoInicialQuery(pacienteId), enabled: open && !!pacienteId });
+  const statusAvaliacao = avaliacao?.status as StatusAvaliacao | undefined;
+  const bloqueado = bloqueiaAgendamento(statusAvaliacao);
 
   useEffect(() => {
     if (!open) return;
@@ -131,6 +135,15 @@ export function AgendamentoDialog({
           <div className="grid gap-2">
             <Label>Paciente</Label>
             <PacienteCombobox value={pacienteId} onChange={setPacienteId} />
+            {bloqueado && (
+              <p className="flex items-start gap-2 rounded-xl border border-warning/50 bg-warning/10 p-3 text-sm">
+                <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
+                <span>
+                  <span className="font-medium">Avaliação inicial: {STATUS_AVALIACAO[statusAvaliacao!].label.toLowerCase()}.</span>{" "}
+                  {STATUS_AVALIACAO[statusAvaliacao!].descricao}
+                </span>
+              </p>
+            )}
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-2">
@@ -230,7 +243,7 @@ export function AgendamentoDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button onClick={salvar} disabled={salvando}>
+          <Button onClick={salvar} disabled={salvando || bloqueado}>
             {salvando && <Loader2 className="animate-spin" />} Agendar
           </Button>
         </DialogFooter>
