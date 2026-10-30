@@ -42,6 +42,11 @@ export const enviarCodigoFamilia = createServerFn({ method: "POST" })
       console.error("[familia] criar conta", criar.message);
       throw new Error("Não foi possível enviar o código agora. Tente novamente em instantes.");
     }
+    if (criar) {
+      // Conta já existente: se for da equipe de uma clínica, não entra pela Área da família.
+      const { data: perfil } = await supabaseAdmin.from("profiles").select("clinica_id").ilike("email", filtro).maybeSingle();
+      if (perfil?.clinica_id) return { mensagem: MSG_ENVIO };
+    }
 
     const url = process.env["SUPABASE_URL"]!;
     const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
