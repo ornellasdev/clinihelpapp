@@ -50,6 +50,8 @@ export type PainelGovernanca = {
     excluidos: { guias: number; glosas: number; documentos: number; relatorios: number };
     adendos: number;
   };
+  /** Pessoas ativas da equipe e quantas concluíram os tópicos essenciais do treinamento. */
+  treinamento: { ativos: number; concluiram: number };
   gerado_em: string;
 };
 
@@ -141,6 +143,17 @@ export function avaliarControles(p: PainelGovernanca): Controle[] {
         equipe.senha_temporaria === 0
           ? "Ninguém está usando senha criada pela gestão."
           : `${pl(equipe.senha_temporaria, "conta ainda usa", "contas ainda usam")} senha temporária.`,
+    },
+    {
+      id: "iso-treinamento",
+      norma: "ISO 27001",
+      referencia: "A.7.2.2",
+      titulo: "Treinamento de segurança e LGPD da equipe",
+      situacao: p.treinamento.concluiram >= p.treinamento.ativos ? "ok" : "atencao",
+      detalhe:
+        p.treinamento.ativos === 0
+          ? "Nenhuma pessoa ativa na equipe."
+          : `${p.treinamento.concluiram} de ${p.treinamento.ativos} pessoas concluíram os tópicos essenciais do Treinamento.`,
     },
     {
       id: "iso-registro",

@@ -60,3 +60,6 @@
 - [x] Etapa 2b: levar a mesma validação aos formulários de valores (convênios, cobranças, repasses) e às demais telas que ainda gravam direto
 - [x] Etapa 3: painel de Segurança, Banco e Auditoria (filtros, pacientes sem termo LGPD, integridade)
 - [x] Publicar
+
+## Treinamento (CliniHelp LMS)
+- [x] Tópicos por cargo com aula e questionário (70% para concluir), progresso da equipe para a gestão e indicador no painel de conformidade

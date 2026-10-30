@@ -7,6 +7,7 @@ import {
   ChartColumn,
   DoorOpen,
   FileCheck2,
+  GraduationCap,
   Scale,
   Hourglass,
   LayoutDashboard,
@@ -66,7 +67,8 @@ type Item = {
     | "/$clinica/indicadores"
     | "/$clinica/equipe"
     | "/$clinica/salas"
-    | "/$clinica/seguranca";
+    | "/$clinica/seguranca"
+    | "/$clinica/treinamento";
   label: string;
   icon: LucideIcon;
   papeis?: Papel[];
@@ -79,6 +81,7 @@ const ITENS: Item[] = [
   { to: "/$clinica/guias", label: "Guias de convênio", icon: FileCheck2, papeis: ["master", "administrador", "recepcao", "financeiro"] },
   { to: "/$clinica/liminares", label: "Liminares", icon: Scale, papeis: ["master", "administrador", "financeiro"] },
   { to: "/$clinica/espera", label: "Lista de espera", icon: Hourglass },
+  { to: "/$clinica/treinamento", label: "Treinamento", icon: GraduationCap },
   { to: "/$clinica/indicadores", label: "Indicadores (KPI)", icon: ChartColumn, papeis: ["master", "administrador", "financeiro"] },
   { to: "/$clinica/equipe", label: "Equipe", icon: UserRoundCog, papeis: ["master", "administrador"] },
   { to: "/$clinica/salas", label: "Salas", icon: DoorOpen, papeis: ["master", "administrador"] },

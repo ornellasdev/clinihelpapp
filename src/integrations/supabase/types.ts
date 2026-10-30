@@ -2070,6 +2070,50 @@ export type Database = {
           },
         ]
       }
+      treinamento_resultados: {
+        Row: {
+          acertos: number
+          aprovado: boolean
+          clinica_id: string
+          created_at: string
+          id: string
+          modulo_id: string
+          total: number
+          user_id: string
+          versao: number
+        }
+        Insert: {
+          acertos: number
+          aprovado: boolean
+          clinica_id: string
+          created_at?: string
+          id?: string
+          modulo_id: string
+          total: number
+          user_id: string
+          versao: number
+        }
+        Update: {
+          acertos?: number
+          aprovado?: boolean
+          clinica_id?: string
+          created_at?: string
+          id?: string
+          modulo_id?: string
+          total?: number
+          user_id?: string
+          versao?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treinamento_resultados_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           clinica_id: string
