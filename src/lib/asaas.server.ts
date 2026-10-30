@@ -27,7 +27,7 @@ export async function asaas<T = any>(apiKey: string, caminho: string, init: { me
       "Content-Type": "application/json",
       "User-Agent": "CliniHelp",
     },
-    body: init.body === undefined ? undefined : JSON.stringify(init.body),
+    body: init.body === undefined ? null : JSON.stringify(init.body),
   });
   const texto = await res.text();
   let json: any = null;
@@ -54,9 +54,9 @@ export type PagamentoAsaas = {
   billingType: string;
   invoiceUrl?: string;
   bankSlipUrl?: string | null;
-  paymentDate?: string | null;
-  clientPaymentDate?: string | null;
-  confirmedDate?: string | null;
-  deleted?: boolean;
+  paymentDate?: string | null | undefined;
+  clientPaymentDate?: string | null | undefined;
+  confirmedDate?: string | null | undefined;
+  deleted?: boolean | undefined;
   externalReference?: string | null;
 };

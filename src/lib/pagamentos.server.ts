@@ -26,8 +26,8 @@ export async function aplicarSituacao(
   const pagoEm = pg.clientPaymentDate ?? pg.paymentDate ?? pg.confirmedDate ?? null;
   const patch: Record<string, unknown> = { status: novo };
   if (novo === "pago") {
-    patch.pago_em = pagoEm ? new Date(`${pagoEm}T12:00:00-03:00`).toISOString() : new Date().toISOString();
-    patch.valor_pago = pg.value;
+    patch["pago_em"] = pagoEm ? new Date(`${pagoEm}T12:00:00-03:00`).toISOString() : new Date().toISOString();
+    patch["valor_pago"] = pg.value;
   }
   const { error } = await admin.from("cobrancas").update(patch).eq("id", cobranca.id).eq("clinica_id", cobranca.clinica_id);
   if (error) throw new Error(error.message);

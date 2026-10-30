@@ -78,7 +78,7 @@ function Formulario({ clinica, onClose, onAtivado }: { clinica: Clinica; onClose
 
   async function salvar(e: React.FormEvent) {
     e.preventDefault();
-    if (doc.length !== 11 && doc.length !== 14) return toast.error("Informe um CPF (11 dígitos) ou CNPJ (14 dígitos).");
+    if (doc.length !== 11 && doc.length !== 14) { toast.error("Informe um CPF (11 dígitos) ou CNPJ (14 dígitos)."); return; }
     setEnviando(true);
     try {
       await ativar({

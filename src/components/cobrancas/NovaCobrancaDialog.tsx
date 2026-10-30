@@ -98,9 +98,9 @@ export function NovaCobrancaDialog({ aberta, onClose, onCriada }: { aberta: bool
   async function salvar(e: React.FormEvent) {
     e.preventDefault();
     const v = Number(valor.replace(",", "."));
-    if (!pacienteId) return toast.error("Escolha o paciente.");
-    if (modo === "sessoes" && marcadas.size === 0) return toast.error("Marque ao menos uma sessão, ou use “Valor livre”.");
-    if (!Number.isFinite(v) || v < VALOR_MINIMO_COBRANCA) return toast.error(`O valor mínimo é ${formatarMoeda(VALOR_MINIMO_COBRANCA)}.`);
+    if (!pacienteId) { toast.error("Escolha o paciente."); return; }
+    if (modo === "sessoes" && marcadas.size === 0) { toast.error("Marque ao menos uma sessão, ou use “Valor livre”."); return; }
+    if (!Number.isFinite(v) || v < VALOR_MINIMO_COBRANCA) { toast.error(`O valor mínimo é ${formatarMoeda(VALOR_MINIMO_COBRANCA)}.`); return; }
     setEnviando(true);
     try {
       const r = await criar({
