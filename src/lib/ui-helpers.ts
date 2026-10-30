@@ -23,7 +23,7 @@ export type { StatusAgenda } from "./agenda-status";
 
 /**
  * Cores por status: azul = agendado, laranja = aguardando, roxo = em atendimento, verde = finalizado,
- * cinza = faltas não cobradas, vermelho = falta não justificada (cobrada).
+ * cinza = faltas justificadas (e do terapeuta), vermelho = falta não justificada (cobrada).
  * className = etiqueta; bloco = cartão na grade da agenda.
  */
 export const STATUS_AGENDA: Record<StatusAgenda, { label: string; curto: string; className: string; bloco: string; ponto: string }> = {
@@ -33,7 +33,7 @@ export const STATUS_AGENDA: Record<StatusAgenda, { label: string; curto: string;
   finalizado: { label: "Finalizado", curto: "Finalizado", className: "bg-status-finalizado/15 text-status-finalizado", bloco: "bg-status-finalizado/12 border-status-finalizado/50", ponto: "bg-status-finalizado" },
   falta_justificada: { label: "Falta justificada", curto: "Falta justif.", className: "bg-status-sem-cobranca/15 text-status-sem-cobranca", bloco: "bg-status-sem-cobranca/12 border-status-sem-cobranca/45", ponto: "bg-status-sem-cobranca" },
   falta_terapeuta: { label: "Falta do terapeuta", curto: "Falta terapeuta", className: "bg-status-sem-cobranca/15 text-status-sem-cobranca", bloco: "bg-status-sem-cobranca/12 border-status-sem-cobranca/45", ponto: "bg-status-sem-cobranca" },
-  falta_cobrada: { label: "Falta não justificada", curto: "Falta cobrada", className: "bg-status-falta/15 text-status-falta", bloco: "bg-status-falta/12 border-status-falta/55", ponto: "bg-status-falta" },
+  falta_cobrada: { label: "Falta não justificada", curto: "Falta não justif.", className: "bg-status-falta/15 text-status-falta", bloco: "bg-status-falta/12 border-status-falta/55", ponto: "bg-status-falta" },
   cancelado: { label: "Cancelado", curto: "Cancelado", className: "bg-muted text-muted-foreground line-through", bloco: "bg-muted border-border opacity-50", ponto: "bg-muted-foreground" },
 };
 

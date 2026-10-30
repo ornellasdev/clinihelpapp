@@ -35,7 +35,7 @@ const FILTROS: Record<string, { label: string; aceita: (s: StatusAgenda) => bool
   faturaveis: { label: "Faturáveis (finalizados + faltas cobradas)", aceita: (s) => STATUS_FATURAVEIS.includes(s) },
   finalizado: { label: "Finalizados", aceita: (s) => s === "finalizado" },
   falta_cobrada: { label: "Faltas não justificadas (cobradas)", aceita: (s) => s === "falta_cobrada" },
-  sem_cobranca: { label: "Faltas não cobradas", aceita: (s) => s === "falta_justificada" || s === "falta_terapeuta" },
+  sem_cobranca: { label: "Faltas justificadas e do terapeuta", aceita: (s) => s === "falta_justificada" || s === "falta_terapeuta" },
   previstos: { label: "A atender (agendados / na clínica)", aceita: (s) => STATUS_PREVISTOS.includes(s) },
   todos: { label: "Todos (exceto cancelados)", aceita: (s) => s !== "cancelado" },
 };

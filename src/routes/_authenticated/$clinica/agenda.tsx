@@ -283,7 +283,7 @@ function Legenda() {
       {LEGENDA.map((s) => (
         <span key={s} className="inline-flex items-center gap-1.5">
           <span className={cn("size-2.5 rounded-full", STATUS_AGENDA[s].ponto)} />
-          {s === "falta_justificada" ? "Faltas não cobradas" : STATUS_AGENDA[s].curto}
+          {s === "falta_justificada" ? "Faltas justificadas" : s === "falta_cobrada" ? "Faltas não justificadas" : STATUS_AGENDA[s].curto}
         </span>
       ))}
     </div>

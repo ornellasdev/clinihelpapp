@@ -216,7 +216,7 @@ export const MODULOS: Modulo[] = [
           "Aguardando atendimento (amarelo): a recepção marca quando a criança chega e a guia/token do dia já foi validada. O paciente entra na fila do profissional.",
           "Em atendimento (roxo): muda sozinho quando o profissional inicia o atendimento ou abre a evolução.",
           "Finalizado (verde): muda sozinho quando o profissional salva a evolução. Gera a cobrança, desconta a guia e conta para o repasse.",
-          "Faltas não cobradas (cinza), falta cobrada (vermelho) e cancelado.",
+          "Faltas justificadas (cinza), faltas não justificadas (vermelho) e cancelado.",
         ],
       },
       {
@@ -296,7 +296,7 @@ export const MODULOS: Modulo[] = [
       },
       {
         pergunta: "O terapeuta faltou. Qual tipo de falta registrar?",
-        opcoes: ["Falta justificada", "Falta cobrada", "Falta do terapeuta, podendo marcar reposição", "Cancelar a sessão"],
+        opcoes: ["Falta justificada", "Falta não justificada", "Falta do terapeuta, podendo marcar reposição", "Cancelar a sessão"],
         correta: 2,
         explicacao: "“Falta do terapeuta” não cobra, não gera repasse e permite sinalizar reposição.",
       },
