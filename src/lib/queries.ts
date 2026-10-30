@@ -272,3 +272,63 @@ export const sessoesParaCobrarQuery = (pacienteId: string, inicioISO: string, fi
           .order("inicio"),
       ),
   });
+
+/** Busca todas as linhas em páginas de 1000 (limite por consulta do banco). */
+async function todasAsPaginas<T>(pagina: (de: number, ate: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>) {
+  const todas: T[] = [];
+  for (let de = 0; ; de += 1000) {
+    const res = await pagina(de, de + 999);
+    const lote = ok(res);
+    todas.push(...lote);
+    if (lote.length < 1000) return todas;
+  }
+}
+
+/** Sessões do mês para os indicadores (valores só aparecem para gestão/financeiro pelo RLS). */
+export const indicadoresQuery = (inicioISO: string, fimISO: string) =>
+  queryOptions({
+    queryKey: ["indicadores", inicioISO, fimISO],
+    queryFn: () =>
+      todasAsPaginas((de, ate) =>
+        supabase
+          .from("agendamentos")
+          .select("id, inicio, fim, status, sala_id, paciente_id, especialidade_id, paciente:pacientes(nome), especialidade:especialidades(nome, cor), fin:atendimento_financeiro(valor, pagamento_status)")
+          .gte("inicio", inicioISO)
+          .lt("inicio", fimISO)
+          .order("inicio")
+          .order("id")
+          .range(de, ate),
+      ),
+  });
+
+/** Sessões realizadas e ainda não pagas, de qualquer mês até a data informada. */
+export const aReceberQuery = (ateISO: string) =>
+  queryOptions({
+    queryKey: ["indicadores", "a-receber", ateISO],
+    queryFn: () =>
+      todasAsPaginas((de, ate) =>
+        supabase
+          .from("agendamentos")
+          .select("id, inicio, fin:atendimento_financeiro!inner(valor)")
+          .eq("status", "realizado")
+          .eq("fin.pagamento_status", "pendente")
+          .lt("inicio", ateISO)
+          .order("inicio")
+          .order("id")
+          .range(de, ate),
+      ),
+  });
+
+/** Lista de espera da clínica (toda a equipe vê; recepção e gestão editam). */
+export const listaEsperaQuery = queryOptions({
+  queryKey: ["lista_espera"],
+  queryFn: async () =>
+    ok(
+      await supabase
+        .from("lista_espera")
+        .select("*, paciente:pacientes(id, nome, data_nascimento, responsavel_nome, responsavel_telefone), especialidade:especialidades(id, nome, cor), profissional:profiles(id, nome)")
+        .order("created_at")
+        .limit(1000),
+    ),
+});
+export type ItemEspera = Awaited<ReturnType<NonNullable<typeof listaEsperaQuery.queryFn>>>[number];

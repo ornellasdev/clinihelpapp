@@ -16,3 +16,7 @@
 - [x] Página pública de pagamento CliniHelp (Pix QR, boleto, cartão)
 - [x] Aviso automático de pagamento (webhook) marca a sessão como paga
 - [x] Chave de teste do desenvolvedor (não é mais usada pelo sistema)
+
+## Indicadores e lista de espera
+- [ ] Página Indicadores: ocupação das salas, faltas, faturamento do mês e valores a receber
+- [ ] Lista de espera: pacientes aguardando vaga por especialidade, dias e horário

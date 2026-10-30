@@ -559,6 +559,89 @@ export type Database = {
           },
         ]
       }
+      lista_espera: {
+        Row: {
+          clinica_id: string
+          created_at: string
+          criado_por: string | null
+          dias_semana: number[]
+          encerrado_em: string | null
+          especialidade_id: string
+          horario_obs: string | null
+          id: string
+          observacoes: string | null
+          paciente_id: string
+          periodos: string[]
+          prioridade: string
+          profissional_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          clinica_id?: string
+          created_at?: string
+          criado_por?: string | null
+          dias_semana?: number[]
+          encerrado_em?: string | null
+          especialidade_id: string
+          horario_obs?: string | null
+          id?: string
+          observacoes?: string | null
+          paciente_id: string
+          periodos?: string[]
+          prioridade?: string
+          profissional_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          clinica_id?: string
+          created_at?: string
+          criado_por?: string | null
+          dias_semana?: number[]
+          encerrado_em?: string | null
+          especialidade_id?: string
+          horario_obs?: string | null
+          id?: string
+          observacoes?: string | null
+          paciente_id?: string
+          periodos?: string[]
+          prioridade?: string
+          profissional_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lista_espera_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lista_espera_especialidade_id_fkey"
+            columns: ["especialidade_id"]
+            isOneToOne: false
+            referencedRelation: "especialidades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lista_espera_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "pacientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lista_espera_profissional_id_fkey"
+            columns: ["profissional_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       paciente_documentos: {
         Row: {
           categoria: string
