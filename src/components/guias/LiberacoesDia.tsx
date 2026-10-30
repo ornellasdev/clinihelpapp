@@ -1,4 +1,4 @@
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { addDays, format, parseISO, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -35,13 +35,14 @@ const SEM_GUIA = "nenhuma";
 
 /** Sessões de convênio do dia que pedem guia, com alerta de risco de glosa. */
 export function useSessoesConvenio(itens: readonly AgendaItem[], data: string, ativo: boolean) {
-  const { data: guias = [] } = useSuspenseQuery(guiasQuery);
-  const { data: usoLinhas = [] } = useSuspenseQuery(guiasUsoQuery);
-  const { data: convenios = [] } = useSuspenseQuery(conveniosQuery);
+  // useQuery (não suspense) para a agenda poder chamar sem bloquear quem não vê guias.
+  const { data: guias = [] } = useQuery({ ...guiasQuery, enabled: ativo });
+  const { data: usoLinhas = [] } = useQuery({ ...guiasUsoQuery, enabled: ativo });
+  const { data: convenios = [] } = useQuery({ ...conveniosQuery, enabled: ativo });
   return useMemo(() => {
     const uso = usoPorGuia(usoLinhas);
     const tipo = new Map(convenios.map((c) => [c.id, c]));
-    const sessoes = ativo
+    const sessoes = ativo && convenios.length
       ? itens
           .filter((i) => i.status !== "cancelado" && exigeGuia(tipo.get(i.paciente?.convenio_id ?? "")?.tipo))
           .map((i) => {
