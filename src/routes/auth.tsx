@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { meQuery } from "@/lib/queries";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,6 +32,8 @@ function AuthPage() {
   const qc = useQueryClient();
   const [modo, setModo] = useState<Modo>("carregando");
   const [primeiroAcesso, setPrimeiroAcesso] = useState(false);
+  // Quem já confirmou o código nesta sessão está só trocando a senha (redefinição), não no primeiro acesso.
+  const passouPeloCodigo = useRef(false);
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -45,7 +47,8 @@ function AuthPage() {
       return true;
     }
     if (me.pendencia) {
-      if (me.pendencia === "senha") setPrimeiroAcesso(true);
+      if (me.pendencia === "codigo") passouPeloCodigo.current = true;
+      if (me.pendencia === "senha") setPrimeiroAcesso(!passouPeloCodigo.current);
       setModo(me.pendencia);
       return false;
     }
@@ -86,6 +89,7 @@ function AuthPage() {
     qc.clear();
     await supabase.auth.signOut();
     setPrimeiroAcesso(false);
+    passouPeloCodigo.current = false;
     setModo("login");
   }
 
