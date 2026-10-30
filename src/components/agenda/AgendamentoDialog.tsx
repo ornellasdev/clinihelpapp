@@ -74,6 +74,12 @@ export function AgendamentoDialog({
     [especialidades, prof],
   );
 
+  // Só um profissional atende a especialidade pedida: já deixa escolhido.
+  const unicoDaEsp = !padrao.profissionalId && daEspecialidade.length === 1 ? daEspecialidade[0]!.id : "";
+  useEffect(() => {
+    if (open && unicoDaEsp) setProfissionalId((atual) => atual || unicoDaEsp);
+  }, [open, unicoDaEsp]);
+
   useEffect(() => {
     if (!prof) return;
     if (espsDoProf.length === 1) setEspecialidadeId(espsDoProf[0]!.id);

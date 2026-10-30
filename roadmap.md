@@ -18,5 +18,5 @@
 - [x] Chave de teste do desenvolvedor (não é mais usada pelo sistema)
 
 ## Indicadores e lista de espera
-- [ ] Página Indicadores: ocupação das salas, faltas, faturamento do mês e valores a receber
-- [ ] Lista de espera: pacientes aguardando vaga por especialidade, dias e horário
+- [x] Página Indicadores: ocupação das salas, faltas, faturamento do mês e valores a receber
+- [x] Lista de espera: pacientes aguardando vaga por especialidade, dias e horário
