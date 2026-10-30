@@ -10,9 +10,9 @@
 - [x] Autorizar o e-mail Google do desenvolvedor
 
 ## Cobranças dos pacientes (Asaas por trás, cara do CliniHelp)
-- [ ] Banco: contas de recebimento por clínica (chave protegida), cobranças e sessões cobradas
-- [ ] Painel /dev: ativar recebimentos da clínica (cria a conta da clínica no Asaas)
-- [ ] Página Cobranças: por sessão, mensal (soma do mês) e avulsa; Pix, boleto, cartão ou à escolha
-- [ ] Página pública de pagamento CliniHelp (Pix QR, boleto, cartão)
-- [ ] Aviso automático de pagamento (webhook) marca a sessão como paga
+- [x] Banco: contas de recebimento por clínica (chave protegida), cobranças e sessões cobradas
+- [x] Painel /dev: ativar recebimentos da clínica (cria a conta da clínica no Asaas)
+- [x] Página Cobranças: por sessão, mensal (soma do mês) e avulsa; Pix, boleto, cartão ou à escolha
+- [x] Página pública de pagamento CliniHelp (Pix QR, boleto, cartão)
+- [x] Aviso automático de pagamento (webhook) marca a sessão como paga
 - [ ] Chave da conta-mãe Asaas do desenvolvedor (aguarda o usuário)
