@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { conveniosQuery, especialidadesQuery, type Guia } from "@/lib/queries";
 import { useMe } from "@/hooks/use-me";
-import { STATUS_GRAVADOS } from "@/lib/guias";
+import { exigeGuia, STATUS_GRAVADOS } from "@/lib/guias";
 import { erroAmigavel } from "@/lib/ui-helpers";
 import { PacienteCombobox } from "@/components/PacienteCombobox";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ export function GuiaDialog({ open, onOpenChange, guia }: { open: boolean; onOpen
   const qc = useQueryClient();
   const { data: especialidades = [] } = useQuery(especialidadesQuery);
   const { data: convenios = [] } = useQuery(conveniosQuery);
-  const opcoesConvenio = convenios.filter((c) => c.tipo !== "particular" && (c.ativo || c.id === guia?.convenio_id));
+  const opcoesConvenio = convenios.filter((c) => exigeGuia(c.tipo) && (c.ativo || c.id === guia?.convenio_id));
 
   const [pacienteId, setPacienteId] = useState("");
   const [convenioId, setConvenioId] = useState("");

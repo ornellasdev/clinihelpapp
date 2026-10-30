@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { conveniosQuery, guiasQuery, guiasUsoQuery, type Guia } from "@/lib/queries";
 import { useMe } from "@/hooks/use-me";
 import { podeGerirGlosas, podeRemoverGuia } from "@/lib/permissions";
-import { SITUACAO_GUIA, saldoGuia, situacaoGuia, type SituacaoGuia } from "@/lib/guias";
+import { exigeGuia, SITUACAO_GUIA, saldoGuia, situacaoGuia, type SituacaoGuia } from "@/lib/guias";
 import { erroAmigavel, fmtData } from "@/lib/ui-helpers";
 import { abrirAnexoGuia, BUCKET_GUIAS } from "@/components/guias/GuiaDialog";
 import { Button } from "@/components/ui/button";
@@ -93,7 +93,7 @@ export function GuiasLista({ onEditar, onGlosar }: { onEditar: (g: Guia) => void
           <SelectContent>
             <SelectItem value={TODAS}>Todos os convênios</SelectItem>
             {convenios
-              .filter((c) => c.tipo !== "particular")
+              .filter((c) => exigeGuia(c.tipo))
               .map((c) => (
                 <SelectItem key={c.id} value={c.id}>
                   {c.nome}
