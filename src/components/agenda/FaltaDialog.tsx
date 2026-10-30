@@ -22,7 +22,7 @@ const LIMITE_MB = REGRA_ATESTADO.maxMB;
 const EXPLICACAO: Record<StatusFalta, string> = {
   falta_justificada: "Não gera cobrança para a família/convênio, não desconta a guia e não gera repasse.",
   falta_terapeuta: "Não gera cobrança, não desconta a guia e não gera repasse para o terapeuta.",
-  falta_cobrada: "Falta cobrada: entra no faturamento da sessão. A guia do convênio não é descontada.",
+  falta_cobrada: "Falta não justificada: é cobrada e entra no faturamento da sessão. A guia do convênio não é descontada.",
 };
 
 export function FaltaDialog({

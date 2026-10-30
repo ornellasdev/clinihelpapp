@@ -181,7 +181,7 @@ export const ARTIGOS: Artigo[] = [
         itens: [
           "Falta justificada (cinza) — não cobra, não baixa guia, sem repasse. Pode anexar atestado (PDF/JPG/PNG); aparece um clipe na agenda.",
           "Falta do terapeuta (cinza) — não cobra, não baixa guia, sem repasse; marca “reposição pendente”.",
-          "Falta não justificada / cobrada (vermelho) — cobra; na hora decide-se se o profissional recebe repasse. Não baixa guia de convênio.",
+          "Falta não justificada (vermelho) — é cobrada; na hora decide-se se o profissional recebe repasse. Não baixa guia de convênio.",
           "Cancelado — mantido para histórico, libera o horário.",
         ],
       },
@@ -550,6 +550,7 @@ export const ARTIGOS: Artigo[] = [
 ];
 
 export const HISTORICO: { data: string; texto: string }[] = [
+  { data: "2026-10-30", texto: "Agenda: legenda passa a dizer “Faltas justificadas” (cinza) e “Faltas não justificadas” (vermelho)." },
   { data: "2026-10-30", texto: "Aba Migração no /dev: importação de convênios e pacientes por planilha." },
   { data: "2026-10-30", texto: "Base de conhecimento criada no painel do desenvolvedor." },
   { data: "2026-10-30", texto: "Lembrete de sessão por WhatsApp na agenda." },

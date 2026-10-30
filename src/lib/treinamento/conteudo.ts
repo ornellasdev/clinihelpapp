@@ -216,7 +216,7 @@ export const MODULOS: Modulo[] = [
           "Aguardando atendimento (amarelo): a recepção marca quando a criança chega e a guia/token do dia já foi validada. O paciente entra na fila do profissional.",
           "Em atendimento (roxo): muda sozinho quando o profissional inicia o atendimento ou abre a evolução.",
           "Finalizado (verde): muda sozinho quando o profissional salva a evolução. Gera a cobrança, desconta a guia e conta para o repasse.",
-          "Faltas não cobradas (cinza), falta cobrada (vermelho) e cancelado.",
+          "Faltas justificadas (cinza), faltas não justificadas (vermelho) e cancelado.",
         ],
       },
       {
