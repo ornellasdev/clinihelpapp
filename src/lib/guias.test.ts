@@ -80,9 +80,9 @@ describe("avisos de renovação", () => {
 });
 
 describe("quem precisa de guia", () => {
-  it("só convênio; liminar (lista de presença + NF) e particular não", () => {
+  it("convênio e liminar sim, particular não", () => {
     expect(exigeGuia("convenio")).toBe(true);
-    expect(exigeGuia("liminar")).toBe(false);
+    expect(exigeGuia("liminar")).toBe(true);
     expect(exigeGuia("particular")).toBe(false);
     expect(exigeGuia(null)).toBe(false);
   });

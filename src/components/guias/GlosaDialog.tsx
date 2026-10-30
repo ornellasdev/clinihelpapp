@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { conveniosQuery, guiasQuery, type Glosa } from "@/lib/queries";
-import { exigeGuia, MOTIVOS_GLOSA, STATUS_GLOSA, type StatusGlosa } from "@/lib/guias";
+import { MOTIVOS_GLOSA, STATUS_GLOSA, type StatusGlosa } from "@/lib/guias";
 import { erroAmigavel } from "@/lib/ui-helpers";
 import { PacienteCombobox } from "@/components/PacienteCombobox";
 import { Button } from "@/components/ui/button";
@@ -149,7 +149,7 @@ export function GlosaDialog({
                 </SelectTrigger>
                 <SelectContent>
                   {convenios
-                    .filter((c) => exigeGuia(c.tipo) || c.id === convenioId)
+                    .filter((c) => c.tipo !== "particular" || c.id === convenioId)
                     .map((c) => (
                       <SelectItem key={c.id} value={c.id}>
                         {c.nome}

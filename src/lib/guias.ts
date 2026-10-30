@@ -77,8 +77,8 @@ export function guiaParaSessao<G extends GuiaBase>(
   return candidatas[0] ?? null;
 }
 
-/** Só convênio depende de guia da operadora. Liminar usa lista de presença + nota fiscal; particular não usa guia. */
-export const exigeGuia = (tipoConvenio?: string | null) => tipoConvenio === "convenio";
+/** Só convênio e liminar dependem de guia da operadora; particular não. */
+export const exigeGuia = (tipoConvenio?: string | null) => tipoConvenio === "convenio" || tipoConvenio === "liminar";
 
 export type StatusLiberacao = "pendente" | "aguardando" | "liberado";
 export const STATUS_LIBERACAO: Record<StatusLiberacao, { label: string; curto: string; className: string }> = {

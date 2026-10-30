@@ -115,7 +115,7 @@ export function FaturamentoLote({
           <SelectContent>
             <SelectItem value={TODOS}>Todos os convênios</SelectItem>
             {convenios
-              .filter((c) => exigeGuia(c.tipo))
+              .filter((c) => c.tipo !== "particular")
               .map((c) => (
                 <SelectItem key={c.id} value={c.id}>
                   {c.nome}
