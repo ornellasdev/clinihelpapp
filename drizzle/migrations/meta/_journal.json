@@ -169,6 +169,13 @@
       "when": 1793375986385,
       "tag": "0023_integridade_referencial_metadados_indices",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1793376025053,
+      "tag": "0024_exclusao_logica_e_retencao",
+      "breakpoints": true
     }
   ]
 }

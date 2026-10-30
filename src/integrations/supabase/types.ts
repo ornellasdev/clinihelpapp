@@ -800,6 +800,8 @@ export type Database = {
           created_at: string
           criado_por: string | null
           data_glosa: string
+          excluido_em: string | null
+          excluido_por: string | null
           guia_id: string | null
           id: string
           motivo: string
@@ -817,6 +819,8 @@ export type Database = {
           created_at?: string
           criado_por?: string | null
           data_glosa?: string
+          excluido_em?: string | null
+          excluido_por?: string | null
           guia_id?: string | null
           id?: string
           motivo: string
@@ -834,6 +838,8 @@ export type Database = {
           created_at?: string
           criado_por?: string | null
           data_glosa?: string
+          excluido_em?: string | null
+          excluido_por?: string | null
           guia_id?: string | null
           id?: string
           motivo?: string
@@ -897,6 +903,8 @@ export type Database = {
           data_liberacao: string | null
           data_solicitacao: string
           especialidade_id: string
+          excluido_em: string | null
+          excluido_por: string | null
           id: string
           observacoes: string | null
           paciente_id: string
@@ -920,6 +928,8 @@ export type Database = {
           data_liberacao?: string | null
           data_solicitacao?: string
           especialidade_id: string
+          excluido_em?: string | null
+          excluido_por?: string | null
           id?: string
           observacoes?: string | null
           paciente_id: string
@@ -943,6 +953,8 @@ export type Database = {
           data_liberacao?: string | null
           data_solicitacao?: string
           especialidade_id?: string
+          excluido_em?: string | null
+          excluido_por?: string | null
           id?: string
           observacoes?: string | null
           paciente_id?: string
@@ -1182,6 +1194,8 @@ export type Database = {
           clinica_id: string
           created_at: string
           enviado_por: string
+          excluido_em: string | null
+          excluido_por: string | null
           id: string
           mime_type: string | null
           nome: string
@@ -1196,6 +1210,8 @@ export type Database = {
           clinica_id?: string
           created_at?: string
           enviado_por?: string
+          excluido_em?: string | null
+          excluido_por?: string | null
           id?: string
           mime_type?: string | null
           nome: string
@@ -1210,6 +1226,8 @@ export type Database = {
           clinica_id?: string
           created_at?: string
           enviado_por?: string
+          excluido_em?: string | null
+          excluido_por?: string | null
           id?: string
           mime_type?: string | null
           nome?: string
@@ -1642,6 +1660,8 @@ export type Database = {
         Row: {
           clinica_id: string
           created_at: string
+          excluido_em: string | null
+          excluido_por: string | null
           finalidade: string | null
           id: string
           liberado_por: string | null
@@ -1657,6 +1677,8 @@ export type Database = {
         Insert: {
           clinica_id?: string
           created_at?: string
+          excluido_em?: string | null
+          excluido_por?: string | null
           finalidade?: string | null
           id?: string
           liberado_por?: string | null
@@ -1672,6 +1694,8 @@ export type Database = {
         Update: {
           clinica_id?: string
           created_at?: string
+          excluido_em?: string | null
+          excluido_por?: string | null
           finalidade?: string | null
           id?: string
           liberado_por?: string | null
@@ -1942,6 +1966,10 @@ export type Database = {
     }
     Functions: {
       acesso_seguro: { Args: never; Returns: boolean }
+      arquivo_referenciado: {
+        Args: { _bucket: string; _path: string }
+        Returns: boolean
+      }
       can_view_especialidade: {
         Args: { _esp: string; _user_id: string }
         Returns: boolean
