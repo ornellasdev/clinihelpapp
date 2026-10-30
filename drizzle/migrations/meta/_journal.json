@@ -225,6 +225,13 @@
       "when": 1793378081057,
       "tag": "0031_painel_governanca",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1793378127673,
+      "tag": "0032_funcoes_novas_sem_acesso_anonimo",
+      "breakpoints": true
     }
   ]
 }
