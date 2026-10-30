@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Building2, ExternalLink, KeyRound, Loader2, LogOut, Plus, ShieldCheck, ShieldX } from "lucide-react";
+import { Building2, ExternalLink, KeyRound, Loader2, LogOut, Plus, ShieldCheck, ShieldX, Wallet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { meQuery, type Me } from "@/lib/queries";
@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { RecebimentosDialog } from "@/components/dev/RecebimentosDialog";
 
 export const Route = createFileRoute("/dev")({
   ssr: false,
@@ -253,6 +254,7 @@ function PainelClinicas() {
   const alternar = useServerFn(definirClinicaAtiva);
   const { data: clinicas, isLoading, refetch } = useQuery({ queryKey: ["dev-clinicas"], queryFn: () => listar() });
   const [novaAberta, setNovaAberta] = useState(false);
+  const [recebimentos, setRecebimentos] = useState<{ id: string; nome: string; pagamentos_ativos: boolean } | null>(null);
 
   async function mudarAtiva(id: string, ativa: boolean) {
     try {
@@ -306,18 +308,20 @@ function PainelClinicas() {
               <div><span className="font-semibold">{c.equipe}</span> <span className="text-muted-foreground">na equipe</span></div>
               <div><span className="font-semibold">{c.pacientes}</span> <span className="text-muted-foreground">pacientes</span></div>
             </div>
-            <Button
-              variant="outline"
-              className="mt-4 w-full"
-              onClick={() => navigate({ to: "/$clinica/painel", params: { clinica: c.slug } })}
-            >
-              <ExternalLink /> Entrar nesta clínica
-            </Button>
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              <Button variant="outline" onClick={() => navigate({ to: "/$clinica/painel", params: { clinica: c.slug } })}>
+                <ExternalLink /> Entrar nesta clínica
+              </Button>
+              <Button variant={c.pagamentos_ativos ? "outline" : "secondary"} onClick={() => setRecebimentos(c)}>
+                <Wallet /> {c.pagamentos_ativos ? "Recebimentos" : "Ativar recebimentos"}
+              </Button>
+            </div>
           </div>
         ))}
       </div>
 
       <NovaClinica aberta={novaAberta} onClose={() => setNovaAberta(false)} onCriada={() => refetch()} />
+      <RecebimentosDialog clinica={recebimentos} onClose={() => setRecebimentos(null)} onAtivado={() => refetch()} />
     </div>
   );
 }
