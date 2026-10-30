@@ -10,7 +10,7 @@ import { erroAmigavel, fmtData } from "@/lib/ui-helpers";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const CATEGORIAS = ["Laudo", "Relatório", "Exame", "Receita", "Documento pessoal", "Termo / contrato", "Encaminhamento", "Outros"];
+const CATEGORIAS = ["Laudo", "Relatório", "Exame", "Receita", "Atestado", "Documento pessoal", "Termo / contrato", "Encaminhamento", "Outros"];
 const BUCKET = "documentos-pacientes";
 
 function tamanho(b?: number | null) {
@@ -109,6 +109,7 @@ export function DocumentosTab({ pacienteId }: { pacienteId: string }) {
                   <div className="truncate text-sm font-medium">{d.nome}</div>
                   <div className="text-xs text-muted-foreground">
                     {fmtData(d.created_at)} {tamanho(d.tamanho) && `· ${tamanho(d.tamanho)}`}
+                    {d.sessao && ` · falta de ${fmtData(d.sessao.inicio, "dd/MM/yyyy HH:mm")}`}
                   </div>
                 </div>
                 <Button size="icon" variant="ghost" onClick={() => baixar(d.storage_path)} aria-label="Abrir">

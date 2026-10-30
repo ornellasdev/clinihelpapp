@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { agendaPacienteQuery, conveniosQuery, pacienteQuery } from "@/lib/queries";
 import { useMe } from "@/hooks/use-me";
 import { podeAgendar, podeEditarPaciente } from "@/lib/permissions";
+import { ClipeAtestado } from "@/components/agenda/AnexoAtestado";
 import { STATUS_AGENDA, corEsp, erroAmigavel, fmtData, fmtHora, idade, iniciais } from "@/lib/ui-helpers";
 import { PacienteForm } from "@/components/pacientes/PacienteForm";
 import { ProntuarioTab } from "@/components/pacientes/ProntuarioTab";
@@ -161,9 +162,12 @@ function Atendimentos({ pacienteId }: { pacienteId: string }) {
           <span className="flex-1 truncate text-muted-foreground">
             {a.profissional?.nome} · {a.sala?.nome}
           </span>
+          {a.reposicao_pendente && <span className="rounded-full bg-warning/25 px-2 py-0.5 text-xs font-medium text-warning-foreground">Reposição pendente</span>}
           <span className={cn("rounded-full px-2 py-0.5 text-xs font-medium", STATUS_AGENDA[a.status].className)}>
             {STATUS_AGENDA[a.status].label}
           </span>
+          {a.documentos?.length ? <ClipeAtestado docs={a.documentos} /> : null}
+          {a.falta_motivo && <p className="w-full pl-0 text-xs text-muted-foreground sm:pl-[7.75rem]">{a.falta_motivo}</p>}
         </div>
       ))}
     </div>

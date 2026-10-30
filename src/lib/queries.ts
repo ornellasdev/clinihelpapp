@@ -157,7 +157,7 @@ export const documentosQuery = (pacienteId: string) =>
       ok(
         await supabase
           .from("paciente_documentos")
-          .select("*")
+          .select("*, sessao:agendamentos(inicio, status)")
           .eq("paciente_id", pacienteId)
           .order("created_at", { ascending: false }),
       ),
