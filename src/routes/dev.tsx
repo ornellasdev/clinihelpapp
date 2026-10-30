@@ -312,8 +312,8 @@ function PainelClinicas() {
               <Button variant="outline" onClick={() => navigate({ to: "/$clinica/painel", params: { clinica: c.slug } })}>
                 <ExternalLink /> Entrar nesta clínica
               </Button>
-              <Button variant={c.pagamentos_ativos ? "outline" : "secondary"} onClick={() => setRecebimentos(c)}>
-                <Wallet /> {c.pagamentos_ativos ? "Recebimentos" : "Ativar recebimentos"}
+              <Button variant="outline" onClick={() => setRecebimentos(c)}>
+                <Wallet /> {c.pagamentos_ativos ? "Recebimentos" : "Sem conta Asaas"}
               </Button>
             </div>
           </div>
@@ -321,7 +321,7 @@ function PainelClinicas() {
       </div>
 
       <NovaClinica aberta={novaAberta} onClose={() => setNovaAberta(false)} onCriada={() => refetch()} />
-      <RecebimentosDialog clinica={recebimentos} onClose={() => setRecebimentos(null)} onAtivado={() => refetch()} />
+      <RecebimentosDialog clinica={recebimentos} onClose={() => setRecebimentos(null)} />
     </div>
   );
 }
