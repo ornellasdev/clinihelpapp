@@ -44,3 +44,12 @@
 - [x] Nota fiscal (número + emissão) com vencimento automático em 30 dias
 - [x] Registro do pagamento marca as sessões do mês como pagas
 - [x] Liminares a receber / vencidas nos Indicadores (KPI)
+
+## Status da agenda ligados ao prontuário, guias e financeiro
+- [x] Novos status: Agendado, Aguardando atendimento, Em atendimento, Finalizado + 3 faltas (Cancelado mantido)
+- [x] Chegada pela recepção (agenda e liberações do dia) coloca a criança na fila do profissional
+- [x] "Meus atendimentos de hoje" no painel com Iniciar / Evoluir; abrir a evolução inicia o atendimento
+- [x] Salvar a evolução finaliza a sessão: cobra, desconta a guia e gera repasse
+- [x] Falta justificada com motivo e atestado (sessão + documentos do paciente), clipe na agenda
+- [x] Falta do terapeuta (sem cobrança/repasse, reposição pendente) e falta cobrada (repasse opcional)
+- [x] Cores por status na agenda, financeiro, indicadores e cobranças ajustados
