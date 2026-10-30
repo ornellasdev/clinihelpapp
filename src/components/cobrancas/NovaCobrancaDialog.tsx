@@ -212,16 +212,20 @@ export function NovaCobrancaDialog({ aberta, onClose, onCriada }: { aberta: bool
                 required
                 value={valor}
                 onChange={(e) => { setValor(e.target.value); setValorEditado(true); }}
+                aria-invalid={!!erros["valor"]}
               />
+              {erros["valor"] && <p className="text-xs text-destructive">{erros["valor"]}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="cb-venc">Vencimento</Label>
-              <Input id="cb-venc" type="date" required min={format(new Date(), "yyyy-MM-dd")} value={vencimento} onChange={(e) => setVencimento(e.target.value)} />
+              <Input id="cb-venc" type="date" required min={format(new Date(), "yyyy-MM-dd")} value={vencimento} onChange={(e) => setVencimento(e.target.value)} aria-invalid={!!erros["vencimento"]} />
+              {erros["vencimento"] && <p className="text-xs text-destructive">{erros["vencimento"]}</p>}
             </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="cb-desc">Descrição (aparece para o responsável)</Label>
-            <Input id="cb-desc" required maxLength={500} value={descricao} onChange={(e) => { setDescricao(e.target.value); setDescEditada(true); }} />
+            <Input id="cb-desc" required maxLength={500} value={descricao} onChange={(e) => { setDescricao(e.target.value); setDescEditada(true); }} aria-invalid={!!erros["descricao"]} />
+            {erros["descricao"] && <p className="text-xs text-destructive">{erros["descricao"]}</p>}
           </div>
           <div className="space-y-2">
             <Label>Forma de pagamento</Label>
