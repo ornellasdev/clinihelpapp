@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarSearch, FilePenLine, Loader2, Lock, Pencil, Plus, X } from "lucide-react";
@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { agendaPacienteQuery, especialidadesQuery, evolucoesQuery, metasQuery, progressoMetasQuery } from "@/lib/queries";
 import { aplicarModelo } from "@/lib/plano-terapeutico";
+import { ehFalta, iniciaAoAbrirEvolucao } from "@/lib/agenda-status";
 import { ModelosEvolucao } from "./ModelosEvolucao";
 import { MetasNaEvolucao } from "./MetasNaEvolucao";
 import { VozEvolucao } from "./VozEvolucao";
@@ -218,7 +219,7 @@ function EvolucaoForm({
   const { data: progresso } = useSuspenseQuery(progressoMetasQuery(pacienteId));
   const { data: agenda = [] } = useQuery(agendaPacienteQuery(pacienteId));
   const minhas = especialidades.filter((e) => me.especialidades.includes(e.id));
-  const meusAtend = agenda.filter((a) => a.profissional_id === me.id && a.status !== "cancelado");
+  const meusAtend = agenda.filter((a) => a.profissional_id === me.id && a.status !== "cancelado" && !ehFalta(a.status));
 
   const [espId, setEspId] = useState(editar?.especialidade_id ?? (minhas.length === 1 ? minhas[0]!.id : ""));
   const [data, setData] = useState(editar?.data_atendimento ?? format(new Date(), "yyyy-MM-dd"));
@@ -243,6 +244,23 @@ function EvolucaoForm({
       if (me.especialidades.includes(a.especialidade_id)) setEspId(a.especialidade_id);
     }
   }, [agId, agenda, editar, me.especialidades]);
+
+  // Abrir a evolução da sessão de hoje inicia o atendimento ("Em atendimento").
+  const iniciado = useRef<string | null>(null);
+  useEffect(() => {
+    if (!agId || editar || iniciado.current === agId) return;
+    const a = agenda.find((x) => x.id === agId);
+    if (!a || a.profissional_id !== me.id || !iniciaAoAbrirEvolucao(a.status)) return;
+    if (format(parseISO(a.inicio), "yyyy-MM-dd") !== format(new Date(), "yyyy-MM-dd")) return;
+    iniciado.current = agId;
+    void supabase
+      .from("agendamentos")
+      .update({ status: "em_atendimento" })
+      .eq("id", agId)
+      .then(({ error }) => {
+        if (!error) qc.invalidateQueries({ queryKey: ["agenda"] });
+      });
+  }, [agId, agenda, editar, me.id, qc]);
 
   async function salvar() {
     if (!espId || !texto.trim()) { toast.error("Escolha a especialidade e escreva a evolução."); return; }
@@ -277,14 +295,18 @@ function EvolucaoForm({
         if (e2) erroMetas = e2.message;
       }
     }
-    if (!error && agId && !editar) {
-      await supabase.from("agendamentos").update({ status: "realizado" }).eq("id", agId).in("status", ["agendado", "confirmado"]);
-      qc.invalidateQueries({ queryKey: ["agenda"] });
+    // Salvar a evolução vinculada finaliza a sessão no banco (cobrança, guia e repasse seguem o status).
+    if (!error && agId) {
+      for (const k of [["agenda"], ["financeiro"], ["guias"], ["indicadores"]]) qc.invalidateQueries({ queryKey: k });
     }
     setSalvando(false);
     if (error) { toast.error(erroAmigavel(error.message)); return; }
     if (erroMetas) toast.error(`Evolução salva, mas o progresso das metas não: ${erroAmigavel(erroMetas)}`);
-    else toast.success(editar ? "Evolução atualizada." : "Evolução registrada.");
+    else {
+      const sessao = agenda.find((x) => x.id === agId);
+      const finalizou = !editar && !!sessao && (sessao.status === "agendado" || sessao.status === "aguardando" || sessao.status === "em_atendimento");
+      toast.success(editar ? "Evolução atualizada." : finalizou ? "Evolução registrada e atendimento finalizado." : "Evolução registrada.");
+    }
     qc.invalidateQueries({ queryKey: ["evolucoes", pacienteId] });
     onClose();
   }

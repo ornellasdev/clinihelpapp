@@ -10,7 +10,8 @@ import { convenioValoresQuery, conveniosQuery, equipeQuery, financeiroQuery } fr
 import { TabelaConvenios } from "@/components/financeiro/TabelaConvenios";
 import { useMe } from "@/hooks/use-me";
 import { podeGerirFinanceiro } from "@/lib/permissions";
-import { calcularRepasse, formatarMoeda } from "@/lib/financeiro";
+import { formatarMoeda, repasseDevido, valorCobrado } from "@/lib/financeiro";
+import { STATUS_FATURAVEIS, STATUS_PREVISTOS, type StatusAgenda } from "@/lib/agenda-status";
 import { STATUS_AGENDA, erroAmigavel, fmtData, fmtHora } from "@/lib/ui-helpers";
 import { PageHeader } from "@/components/PageHeader";
 import { Input } from "@/components/ui/input";
@@ -23,6 +24,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { exportarCsv, exportarPdf, exportarXlsx, gerarCsv, montarLinhas } from "@/lib/exportar-financeiro";
 
 const mesAtual = () => format(new Date(), "yyyy-MM");
+
+/** Filtros de status: grupos de regra financeira e status individuais. */
+const FILTROS: Record<string, { label: string; aceita: (s: StatusAgenda) => boolean }> = {
+  faturaveis: { label: "Faturáveis (finalizados + faltas cobradas)", aceita: (s) => STATUS_FATURAVEIS.includes(s) },
+  finalizado: { label: "Finalizados", aceita: (s) => s === "finalizado" },
+  falta_cobrada: { label: "Faltas não justificadas (cobradas)", aceita: (s) => s === "falta_cobrada" },
+  sem_cobranca: { label: "Faltas não cobradas", aceita: (s) => s === "falta_justificada" || s === "falta_terapeuta" },
+  previstos: { label: "A atender (agendados / na clínica)", aceita: (s) => STATUS_PREVISTOS.includes(s) },
+  todos: { label: "Todos (exceto cancelados)", aceita: (s) => s !== "cancelado" },
+};
 
 export const Route = createFileRoute("/_authenticated/$clinica/financeiro")({
   validateSearch: z.object({
@@ -50,7 +61,7 @@ function FinanceiroPage() {
   const navigate = useNavigate({ from: Route.fullPath });
   const qc = useQueryClient();
   const mes = search.mes ?? mesAtual();
-  const status = search.status ?? "realizado";
+  const status = search.status && FILTROS[search.status] ? search.status : "faturaveis";
   const ini = startOfMonth(parseISO(`${mes}-01`));
   const q = financeiroQuery(ini.toISOString(), addMonths(ini, 1).toISOString());
   const { data: linhas } = useSuspenseQuery(q);
@@ -58,14 +69,14 @@ function FinanceiroPage() {
   const gestor = podeGerirFinanceiro(me.papeis);
 
   const filtradas = linhas.filter(
-    (l) => (status === "todos" ? l.status !== "cancelado" : l.status === status) && (!search.prof || l.profissional_id === search.prof),
+    (l) => FILTROS[status]!.aceita(l.status) && (!search.prof || l.profissional_id === search.prof),
   );
 
   const totais = useMemo(() => {
-    const valor = filtradas.reduce((s, l) => s + Number(l.fin?.valor ?? 0), 0);
-    const repasse = filtradas.reduce((s, l) => s + Number(l.fin?.valor_repasse ?? 0), 0);
-    const recebido = filtradas.filter((l) => l.fin?.pagamento_status === "pago").reduce((s, l) => s + Number(l.fin?.valor ?? 0), 0);
-    const repassePago = filtradas.filter((l) => l.fin?.repasse_pago).reduce((s, l) => s + Number(l.fin?.valor_repasse ?? 0), 0);
+    const valor = filtradas.reduce((s, l) => s + valorCobrado(l.fin), 0);
+    const repasse = filtradas.reduce((s, l) => s + repasseDevido(l.fin), 0);
+    const recebido = filtradas.filter((l) => l.fin?.pagamento_status === "pago").reduce((s, l) => s + valorCobrado(l.fin), 0);
+    const repassePago = filtradas.filter((l) => l.fin?.repasse_pago).reduce((s, l) => s + repasseDevido(l.fin), 0);
     return { valor, repasse, recebido, repassePago, liquido: valor - repasse };
   }, [filtradas]);
 
@@ -74,14 +85,14 @@ function FinanceiroPage() {
     for (const l of filtradas) {
       const it = m.get(l.profissional_id) ?? { nome: l.profissional?.nome ?? "", n: 0, valor: 0, repasse: 0 };
       it.n++;
-      it.valor += Number(l.fin?.valor ?? 0);
-      it.repasse += Number(l.fin?.valor_repasse ?? 0);
+      it.valor += valorCobrado(l.fin);
+      it.repasse += repasseDevido(l.fin);
       m.set(l.profissional_id, it);
     }
     return [...m.values()].sort((a, b) => a.nome.localeCompare(b.nome));
   }, [filtradas]);
 
-  async function atualizar(id: string, patch: { valor?: number; percentual_repasse?: number; pagamento_status?: string; repasse_pago?: boolean }) {
+  async function atualizar(id: string, patch: { valor?: number; percentual_repasse?: number; pagamento_status?: string; repasse_pago?: boolean; repassar?: boolean }) {
     const { error } = await supabase.from("atendimento_financeiro").update(patch).eq("agendamento_id", id);
     if (error) { toast.error(erroAmigavel(error.message)); return; }
     qc.invalidateQueries({ queryKey: q.queryKey });
@@ -152,15 +163,15 @@ function FinanceiroPage() {
       <div className="mb-5 flex flex-wrap gap-2">
         <Input type="month" value={mes} onChange={(e) => e.target.value && navigate({ search: (s) => ({ ...s, mes: e.target.value }) })} className="w-auto" />
         <Select value={status} onValueChange={(v) => navigate({ search: (s) => ({ ...s, status: v }) })}>
-          <SelectTrigger className="w-44">
+          <SelectTrigger className="w-full sm:w-80">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="realizado">Realizados</SelectItem>
-            <SelectItem value="falta">Faltas</SelectItem>
-            <SelectItem value="agendado">Agendados</SelectItem>
-            <SelectItem value="confirmado">Confirmados</SelectItem>
-            <SelectItem value="todos">Todos (exceto cancelados)</SelectItem>
+            {Object.entries(FILTROS).map(([k, f]) => (
+              <SelectItem key={k} value={k}>
+                {f.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         {gestor && (
@@ -258,7 +269,9 @@ function FinanceiroPage() {
                     </span>
                   </td>
                   <td className="p-3 text-right">
-                    {gestor ? (
+                    {!fin.cobrar ? (
+                      <span className="text-xs text-muted-foreground">Não cobrada</span>
+                    ) : gestor ? (
                       <CampoNumero valor={Number(fin.valor)} onSalvar={(v) => atualizar(l.id, { valor: v })} />
                     ) : (
                       formatarMoeda(fin.valor)
@@ -272,7 +285,14 @@ function FinanceiroPage() {
                     )}
                   </td>
                   <td className="whitespace-nowrap p-3 text-right font-medium">
-                    {formatarMoeda(calcularRepasse(Number(fin.valor), Number(fin.percentual_repasse)))}
+                    {formatarMoeda(repasseDevido(fin))}
+                    {l.status === "falta_cobrada" && (
+                      <label className="mt-1 flex items-center justify-end gap-1.5 text-xs font-normal text-muted-foreground">
+                        {fin.repassar ? "com repasse" : "sem repasse"}
+                        {gestor && <Switch className="scale-75" checked={fin.repassar} onCheckedChange={(v) => atualizar(l.id, { repassar: v })} aria-label="Repasse nesta falta" />}
+                      </label>
+                    )}
+                    {!fin.cobrar && <div className="text-xs font-normal text-muted-foreground">sem repasse</div>}
                   </td>
                   <td className="p-3 text-center">
                     <Switch
@@ -293,6 +313,7 @@ function FinanceiroPage() {
       {gestor && (
         <p className="mt-3 text-xs text-muted-foreground">
           O valor de cada sessão vem do convênio do paciente (tabela abaixo) e o percentual, do repasse do profissional (definido em Equipe). Os dois podem ser ajustados em cada sessão.
+          Sessões finalizadas e faltas não justificadas são cobradas; faltas justificadas e do terapeuta não geram cobrança nem repasse. Na falta cobrada, o repasse segue o que foi marcado na agenda e pode ser trocado aqui.
         </p>
       )}
       {gestor && <TabelaConvenios />}

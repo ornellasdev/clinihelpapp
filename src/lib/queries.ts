@@ -157,7 +157,7 @@ export const documentosQuery = (pacienteId: string) =>
       ok(
         await supabase
           .from("paciente_documentos")
-          .select("*")
+          .select("*, sessao:agendamentos(inicio, status)")
           .eq("paciente_id", pacienteId)
           .order("created_at", { ascending: false }),
       ),
@@ -220,7 +220,7 @@ export const modelosEvolucaoQuery = queryOptions({
 
 // liberacao: só vem preenchida para quem pode ver guias (recepção/gestão/financeiro); para os demais o RLS devolve null.
 const AGENDA_SELECT =
-  "*, liberacao:liberacoes_atendimento(status, token, guia_id), paciente:pacientes(id, nome, convenio_id), profissional:profiles(id, nome), sala:salas(id, nome), especialidade:especialidades(id, nome, cor)";
+  "*, liberacao:liberacoes_atendimento(status, token, guia_id), paciente:pacientes(id, nome, convenio_id), profissional:profiles(id, nome), sala:salas(id, nome), especialidade:especialidades(id, nome, cor), documentos:paciente_documentos(id, nome, storage_path, mime_type)";
 
 async function fetchAgenda(inicioISO: string, fimISO: string) {
   return ok(
@@ -306,9 +306,9 @@ export const sessoesParaCobrarQuery = (pacienteId: string, inicioISO: string, fi
       ok(
         await supabase
           .from("agendamentos")
-          .select("id, inicio, status, especialidade:especialidades(nome), profissional:profiles(nome), fin:atendimento_financeiro!inner(valor, pagamento_status), itens:cobranca_itens(cobranca:cobrancas(status))")
+          .select("id, inicio, status, especialidade:especialidades(nome), profissional:profiles(nome), fin:atendimento_financeiro!inner(valor, pagamento_status, cobrar), itens:cobranca_itens(cobranca:cobrancas(status))")
           .eq("paciente_id", pacienteId)
-          .neq("status", "cancelado")
+          .not("status", "in", "(cancelado,falta_justificada,falta_terapeuta)")
           .gte("inicio", inicioISO)
           .lt("inicio", fimISO)
           .order("inicio"),
@@ -334,7 +334,7 @@ export const indicadoresQuery = (inicioISO: string, fimISO: string) =>
       todasAsPaginas((de, ate) =>
         supabase
           .from("agendamentos")
-          .select("id, inicio, fim, status, sala_id, paciente_id, especialidade_id, paciente:pacientes(nome), especialidade:especialidades(nome, cor), fin:atendimento_financeiro(valor, pagamento_status)")
+          .select("id, inicio, fim, status, sala_id, paciente_id, especialidade_id, paciente:pacientes(nome), especialidade:especialidades(nome, cor), fin:atendimento_financeiro(valor, pagamento_status, cobrar)")
           .gte("inicio", inicioISO)
           .lt("inicio", fimISO)
           .order("inicio")
@@ -343,7 +343,7 @@ export const indicadoresQuery = (inicioISO: string, fimISO: string) =>
       ),
   });
 
-/** Sessões realizadas e ainda não pagas, de qualquer mês até a data informada. */
+/** Sessões faturáveis (finalizadas ou faltas cobradas) ainda não pagas, de qualquer mês até a data informada. */
 export const aReceberQuery = (ateISO: string) =>
   queryOptions({
     queryKey: ["indicadores", "a-receber", ateISO],
@@ -352,7 +352,8 @@ export const aReceberQuery = (ateISO: string) =>
         supabase
           .from("agendamentos")
           .select("id, inicio, fin:atendimento_financeiro!inner(valor)")
-          .eq("status", "realizado")
+          .in("status", ["finalizado", "falta_cobrada"])
+          .eq("fin.cobrar", true)
           .eq("fin.pagamento_status", "pendente")
           .lt("inicio", ateISO)
           .order("inicio")
@@ -429,7 +430,7 @@ export const guiasUsoQuery = queryOptions({
     todasAsPaginas((de, ate) => supabase.from("guias_uso").select("guia_id, usadas, reservadas").order("guia_id").range(de, ate)),
 });
 
-/** Sessões realizadas no período com os códigos da guia, para conferência e lançamento no portal da operadora. */
+/** Sessões finalizadas no período com os códigos da guia, para conferência e lançamento no portal da operadora. */
 export const faturamentoGuiasQuery = (inicioISO: string, fimISO: string) =>
   queryOptions({
     queryKey: ["guias", "faturamento", inicioISO, fimISO],
@@ -440,7 +441,7 @@ export const faturamentoGuiasQuery = (inicioISO: string, fimISO: string) =>
           .select(
             "id, inicio, paciente_id, especialidade_id, paciente:pacientes(id, nome, convenio_id, carteirinha), profissional:profiles(nome, conselho, registro_profissional), especialidade:especialidades(nome), liberacao:liberacoes_atendimento(status, token, guia:guias_convenio(id, codigo_tuss, codigo_guia, codigo_faturamento, convenio_id, status)), fin:atendimento_financeiro(valor)",
           )
-          .eq("status", "realizado")
+          .eq("status", "finalizado")
           .gte("inicio", inicioISO)
           .lt("inicio", fimISO)
           .order("inicio")
@@ -465,7 +466,7 @@ export const glosasQuery = queryOptions({
 });
 export type Glosa = Awaited<ReturnType<NonNullable<typeof glosasQuery.queryFn>>>[number];
 
-/** Sessões realizadas no mês com o que a lista de presença e o fechamento da liminar precisam (filtra-se o tipo liminar na tela). */
+/** Sessões finalizadas no mês com o que a lista de presença e o fechamento da liminar precisam (filtra-se o tipo liminar na tela). */
 export const sessoesLiminarQuery = (inicioISO: string, fimISO: string) =>
   queryOptions({
     queryKey: ["liminar", "sessoes", inicioISO, fimISO],
@@ -476,7 +477,7 @@ export const sessoesLiminarQuery = (inicioISO: string, fimISO: string) =>
           .select(
             "id, inicio, fim, paciente_id, paciente:pacientes(id, nome, data_nascimento, cpf, carteirinha, convenio_id, responsavel_nome, responsavel_cpf), profissional:profiles(nome, conselho, registro_profissional), especialidade:especialidades(nome), fin:atendimento_financeiro(valor), item:fatura_liminar_itens(fatura_id)",
           )
-          .eq("status", "realizado")
+          .eq("status", "finalizado")
           .gte("inicio", inicioISO)
           .lt("inicio", fimISO)
           .order("inicio")

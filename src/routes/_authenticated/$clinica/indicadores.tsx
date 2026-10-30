@@ -12,6 +12,7 @@ import { useClinica } from "@/hooks/use-clinica";
 import { useMe } from "@/hooks/use-me";
 import { podeGerirFinanceiro } from "@/lib/permissions";
 import { formatarMoeda } from "@/lib/financeiro";
+import { ehFaltaDoPaciente } from "@/lib/agenda-status";
 import { HORARIO_PADRAO, horasDisponiveisPorSala, minutosOcupados, percentual, resumoFinanceiro, taxaFaltas, type HorarioFuncionamento } from "@/lib/indicadores";
 import { PageHeader } from "@/components/PageHeader";
 import { Input } from "@/components/ui/input";
@@ -106,7 +107,7 @@ function IndicadoresPage() {
       const e = esp.get(s.especialidade_id) ?? { nome: s.especialidade?.nome ?? "—", itens: [] };
       e.itens.push(s);
       esp.set(s.especialidade_id, e);
-      if (s.status === "falta") {
+      if (ehFaltaDoPaciente(s.status)) {
         const p = pac.get(s.paciente_id) ?? { id: s.paciente_id, nome: s.paciente?.nome ?? "—", n: 0 };
         p.n++;
         pac.set(s.paciente_id, p);
@@ -155,7 +156,7 @@ function IndicadoresPage() {
 
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Kpi icone={DoorOpen} label="Ocupação das salas" valor={`${ocupacao.pct.toLocaleString("pt-BR")}%`} sub={`${fmtHoras(ocupacao.horas)} reservadas`} />
-        <Kpi icone={UserX} label="Taxa de faltas" valor={`${faltas.geral.taxa.toLocaleString("pt-BR")}%`} sub={`${faltas.geral.faltas} ${faltas.geral.faltas === 1 ? "falta" : "faltas"} no mês`} />
+        <Kpi icone={UserX} label="Taxa de faltas" valor={`${faltas.geral.taxa.toLocaleString("pt-BR")}%`} sub={`${faltas.geral.faltas} do paciente (${faltas.geral.justificadas} justif. · ${faltas.geral.cobradas} cobradas)${faltas.geral.terapeuta ? ` · ${faltas.geral.terapeuta} do terapeuta` : ""}`} />
         <Kpi icone={Wallet} label="Faturamento do mês" valor={formatarMoeda(fin.faturado)} sub={`${formatarMoeda(fin.recebido)} já recebido`} destaque />
         <Kpi icone={CircleDollarSign} label="Valores a receber" valor={formatarMoeda(totalAReceber)} sub={`${formatarMoeda(fin.aReceber)} deste mês`} />
       </div>
@@ -198,7 +199,7 @@ function IndicadoresPage() {
 
         <Secao titulo="Faltas por especialidade">
           {faltas.porEsp.length === 0 ? (
-            <Vazio>Sem atendimentos realizados ou faltas neste mês.</Vazio>
+            <Vazio>Sem atendimentos finalizados ou faltas neste mês.</Vazio>
           ) : (
             <ul className="grid gap-3">
               {faltas.porEsp.map((e) => (
@@ -235,10 +236,10 @@ function IndicadoresPage() {
 
         <Secao titulo="Financeiro do mês">
           <dl className="grid grid-cols-2 gap-3">
-            <Valor label="Faturado (realizados)" v={fin.faturado} />
+            <Valor label="Faturado (finalizados + faltas cobradas)" v={fin.faturado} />
             <Valor label="Recebido" v={fin.recebido} />
             <Valor label="A receber do mês" v={fin.aReceber} />
-            <Valor label="Previsto (ainda agendado)" v={fin.previsto} />
+            <Valor label="Previsto (ainda não atendido)" v={fin.previsto} />
           </dl>
           <div className="mt-5 border-t pt-4">
             <div className="mb-2 flex items-center justify-between">
@@ -248,7 +249,7 @@ function IndicadoresPage() {
               </Link>
             </div>
             {aReceberPorMes.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Nenhuma sessão realizada pendente de pagamento.</p>
+              <p className="text-sm text-muted-foreground">Nenhuma sessão finalizada ou falta cobrada pendente de pagamento.</p>
             ) : (
               <ul className="divide-y text-sm">
                 {aReceberPorMes.map(([m, it]) => (

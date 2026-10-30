@@ -1,4 +1,6 @@
 import { differenceInMinutes, endOfMonth, eachDayOfInterval, getDay, parseISO, startOfMonth } from "date-fns";
+import { ehFaturavel, ehPrevisto } from "./agenda-status";
+import { valorCobrado } from "./financeiro";
 
 export type HorarioFuncionamento = { horaIni: number; horaFim: number; sabado: boolean };
 export const HORARIO_PADRAO: HorarioFuncionamento = { horaIni: 8, horaFim: 18, sabado: false };
@@ -32,18 +34,25 @@ export function percentual(parte: number, total: number): number {
   return Math.round((parte / total) * 1000) / 10;
 }
 
-/** Taxa de faltas = faltas ÷ (faltas + realizados). Agendados e cancelados não entram. */
+/**
+ * Taxa de faltas do paciente = faltas do paciente (justificadas + não justificadas) ÷ (essas faltas + finalizados).
+ * Falta do terapeuta é contada à parte e não entra na taxa. Agendados e cancelados não entram.
+ */
 export function taxaFaltas(itens: readonly { status: string }[]) {
-  const faltas = itens.filter((i) => i.status === "falta").length;
-  const realizados = itens.filter((i) => i.status === "realizado").length;
-  return { faltas, realizados, taxa: percentual(faltas, faltas + realizados) };
+  const justificadas = itens.filter((i) => i.status === "falta_justificada").length;
+  const cobradas = itens.filter((i) => i.status === "falta_cobrada").length;
+  const terapeuta = itens.filter((i) => i.status === "falta_terapeuta").length;
+  const faltas = justificadas + cobradas;
+  const realizados = itens.filter((i) => i.status === "finalizado").length;
+  return { faltas, justificadas, cobradas, terapeuta, realizados, taxa: percentual(faltas, faltas + realizados) };
 }
 
-type SessaoFin = { status: string; fin: { valor: number | string | null; pagamento_status: string } | null };
+type SessaoFin = { status: string; fin: { valor: number | string | null; pagamento_status: string; cobrar?: boolean | null } | null };
 
 /**
- * Faturamento = sessões realizadas no mês. Recebido = realizadas já pagas.
- * A receber = realizadas ainda pendentes. Previsto = agendadas/confirmadas que ainda vão acontecer.
+ * Faturamento = sessões finalizadas + faltas cobradas no mês. Recebido = dessas, as já pagas.
+ * A receber = dessas, as pendentes. Previsto = sessões que ainda vão acontecer.
+ * Faltas justificadas e do terapeuta não geram valor.
  */
 export function resumoFinanceiro(itens: readonly SessaoFin[]) {
   let faturado = 0;
@@ -51,12 +60,12 @@ export function resumoFinanceiro(itens: readonly SessaoFin[]) {
   let aReceber = 0;
   let previsto = 0;
   for (const i of itens) {
-    const v = Number(i.fin?.valor ?? 0);
-    if (i.status === "realizado") {
+    const v = valorCobrado(i.fin);
+    if (ehFaturavel(i.status)) {
       faturado += v;
       if (i.fin?.pagamento_status === "pago") recebido += v;
       else aReceber += v;
-    } else if (i.status === "agendado" || i.status === "confirmado") {
+    } else if (ehPrevisto(i.status)) {
       previsto += v;
     }
   }

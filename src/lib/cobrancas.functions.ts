@@ -54,8 +54,8 @@ export const criarCobranca = createServerFn({ method: "POST" })
         .from("agendamentos")
         .select("id, status, paciente_id")
         .in("id", sessoes);
-      if ((ags ?? []).length !== sessoes.length || ags!.some((a: any) => a.paciente_id !== data.pacienteId || a.status === "cancelado")) {
-        throw new Error("Alguma sessão escolhida não é deste paciente ou foi cancelada.");
+      if ((ags ?? []).length !== sessoes.length || ags!.some((a: any) => a.paciente_id !== data.pacienteId || ["cancelado", "falta_justificada", "falta_terapeuta"].includes(a.status))) {
+        throw new Error("Alguma sessão escolhida não é deste paciente, foi cancelada ou é uma falta não cobrada.");
       }
       const { data: presas } = await supabase
         .from("cobranca_itens")

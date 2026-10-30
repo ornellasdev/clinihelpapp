@@ -11,7 +11,8 @@ import { podeAgendar, podeVerGuias } from "@/lib/permissions";
 import { ALERTA_SESSAO } from "@/lib/guias";
 import { useSessoesConvenio, type SessaoConvenio } from "@/components/guias/LiberacoesDia";
 import { useClinica } from "@/hooks/use-clinica";
-import { STATUS_AGENDA, barraEsp, corEsp, fmtHora } from "@/lib/ui-helpers";
+import { STATUS_AGENDA, barraEsp, fmtHora, type StatusAgenda } from "@/lib/ui-helpers";
+import { ClipeAtestado } from "@/components/agenda/AnexoAtestado";
 import { PageHeader } from "@/components/PageHeader";
 import { AgendamentoDialog, type NovoAgendamentoPadrao } from "@/components/agenda/AgendamentoDialog";
 import { AgendamentoDetalhe } from "@/components/agenda/AgendamentoDetalhe";
@@ -145,14 +146,16 @@ function AgendaPage() {
         </Link>
       )}
 
+      <Legenda />
+
       {/* Mobile: lista */}
       <div className="space-y-2 md:hidden">
         {filtrados.length === 0 && <Vazio />}
         {filtrados.map((i) => (
+          <div key={i.id} className="relative">
           <button
-            key={i.id}
             onClick={() => setDetalhe(i)}
-            className={cn("flex w-full items-center gap-3 rounded-xl border border-l-4 bg-card p-3 text-left", barraEsp(i.especialidade?.cor), i.status === "cancelado" && "opacity-50")}
+            className={cn("flex w-full items-center gap-3 rounded-xl border border-l-4 p-3 text-left", STATUS_AGENDA[i.status].bloco, barraEsp(i.especialidade?.cor))}
           >
             <div className="w-14 shrink-0 text-center">
               <div className="font-display text-lg font-semibold">{fmtHora(i.inicio)}</div>
@@ -168,10 +171,12 @@ function AgendaPage() {
               </div>
               <div className="truncate text-xs text-muted-foreground">{i.sala?.nome}</div>
             </div>
-            <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium", STATUS_AGENDA[i.status].className)}>
-              {STATUS_AGENDA[i.status].label}
+            <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium", STATUS_AGENDA[i.status].className, i.status === "falta_justificada" && !!i.documentos?.length && "mr-7")}>
+              {STATUS_AGENDA[i.status].curto}
             </span>
           </button>
+          {i.status === "falta_justificada" && <ClipeAtestado docs={i.documentos} className="absolute right-2 top-1/2 -translate-y-1/2" />}
+          </div>
         ))}
       </div>
 
@@ -212,26 +217,33 @@ function AgendaPage() {
                   const ini = parseISO(i.inicio);
                   const top = ((ini.getHours() - HORA_INI) * 60 + ini.getMinutes()) * (PX_HORA / 60);
                   const h = Math.max(28, differenceInMinutes(parseISO(i.fim), ini) * (PX_HORA / 60) - 3);
+                  const clipe = i.status === "falta_justificada" && !!i.documentos?.length;
                   return (
-                    <button
-                      key={i.id}
-                      onClick={() => setDetalhe(i)}
-                      className={cn(
-                        "absolute inset-x-1.5 z-10 overflow-hidden rounded-lg border px-2 py-1.5 text-left text-xs shadow-sm transition hover:shadow-md",
-                        corEsp(i.especialidade?.cor),
-                        i.status === "cancelado" && "opacity-40",
-                      )}
-                      style={{ top: top + 1, height: h }}
-                    >
-                      <div className="flex items-center gap-1 truncate font-semibold text-foreground">
-                        <MarcaGuia s={guiaPorItem.get(i.id)} />
-                        {i.paciente?.nome}
-                      </div>
-                      <div className="truncate text-foreground/70">
-                        {fmtHora(i.inicio)} · {i.profissional?.nome}
-                      </div>
-                      {h > 56 && <div className="mt-0.5 truncate">{STATUS_AGENDA[i.status].label}</div>}
-                    </button>
+                    <div key={i.id} className="absolute inset-x-1.5 z-10" style={{ top: top + 1, height: h }}>
+                      <button
+                        onClick={() => setDetalhe(i)}
+                        className={cn(
+                          "size-full overflow-hidden rounded-lg border border-l-4 px-2 py-1.5 text-left text-xs shadow-sm transition hover:shadow-md",
+                          STATUS_AGENDA[i.status].bloco,
+                          barraEsp(i.especialidade?.cor),
+                        )}
+                      >
+                        <div className={cn("flex items-center gap-1 truncate font-semibold text-foreground", clipe && "pr-6")}>
+                          <MarcaGuia s={guiaPorItem.get(i.id)} />
+                          {i.paciente?.nome}
+                        </div>
+                        <div className="truncate text-foreground/70">
+                          {fmtHora(i.inicio)} · {i.especialidade?.nome} · {i.profissional?.nome}
+                        </div>
+                        {h > 56 && (
+                          <div className="mt-0.5 flex items-center gap-1 truncate font-medium text-foreground/80">
+                            <span className={cn("size-1.5 shrink-0 rounded-full", STATUS_AGENDA[i.status].ponto)} />
+                            {STATUS_AGENDA[i.status].label}
+                          </div>
+                        )}
+                      </button>
+                      {clipe && <ClipeAtestado docs={i.documentos} className="absolute right-1 top-1" />}
+                    </div>
                   );
                 })}
             </div>
@@ -261,6 +273,21 @@ function MarcaGuia({ s }: { s: SessaoConvenio | undefined }) {
       </span>
     );
   return null;
+}
+
+const LEGENDA: StatusAgenda[] = ["agendado", "aguardando", "em_atendimento", "finalizado", "falta_justificada", "falta_cobrada"];
+
+function Legenda() {
+  return (
+    <div className="mb-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground" aria-label="Cores dos status">
+      {LEGENDA.map((s) => (
+        <span key={s} className="inline-flex items-center gap-1.5">
+          <span className={cn("size-2.5 rounded-full", STATUS_AGENDA[s].ponto)} />
+          {s === "falta_justificada" ? "Faltas não cobradas" : STATUS_AGENDA[s].curto}
+        </span>
+      ))}
+    </div>
+  );
 }
 
 function Vazio() {

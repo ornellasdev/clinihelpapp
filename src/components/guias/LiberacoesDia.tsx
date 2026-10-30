@@ -2,7 +2,7 @@ import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-quer
 import { useMemo, useState } from "react";
 import { addDays, format, parseISO, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { AlertTriangle, BellRing, CheckCircle2, ChevronLeft, ChevronRight, Clock, Loader2 } from "lucide-react";
+import { AlertTriangle, BellRing, CheckCircle2, ChevronLeft, ChevronRight, Clock, Loader2, UserCheck } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { agendaQuery, conveniosQuery, guiasQuery, guiasUsoQuery, type AgendaItem, type Guia } from "@/lib/queries";
@@ -19,6 +19,7 @@ import {
   usoPorGuia,
   type StatusLiberacao,
 } from "@/lib/guias";
+import { ehFalta } from "@/lib/agenda-status";
 import { STATUS_AGENDA, barraEsp, erroAmigavel, fmtData, fmtHora } from "@/lib/ui-helpers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,7 +45,7 @@ export function useSessoesConvenio(itens: readonly AgendaItem[], data: string, a
     const tipo = new Map(convenios.map((c) => [c.id, c]));
     const sessoes = ativo && convenios.length
       ? itens
-          .filter((i) => i.status !== "cancelado" && exigeGuia(tipo.get(i.paciente?.convenio_id ?? "")?.tipo))
+          .filter((i) => i.status !== "cancelado" && !ehFalta(i.status) && exigeGuia(tipo.get(i.paciente?.convenio_id ?? "")?.tipo))
           .map((i) => {
             const s = { paciente_id: i.paciente_id, especialidade_id: i.especialidade_id, data, guia_id: i.liberacao?.guia_id ?? null };
             const vinculada = s.guia_id ? (guias.find((g) => g.id === s.guia_id) ?? null) : null;
@@ -179,6 +180,18 @@ function SessaoCard({ s, guias, uso, pode, data }: { s: SessaoConvenio; guias: G
     qc.invalidateQueries({ queryKey: ["guias"] });
   }
 
+  /** Criança chegou: vai para "Aguardando atendimento" e entra na fila do profissional. */
+  async function chegou() {
+    if (s.status !== "liberado" && !confirm("A liberação na operadora ainda não foi marcada. Marcar a chegada mesmo assim?")) return;
+    setSalvando("chegada");
+    const { error } = await supabase.from("agendamentos").update({ status: "aguardando" }).eq("id", i.id);
+    setSalvando(null);
+    if (error) return void toast.error(erroAmigavel(error.message));
+    toast.success(`${i.paciente?.nome}: aguardando atendimento.`);
+    qc.invalidateQueries({ queryKey: ["agenda"] });
+    qc.invalidateQueries({ queryKey: ["guias"] });
+  }
+
   const salvarToken = () => {
     const t = token.trim();
     if (t === (i.liberacao?.token ?? "")) return;
@@ -223,6 +236,11 @@ function SessaoCard({ s, guias, uso, pode, data }: { s: SessaoConvenio; guias: G
           <span className="flex shrink-0 items-center gap-1 text-xs text-success">
             <CheckCircle2 className="size-4" /> Liberado
           </span>
+        )}
+        {pode && i.status === "agendado" && (
+          <Button size="sm" variant={s.status === "liberado" ? "default" : "outline"} onClick={chegou} disabled={!!salvando}>
+            {salvando === "chegada" ? <Loader2 className="animate-spin" /> : <UserCheck />} Chegou
+          </Button>
         )}
       </div>
 
