@@ -208,6 +208,7 @@ export type Database = {
           created_at: string
           id: string
           nome: string
+          pagamentos_ativos: boolean
           slug: string
         }
         Insert: {
@@ -215,6 +216,7 @@ export type Database = {
           created_at?: string
           id?: string
           nome: string
+          pagamentos_ativos?: boolean
           slug: string
         }
         Update: {
@@ -222,9 +224,137 @@ export type Database = {
           created_at?: string
           id?: string
           nome?: string
+          pagamentos_ativos?: boolean
           slug?: string
         }
         Relationships: []
+      }
+      cobranca_itens: {
+        Row: {
+          agendamento_id: string
+          clinica_id: string
+          cobranca_id: string
+        }
+        Insert: {
+          agendamento_id: string
+          clinica_id?: string
+          cobranca_id: string
+        }
+        Update: {
+          agendamento_id?: string
+          clinica_id?: string
+          cobranca_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cobranca_itens_agendamento_id_fkey"
+            columns: ["agendamento_id"]
+            isOneToOne: false
+            referencedRelation: "agendamentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cobranca_itens_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cobranca_itens_cobranca_id_fkey"
+            columns: ["cobranca_id"]
+            isOneToOne: false
+            referencedRelation: "cobrancas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cobrancas: {
+        Row: {
+          asaas_cliente_id: string
+          asaas_cobranca_id: string
+          clinica_id: string
+          created_at: string
+          criado_por: string | null
+          descricao: string
+          forma: string
+          id: string
+          paciente_id: string
+          pagador_cpf: string
+          pagador_email: string | null
+          pagador_nome: string
+          pagador_telefone: string | null
+          pago_em: string | null
+          status: string
+          tipo: string
+          token_publico: string
+          updated_at: string
+          valor: number
+          valor_pago: number | null
+          vencimento: string
+        }
+        Insert: {
+          asaas_cliente_id: string
+          asaas_cobranca_id: string
+          clinica_id?: string
+          created_at?: string
+          criado_por?: string | null
+          descricao: string
+          forma: string
+          id?: string
+          paciente_id: string
+          pagador_cpf: string
+          pagador_email?: string | null
+          pagador_nome: string
+          pagador_telefone?: string | null
+          pago_em?: string | null
+          status?: string
+          tipo: string
+          token_publico: string
+          updated_at?: string
+          valor: number
+          valor_pago?: number | null
+          vencimento: string
+        }
+        Update: {
+          asaas_cliente_id?: string
+          asaas_cobranca_id?: string
+          clinica_id?: string
+          created_at?: string
+          criado_por?: string | null
+          descricao?: string
+          forma?: string
+          id?: string
+          paciente_id?: string
+          pagador_cpf?: string
+          pagador_email?: string | null
+          pagador_nome?: string
+          pagador_telefone?: string | null
+          pago_em?: string | null
+          status?: string
+          tipo?: string
+          token_publico?: string
+          updated_at?: string
+          valor?: number
+          valor_pago?: number | null
+          vencimento?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cobrancas_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cobrancas_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "pacientes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       convenio_valores: {
         Row: {
@@ -626,6 +756,50 @@ export type Database = {
             columns: ["convenio_id"]
             isOneToOne: false
             referencedRelation: "convenios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pagamento_contas: {
+        Row: {
+          ambiente: string
+          api_key_cripto: string
+          asaas_conta_id: string
+          asaas_wallet_id: string | null
+          clinica_id: string
+          created_at: string
+          titular_documento: string | null
+          titular_nome: string | null
+          webhook_token_hash: string
+        }
+        Insert: {
+          ambiente: string
+          api_key_cripto: string
+          asaas_conta_id: string
+          asaas_wallet_id?: string | null
+          clinica_id: string
+          created_at?: string
+          titular_documento?: string | null
+          titular_nome?: string | null
+          webhook_token_hash: string
+        }
+        Update: {
+          ambiente?: string
+          api_key_cripto?: string
+          asaas_conta_id?: string
+          asaas_wallet_id?: string | null
+          clinica_id?: string
+          created_at?: string
+          titular_documento?: string | null
+          titular_nome?: string | null
+          webhook_token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagamento_contas_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: true
+            referencedRelation: "clinicas"
             referencedColumns: ["id"]
           },
         ]

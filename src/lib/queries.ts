@@ -227,3 +227,48 @@ export const financeiroQuery = (inicioISO: string, fimISO: string) =>
           .order("inicio"),
       ),
   });
+
+/** Se a clínica já pode gerar cobranças (conta de recebimento ativada pelo suporte CliniHelp). */
+export const recebimentosAtivosQuery = (clinicaId: string) =>
+  queryOptions({
+    queryKey: ["clinica", clinicaId, "recebimentos"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("clinicas").select("pagamentos_ativos").eq("id", clinicaId).maybeSingle();
+      if (error) throw new Error(error.message);
+      return data?.pagamentos_ativos ?? false;
+    },
+  });
+
+/** Cobranças com vencimento no período (RLS: só gestão e financeiro). */
+export const cobrancasQuery = (de: string, ate: string) =>
+  queryOptions({
+    queryKey: ["cobrancas", de, ate],
+    queryFn: async () =>
+      ok(
+        await supabase
+          .from("cobrancas")
+          .select("id, paciente_id, tipo, descricao, valor, vencimento, forma, status, pagador_nome, pagador_telefone, token_publico, pago_em, valor_pago, created_at, paciente:pacientes(nome), itens:cobranca_itens(agendamento_id)")
+          .gte("vencimento", de)
+          .lte("vencimento", ate)
+          .order("vencimento", { ascending: false })
+          .order("created_at", { ascending: false }),
+      ),
+  });
+
+/** Sessões do paciente no período, com valor e se já estão em alguma cobrança. */
+export const sessoesParaCobrarQuery = (pacienteId: string, inicioISO: string, fimISO: string) =>
+  queryOptions({
+    queryKey: ["cobrancas", "sessoes", pacienteId, inicioISO, fimISO],
+    enabled: !!pacienteId,
+    queryFn: async () =>
+      ok(
+        await supabase
+          .from("agendamentos")
+          .select("id, inicio, status, especialidade:especialidades(nome), profissional:profiles(nome), fin:atendimento_financeiro!inner(valor, pagamento_status), itens:cobranca_itens(cobranca:cobrancas(status))")
+          .eq("paciente_id", pacienteId)
+          .neq("status", "cancelado")
+          .gte("inicio", inicioISO)
+          .lt("inicio", fimISO)
+          .order("inicio"),
+      ),
+  });

@@ -9,6 +9,7 @@ import {
   LogOut,
   Menu,
   ShieldAlert,
+  Receipt,
   ScrollText,
   Users,
   UserRoundCog,
@@ -45,12 +46,13 @@ export const Route = createFileRoute("/_authenticated/$clinica")({
   component: ClinicLayout,
 });
 
-type Item = { to: "/$clinica/painel" | "/$clinica/agenda" | "/$clinica/pacientes" | "/$clinica/financeiro" | "/$clinica/equipe" | "/$clinica/salas" | "/$clinica/auditoria"; label: string; icon: LucideIcon; papeis?: Papel[] };
+type Item = { to: "/$clinica/painel" | "/$clinica/agenda" | "/$clinica/pacientes" | "/$clinica/financeiro" | "/$clinica/cobrancas" | "/$clinica/equipe" | "/$clinica/salas" | "/$clinica/auditoria"; label: string; icon: LucideIcon; papeis?: Papel[] };
 const ITENS: Item[] = [
   { to: "/$clinica/painel", label: "Painel", icon: LayoutDashboard },
   { to: "/$clinica/agenda", label: "Agenda", icon: CalendarDays },
   { to: "/$clinica/pacientes", label: "Pacientes", icon: Users },
   { to: "/$clinica/financeiro", label: "Financeiro", icon: Wallet, papeis: ["master", "administrador", "financeiro", "profissional"] },
+  { to: "/$clinica/cobrancas", label: "Cobranças", icon: Receipt, papeis: ["master", "administrador", "financeiro"] },
   { to: "/$clinica/equipe", label: "Equipe", icon: UserRoundCog, papeis: ["master", "administrador"] },
   { to: "/$clinica/salas", label: "Salas", icon: DoorOpen, papeis: ["master", "administrador"] },
   { to: "/$clinica/auditoria", label: "Auditoria", icon: ScrollText, papeis: ["master", "administrador"] },
