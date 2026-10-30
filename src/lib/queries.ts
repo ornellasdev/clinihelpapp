@@ -227,7 +227,7 @@ export const modelosEvolucaoQuery = queryOptions({
 
 // liberacao: só vem preenchida para quem pode ver guias (recepção/gestão/financeiro); para os demais o RLS devolve null.
 const AGENDA_SELECT =
-  "*, liberacao:liberacoes_atendimento(status, token, guia_id), paciente:pacientes(id, nome, convenio_id), profissional:profiles(id, nome), sala:salas(id, nome), especialidade:especialidades(id, nome, cor), documentos:paciente_documentos(id, nome, storage_path, mime_type)";
+  "*, liberacao:liberacoes_atendimento(status, token, guia_id), "*, liberacao:liberacoes_atendimento(status, token, guia_id), paciente:pacientes(id, nome, convenio_id, responsavel_nome, responsavel_telefone, responsavel2_nome, responsavel2_telefone), profissional:profiles(id, nome), sala:salas(id, nome), especialidade:especialidades(id, nome, cor), documentos:paciente_documentos(id, nome, storage_path, mime_type)"; profissional:profiles(id, nome), sala:salas(id, nome), especialidade:especialidades(id, nome, cor), documentos:paciente_documentos(id, nome, storage_path, mime_type)";
 
 async function fetchAgenda(inicioISO: string, fimISO: string) {
   return ok(
