@@ -99,10 +99,13 @@ function FinanceiroPage() {
       />
       <Tabs value={aba} onValueChange={(v) => navigate({ search: (s) => ({ ...s, aba: v === "cobrancas" ? "cobrancas" : undefined }) })}>
         <TabsList className="mb-5 h-auto w-full justify-start overflow-x-auto bg-surface p-1 sm:w-auto">
-          <TabsTrigger value="atendimentos" className="gap-2 px-4 py-2">
-            <Wallet className="size-4" /> Atendimentos e repasses
+          <TabsTrigger value="atendimentos" className="flex-1 gap-2 px-4 py-2 sm:flex-none">
+            <Wallet className="size-4" />
+            <span>
+              Atendimentos<span className="hidden sm:inline"> e repasses</span>
+            </span>
           </TabsTrigger>
-          <TabsTrigger value="cobrancas" className="gap-2 px-4 py-2">
+          <TabsTrigger value="cobrancas" className="flex-1 gap-2 px-4 py-2 sm:flex-none">
             <Receipt className="size-4" /> Cobranças
           </TabsTrigger>
         </TabsList>
