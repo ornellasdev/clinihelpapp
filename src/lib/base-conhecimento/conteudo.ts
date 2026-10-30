@@ -67,7 +67,7 @@ export const ARTIGOS: Artigo[] = [
     blocos: [
       {
         itens: [
-          "Painel — atendimentos de hoje; o terapeuta vê a fila “Aguardando” e “Em atendimento” no topo.",
+          "Painel — atendimentos de hoje; o terapeuta vê a fila “Aguardando” e “Em atendimento” no topo; recepção/gestão/financeiro veem as avaliações iniciais pendentes e os formulários preenchidos.",
           "Agenda — por dia/semana, por sala e por profissional; cores por status.",
           "Pacientes — cadastro, ficha, documentos, plano terapêutico, prontuário e relatório PDF.",
           "Lista de espera — crianças aguardando vaga por especialidade e horário.",
