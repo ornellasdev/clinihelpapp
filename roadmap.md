@@ -58,4 +58,5 @@
 - [x] Etapa 1: banco — vínculos que preservam histórico, exclusão lógica, índices, dados clínicos separados, consentimento LGPD, adendos, auditoria imutável, acesso por papel, views de indicadores
 - [x] Etapa 2: ficha padronizada com validação, dados clínicos só para a equipe terapêutica, prontuário assinado + adendo, links temporários para anexos, saída automática em 15 min
 - [ ] Etapa 2b: levar a mesma validação aos formulários de valores (convênios, cobranças, repasses) e às demais telas que ainda gravam direto
-- [ ] Etapa 3: painel de Segurança, Banco e Auditoria (filtros, pacientes sem termo LGPD, integridade)
+- [x] Etapa 3: painel de Segurança, Banco e Auditoria (filtros, pacientes sem termo LGPD, integridade)
+- [x] Publicar
