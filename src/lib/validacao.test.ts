@@ -75,3 +75,18 @@ describe("arquivos de atestado", () => {
     expect(problemaNoArquivo({ name: "a.pdf", size: 15 * 1024 * 1024 + 1, type: "application/pdf" }, REGRA_ATESTADO)).not.toBeNull();
   });
 });
+
+describe("CID e links temporários", () => {
+  it("CID-10 aceita um ou vários códigos", async () => {
+    const { cidValido } = await import("./validacao");
+    expect(cidValido("F84.0")).toBe(true);
+    expect(cidValido("f84.0, F90.0")).toBe(true);
+    expect(cidValido("TEA")).toBe(false);
+  });
+  it("link de arquivo privado vale de 60 a 300 segundos", async () => {
+    const { validadeLinkTemporario } = await import("./validacao");
+    expect(validadeLinkTemporario(10)).toBe(60);
+    expect(validadeLinkTemporario(120)).toBe(120);
+    expect(validadeLinkTemporario(3600)).toBe(300);
+  });
+});

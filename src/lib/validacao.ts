@@ -94,3 +94,10 @@ export function primeiroErro(issues: readonly { path: readonly PropertyKey[]; me
   const i = issues[0];
   return i ? { campo: String(i.path[0] ?? ""), mensagem: i.message } : null;
 }
+
+/** CID-10: uma ou mais códigos (ex.: F84.0 ou "F84.0, F90.0"), guardados em maiúsculas. */
+export const cidValido = (valor: string) =>
+  /^[A-Z]\d{2}(\.\d{1,2})?(\s*[,;/]\s*[A-Z]\d{2}(\.\d{1,2})?)*$/.test(valor.trim().toUpperCase());
+
+/** Links de arquivos privados valem entre 60 e 300 segundos. */
+export const validadeLinkTemporario = (segundos: number) => Math.min(300, Math.max(60, Math.round(segundos)));
