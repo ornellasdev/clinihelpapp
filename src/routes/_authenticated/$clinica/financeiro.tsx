@@ -5,7 +5,6 @@ import { addMonths, format, parseISO, startOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { z } from "zod";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { cobrancasQuery, convenioValoresQuery, conveniosQuery, equipeQuery, financeiroQuery, meQuery, recebimentosAtivosQuery } from "@/lib/queries";
 import { TabelaConvenios } from "@/components/financeiro/TabelaConvenios";
 import { CobrancasAba, periodoCobrancas } from "@/components/cobrancas/CobrancasAba";
