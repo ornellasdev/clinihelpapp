@@ -2,7 +2,7 @@ import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-quer
 import { useMemo, useState } from "react";
 import { addDays, format, parseISO, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { AlertTriangle, BellRing, CheckCircle2, ChevronLeft, ChevronRight, Clock, Loader2 } from "lucide-react";
+import { AlertTriangle, BellRing, CheckCircle2, ChevronLeft, ChevronRight, Clock, Loader2, UserCheck } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { agendaQuery, conveniosQuery, guiasQuery, guiasUsoQuery, type AgendaItem, type Guia } from "@/lib/queries";
@@ -180,6 +180,18 @@ function SessaoCard({ s, guias, uso, pode, data }: { s: SessaoConvenio; guias: G
     qc.invalidateQueries({ queryKey: ["guias"] });
   }
 
+  /** Criança chegou: vai para "Aguardando atendimento" e entra na fila do profissional. */
+  async function chegou() {
+    if (s.status !== "liberado" && !confirm("A liberação na operadora ainda não foi marcada. Marcar a chegada mesmo assim?")) return;
+    setSalvando("chegada");
+    const { error } = await supabase.from("agendamentos").update({ status: "aguardando" }).eq("id", i.id);
+    setSalvando(null);
+    if (error) return void toast.error(erroAmigavel(error.message));
+    toast.success(`${i.paciente?.nome}: aguardando atendimento.`);
+    qc.invalidateQueries({ queryKey: ["agenda"] });
+    qc.invalidateQueries({ queryKey: ["guias"] });
+  }
+
   const salvarToken = () => {
     const t = token.trim();
     if (t === (i.liberacao?.token ?? "")) return;
@@ -224,6 +236,11 @@ function SessaoCard({ s, guias, uso, pode, data }: { s: SessaoConvenio; guias: G
           <span className="flex shrink-0 items-center gap-1 text-xs text-success">
             <CheckCircle2 className="size-4" /> Liberado
           </span>
+        )}
+        {pode && i.status === "agendado" && (
+          <Button size="sm" variant={s.status === "liberado" ? "default" : "outline"} onClick={chegou} disabled={!!salvando}>
+            {salvando === "chegada" ? <Loader2 className="animate-spin" /> : <UserCheck />} Chegou
+          </Button>
         )}
       </div>
 
