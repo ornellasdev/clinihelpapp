@@ -10,5 +10,7 @@ export const novaCobrancaSchema = z.object({
   vencimento: z.string().refine((s) => vencimentoValido(s, hojeEmSaoPaulo()), "O vencimento precisa ser de hoje até 1 ano à frente."),
   descricao: z.string().trim().min(3, "Escreva a descrição da cobrança.").max(500, "Descrição muito longa (máx. 500 caracteres)."),
   forma: z.enum(["pix", "boleto", "cartao", "todas"], "Escolha a forma de pagamento."),
+  /** Cobrança da avaliação inicial do paciente novo (libera o formulário da família quando paga). */
+  avaliacaoInicial: z.boolean().optional(),
 });
 export type NovaCobranca = z.input<typeof novaCobrancaSchema>;

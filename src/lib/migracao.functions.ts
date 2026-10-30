@@ -62,8 +62,11 @@ export const importarDados = createServerFn({ method: "POST" })
         });
       ignorados = linhas.length - novos.length;
       for (const parte of lote(novos)) {
-        const { error } = await supabaseAdmin.from("pacientes").insert(parte as any);
+        const { data: criados, error } = await supabaseAdmin.from("pacientes").insert(parte as any).select("id");
         if (error) throw new Error(`Falha ao gravar pacientes (${inseridos} já gravados): ${error.message}`);
+        // Pacientes migrados já são da clínica: não passam pela avaliação inicial de paciente novo.
+        const ids = (criados ?? []).map((c: { id: string }) => c.id);
+        if (ids.length) await supabaseAdmin.from("avaliacoes_iniciais").update({ status: "dispensada" }).in("paciente_id", ids);
         inseridos += parte.length;
       }
     }

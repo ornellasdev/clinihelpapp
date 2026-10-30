@@ -133,7 +133,7 @@ export const pacientesQuery = (busca: string) =>
     queryFn: async () => {
       let q = supabase
         .from("pacientes")
-        .select("id, nome, data_nascimento, responsavel_nome, responsavel_telefone, ativo, convenio")
+        .select("id, nome, data_nascimento, responsavel_nome, responsavel_telefone, ativo, convenio, avaliacao:avaliacoes_iniciais(status)")
         .order("nome")
         .limit(500);
       if (busca.trim()) q = q.ilike("nome", `%${busca.trim()}%`);
@@ -508,3 +508,53 @@ export const faturasLiminarQuery = queryOptions({
     ),
 });
 export type FaturaLiminar = Awaited<ReturnType<NonNullable<typeof faturasLiminarQuery.queryFn>>>[number];
+
+/** Avaliação inicial do paciente (a cobrança ligada só aparece para gestão/financeiro, pelo RLS). */
+export const avaliacaoInicialQuery = (pacienteId: string) =>
+  queryOptions({
+    queryKey: ["avaliacao-inicial", pacienteId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("avaliacoes_iniciais")
+        .select("*, cobranca:cobrancas(id, status, valor, vencimento, token_publico)")
+        .eq("paciente_id", pacienteId)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      return data;
+    },
+  });
+
+/** Avaliações em andamento ou recém-concluídas, para o aviso do Painel. */
+export const avaliacoesAbertasQuery = queryOptions({
+  queryKey: ["avaliacao-inicial", "abertas"],
+  queryFn: async () => {
+    const desde = new Date(Date.now() - 60 * 86_400_000).toISOString();
+    return ok(
+      await supabase
+        .from("avaliacoes_iniciais")
+        .select("paciente_id, status, preenchido_em, formulario_liberado_em, created_at, paciente:pacientes(nome, ativo, agendamentos(count))")
+        .or(`status.in.(aguardando_pagamento,aguardando_formulario),and(status.eq.concluida,preenchido_em.gte.${desde})`)
+        .order("created_at", { ascending: false })
+        .limit(100),
+    );
+  },
+});
+
+/** Entrevista inicial preenchida pela família (só quem vê dados clínicos). */
+export const anamneseQuery = (pacienteId: string) =>
+  queryOptions({
+    queryKey: ["anamnese", pacienteId],
+    queryFn: async () => {
+      const [a, p] = await Promise.all([
+        supabase.from("anamneses").select("*").eq("paciente_id", pacienteId).maybeSingle(),
+        supabase
+          .from("anamnese_pareceres")
+          .select("*, especialidade:especialidades(nome)")
+          .eq("paciente_id", pacienteId)
+          .order("created_at"),
+      ]);
+      if (a.error) throw new Error(a.error.message);
+      if (p.error) throw new Error(p.error.message);
+      return { anamnese: a.data, pareceres: p.data ?? [] };
+    },
+  });

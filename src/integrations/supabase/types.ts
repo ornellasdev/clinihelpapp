@@ -116,6 +116,130 @@ export type Database = {
           },
         ]
       }
+      anamnese_pareceres: {
+        Row: {
+          clinica_id: string
+          condutas: string
+          created_at: string
+          encaminhamentos: string
+          especialidade_id: string
+          id: string
+          paciente_id: string
+          profissional_id: string
+          profissional_nome: string | null
+          profissional_registro: string | null
+        }
+        Insert: {
+          clinica_id?: string
+          condutas: string
+          created_at?: string
+          encaminhamentos: string
+          especialidade_id: string
+          id?: string
+          paciente_id: string
+          profissional_id?: string
+          profissional_nome?: string | null
+          profissional_registro?: string | null
+        }
+        Update: {
+          clinica_id?: string
+          condutas?: string
+          created_at?: string
+          encaminhamentos?: string
+          especialidade_id?: string
+          id?: string
+          paciente_id?: string
+          profissional_id?: string
+          profissional_nome?: string | null
+          profissional_registro?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anamnese_pareceres_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "anamnese_pareceres_especialidade_id_fkey"
+            columns: ["especialidade_id"]
+            isOneToOne: false
+            referencedRelation: "especialidades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "anamnese_pareceres_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "anamneses"
+            referencedColumns: ["paciente_id"]
+          },
+        ]
+      }
+      anamneses: {
+        Row: {
+          clinica_id: string
+          comprovante_hash: string
+          created_at: string
+          ip: string | null
+          lgpd_texto_hash: string
+          paciente_id: string
+          preenchido_por: string
+          preenchido_por_email: string | null
+          preenchido_por_nome: string
+          preenchido_por_parentesco: string
+          respostas: Json
+          user_agent: string | null
+          versao: number
+        }
+        Insert: {
+          clinica_id: string
+          comprovante_hash: string
+          created_at?: string
+          ip?: string | null
+          lgpd_texto_hash: string
+          paciente_id: string
+          preenchido_por: string
+          preenchido_por_email?: string | null
+          preenchido_por_nome: string
+          preenchido_por_parentesco: string
+          respostas: Json
+          user_agent?: string | null
+          versao: number
+        }
+        Update: {
+          clinica_id?: string
+          comprovante_hash?: string
+          created_at?: string
+          ip?: string | null
+          lgpd_texto_hash?: string
+          paciente_id?: string
+          preenchido_por?: string
+          preenchido_por_email?: string | null
+          preenchido_por_nome?: string
+          preenchido_por_parentesco?: string
+          respostas?: Json
+          user_agent?: string | null
+          versao?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anamneses_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "anamneses_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: true
+            referencedRelation: "avaliacoes_iniciais"
+            referencedColumns: ["paciente_id"]
+          },
+        ]
+      }
       atendimento_financeiro: {
         Row: {
           agendamento_id: string
@@ -222,6 +346,76 @@ export type Database = {
             columns: ["clinica_id"]
             isOneToOne: false
             referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      avaliacoes_iniciais: {
+        Row: {
+          clinica_id: string
+          cobranca_id: string | null
+          created_at: string
+          formulario_liberado_em: string | null
+          paciente_id: string
+          pagamento_confirmado_em: string | null
+          pagamento_confirmado_por: string | null
+          pagamento_observacao: string | null
+          pagamento_origem: string | null
+          preenchido_em: string | null
+          preenchido_por_nome: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          clinica_id?: string
+          cobranca_id?: string | null
+          created_at?: string
+          formulario_liberado_em?: string | null
+          paciente_id: string
+          pagamento_confirmado_em?: string | null
+          pagamento_confirmado_por?: string | null
+          pagamento_observacao?: string | null
+          pagamento_origem?: string | null
+          preenchido_em?: string | null
+          preenchido_por_nome?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          clinica_id?: string
+          cobranca_id?: string | null
+          created_at?: string
+          formulario_liberado_em?: string | null
+          paciente_id?: string
+          pagamento_confirmado_em?: string | null
+          pagamento_confirmado_por?: string | null
+          pagamento_observacao?: string | null
+          pagamento_origem?: string | null
+          preenchido_em?: string | null
+          preenchido_por_nome?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avaliacoes_iniciais_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "avaliacoes_iniciais_cobranca_id_fkey"
+            columns: ["cobranca_id"]
+            isOneToOne: false
+            referencedRelation: "cobrancas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "avaliacoes_iniciais_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: true
+            referencedRelation: "pacientes"
             referencedColumns: ["id"]
           },
         ]
@@ -2352,6 +2546,10 @@ export type Database = {
         Args: { _esp: string; _user_id: string }
         Returns: boolean
       }
+      confirmar_pagamento_avaliacao: {
+        Args: { _observacao: string; _paciente: string }
+        Returns: undefined
+      }
       dev_entrar_clinica: { Args: { _slug: string }; Returns: string }
       documento_clinico: { Args: { _categoria: string }; Returns: boolean }
       eh_dev: { Args: never; Returns: boolean }
@@ -2365,6 +2563,18 @@ export type Database = {
           inicio: string
           profissional: string
           sala: string
+          status: string
+        }[]
+      }
+      familia_avaliacao: {
+        Args: { _paciente: string }
+        Returns: {
+          clinica_nome: string
+          ficha: Json
+          formulario_liberado_em: string
+          preenchido_em: string
+          preenchido_por_nome: string
+          respostas: Json
           status: string
         }[]
       }
@@ -2456,6 +2666,22 @@ export type Database = {
         Returns: undefined
       }
       registrar_acesso: { Args: { _acao: string }; Returns: undefined }
+      registrar_anamnese: {
+        Args: {
+          _comprovante: string
+          _email: string
+          _ip: string
+          _lgpd_hash: string
+          _nome: string
+          _paciente: string
+          _parentesco: string
+          _respostas: Json
+          _user_agent: string
+          _usuario: string
+          _versao: number
+        }
+        Returns: string
+      }
       registrar_evolucao: {
         Args: {
           _agendamento?: string
@@ -2470,6 +2696,10 @@ export type Database = {
       responsavel_de: { Args: { _paciente: string }; Returns: boolean }
       tem_especialidade: { Args: { _user_id: string }; Returns: boolean }
       ve_cadastro_completo: { Args: { _uid: string }; Returns: boolean }
+      vincular_cobranca_avaliacao: {
+        Args: { _cobranca: string; _paciente: string }
+        Returns: undefined
+      }
     }
     Enums: {
       agendamento_status:

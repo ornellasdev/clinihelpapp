@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Suspense, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { CalendarDays, CheckCircle2, FileDown, FileSignature, Loader2, LogOut, Receipt, Wallet } from "lucide-react";
+import { CalendarDays, CheckCircle2, ClipboardList, FileDown, FileSignature, Loader2, LogOut, Receipt, Wallet } from "lucide-react";
+import { PREFIXO_RASCUNHO } from "@/lib/anamnese";
 import { supabase } from "@/integrations/supabase/client";
 import { baixarRelatorioFamilia, comprovanteTermoFamilia } from "@/lib/familia.functions";
 import { ROTULO_DECISAO, type Decisao } from "@/lib/familia";
@@ -27,6 +28,11 @@ const cobrancasQ = (p: string) =>
   queryOptions({ queryKey: ["familia", p, "cobrancas"], queryFn: async () => ok(await supabase.rpc("familia_cobrancas", { _paciente: p })) });
 const relatoriosQ = (p: string) =>
   queryOptions({ queryKey: ["familia", p, "relatorios"], queryFn: async () => ok(await supabase.rpc("familia_relatorios", { _paciente: p })) });
+const avaliacaoQ = (p: string) =>
+  queryOptions({
+    queryKey: ["familia", p, "avaliacao"],
+    queryFn: async () => (ok(await supabase.rpc("familia_avaliacao", { _paciente: p })) as { status: string; preenchido_em: string | null }[])[0] ?? null,
+  });
 const termosQ = (p: string) => queryOptions({ queryKey: ["familia", p, "termos"], queryFn: async () => ok(await supabase.rpc("familia_termos", { _paciente: p })) });
 
 const ABAS = ["agenda", "pagamentos", "relatorios", "termos"] as const;
@@ -53,6 +59,8 @@ function PortalFamilia() {
   async function sair() {
     await qc.cancelQueries();
     qc.clear();
+    // Rascunhos do formulário de avaliação não ficam no aparelho depois de sair.
+    Object.keys(localStorage).filter((k) => k.startsWith(PREFIXO_RASCUNHO)).forEach((k) => localStorage.removeItem(k));
     await supabase.auth.signOut();
     navigate({ to: "/familia", replace: true });
   }
@@ -113,6 +121,7 @@ function PortalFamilia() {
             <FileSignature className="size-4 shrink-0" /> {atual.termos_pendentes} termo(s) aguardando sua assinatura
           </button>
         )}
+        <AvisoAvaliacao pacienteId={atual.id} />
       </div>
 
       <Tabs value={aba} onValueChange={(v) => navigate({ search: { crianca: atual.id, aba: v as (typeof ABAS)[number] } })}>
@@ -338,4 +347,41 @@ function TermosFamilia({ pacienteId }: { pacienteId: string }) {
       {assinar && <AssinarTermoDialog termo={assinar} pacienteId={pacienteId} onClose={() => setAssinar(null)} />}
     </div>
   );
+}
+
+/** Etapa da avaliação inicial: pagar → preencher o formulário → clínica agenda. */
+function AvisoAvaliacao({ pacienteId }: { pacienteId: string }) {
+  const navigate = useNavigate({ from: Route.fullPath });
+  const { data: av } = useQuery(avaliacaoQ(pacienteId));
+  if (!av) return null;
+  if (av.status === "aguardando_pagamento")
+    return (
+      <button
+        onClick={() => navigate({ search: { crianca: pacienteId, aba: "pagamentos" } })}
+        className="mt-3 flex w-full items-center gap-2 rounded-xl bg-warning/15 px-3 py-2 text-left text-sm font-medium text-warning-foreground"
+      >
+        <Wallet className="size-4 shrink-0" /> Pague a avaliação inicial para liberar o formulário de entrevista.
+      </button>
+    );
+  if (av.status === "aguardando_formulario")
+    return (
+      <div className="mt-3 rounded-xl border border-primary/40 bg-primary/5 p-3">
+        <p className="text-sm">
+          <span className="font-medium">Pagamento confirmado!</span> Falta preencher o formulário de avaliação inicial. Depois dele, a clínica agenda a
+          primeira consulta.
+        </p>
+        <Button asChild className="mt-3 w-full">
+          <Link to="/familia/avaliacao" search={{ crianca: pacienteId }}>
+            <ClipboardList /> Preencher formulário de avaliação
+          </Link>
+        </Button>
+      </div>
+    );
+  if (av.status === "concluida")
+    return (
+      <p className="mt-3 flex items-center gap-1.5 text-sm text-success">
+        <CheckCircle2 className="size-4" /> Formulário de avaliação enviado{av.preenchido_em ? ` em ${fmtData(av.preenchido_em)}` : ""}.
+      </p>
+    );
+  return null;
 }

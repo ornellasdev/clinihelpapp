@@ -7,6 +7,8 @@ import { pacientesQuery } from "@/lib/queries";
 import { useMe } from "@/hooks/use-me";
 import { podeEditarPaciente } from "@/lib/permissions";
 import { idade, iniciais } from "@/lib/ui-helpers";
+import { STATUS_AVALIACAO, bloqueiaAgendamento, type StatusAvaliacao } from "@/lib/avaliacao-inicial";
+import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,6 +73,11 @@ function PacientesPage() {
                 <div className="flex items-center gap-2">
                   <span className="truncate font-semibold">{p.nome}</span>
                   {!p.ativo && <span className="rounded bg-muted px-1.5 text-[10px] uppercase text-muted-foreground">inativo</span>}
+                  {bloqueiaAgendamento(p.avaliacao?.status as StatusAvaliacao | undefined) && (
+                    <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium", STATUS_AVALIACAO[p.avaliacao!.status as StatusAvaliacao].className)}>
+                      {STATUS_AVALIACAO[p.avaliacao!.status as StatusAvaliacao].label}
+                    </span>
+                  )}
                 </div>
                 <div className="text-sm text-muted-foreground">
                   {[idade(p.data_nascimento), p.convenio].filter(Boolean).join(" · ") || "—"}

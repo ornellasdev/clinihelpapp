@@ -11,6 +11,7 @@ import {
   tipoPorSessoes,
   type StatusCobranca,
 } from "./cobrancas";
+import { motivoSemCobrancaAvaliacao, type StatusAvaliacao } from "./avaliacao-inicial";
 
 async function exigirFinanceiro(supabase: any, userId: string): Promise<string> {
   const [{ data: gestor }, { data: fin }, { data: clinica }] = await Promise.all([
@@ -45,6 +46,16 @@ export const criarCobranca = createServerFn({ method: "POST" })
     if (!cpfValido(pagador.cpf)) throw new Error("Cadastre um CPF válido do responsável financeiro do paciente.");
 
     const sessoes = [...new Set(data.sessoes)];
+    if (data.avaliacaoInicial) {
+      if (sessoes.length) throw new Error("A cobrança da avaliação inicial não leva sessões.");
+      const { data: av } = await supabase
+        .from("avaliacoes_iniciais")
+        .select("status, cobranca:cobrancas(status)")
+        .eq("paciente_id", data.pacienteId)
+        .maybeSingle();
+      const motivo = motivoSemCobrancaAvaliacao(av?.status as StatusAvaliacao | undefined, (av?.cobranca?.status ?? null) as StatusCobranca | null);
+      if (motivo) throw new Error(motivo);
+    }
     if (sessoes.length) {
       const { data: ags } = await supabase
         .from("agendamentos")
@@ -120,6 +131,13 @@ export const criarCobranca = createServerFn({ method: "POST" })
         .from("cobranca_itens")
         .insert(sessoes.map((agendamento_id) => ({ cobranca_id: id, agendamento_id, clinica_id: clinicaId })));
       if (iErr) console.error("Falha ao vincular sessões à cobrança:", iErr.message);
+    }
+    if (data.avaliacaoInicial) {
+      const { error: vErr } = await supabase.rpc("vincular_cobranca_avaliacao", { _paciente: data.pacienteId, _cobranca: id });
+      if (vErr) {
+        console.error("Falha ao ligar a cobrança à avaliação inicial:", vErr.message);
+        throw new Error("A cobrança foi gerada, mas não ficou ligada à avaliação inicial. Cancele-a e gere de novo.");
+      }
     }
     return { id };
   });

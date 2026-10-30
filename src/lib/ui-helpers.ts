@@ -59,6 +59,10 @@ export function iniciais(nome: string) {
 }
 
 export function erroAmigavel(msg: string) {
+  if (msg.includes("avaliacao_inicial_pendente"))
+    return msg.includes("formulário")
+      ? "Primeira consulta bloqueada: a família ainda não preencheu o formulário de avaliação."
+      : "Primeira consulta bloqueada: o pagamento da avaliação inicial ainda não foi confirmado.";
   if (msg.includes("sala_sem_conflito")) return "Esta sala já está ocupada nesse horário.";
   if (msg.includes("profissional_sem_conflito")) return "O profissional já tem atendimento nesse horário.";
   if (msg.includes("row-level security")) return "Seu perfil não tem permissão para esta ação.";

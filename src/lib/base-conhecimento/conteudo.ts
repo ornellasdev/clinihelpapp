@@ -67,7 +67,7 @@ export const ARTIGOS: Artigo[] = [
     blocos: [
       {
         itens: [
-          "Painel — atendimentos de hoje; o terapeuta vê a fila “Aguardando” e “Em atendimento” no topo.",
+          "Painel — atendimentos de hoje; o terapeuta vê a fila “Aguardando” e “Em atendimento” no topo; recepção/gestão/financeiro veem as avaliações iniciais pendentes e os formulários preenchidos.",
           "Agenda — por dia/semana, por sala e por profissional; cores por status.",
           "Pacientes — cadastro, ficha, documentos, plano terapêutico, prontuário e relatório PDF.",
           "Lista de espera — crianças aguardando vaga por especialidade e horário.",
@@ -225,8 +225,47 @@ export const ARTIGOS: Artigo[] = [
           "Convênio/plano do paciente define o valor da sessão (recepção escolhe o plano sem ver o preço).",
           "Dados clínicos (diagnóstico, CID, alergias, medicação) ficam em área separada: só Master e terapeutas do paciente.",
           "Documentos: anexos privados; documentos clínicos seguem a mesma regra dos dados clínicos.",
+          "Paciente novo passa pela Avaliação inicial (pagamento + formulário dos pais) antes da 1ª consulta — ver artigo próprio.",
         ],
       },
+    ],
+    atualizadoEm: "2026-10-30",
+  },
+  {
+    id: "avaliacao-inicial",
+    categoria: "Rotina da clínica",
+    titulo: "Avaliação inicial e formulário de entrevista (anamnese)",
+    resumo: "Paciente novo só agenda a 1ª consulta depois de pagar a avaliação e de a família preencher o formulário.",
+    quemUsa: "Recepção, financeiro, gestão, profissionais e pais",
+    onde: "Ficha do paciente (quadro Avaliação inicial e aba Avaliação inicial), Painel e Área da família",
+    blocos: [
+      {
+        titulo: "Fluxo",
+        itens: [
+          "Ao cadastrar um paciente novo, a avaliação nasce “Aguardando pagamento”. A agenda recusa qualquer agendamento desse paciente (regra do banco, vale para todos os perfis).",
+          "Financeiro/gestão gera a “Cobrança da avaliação” (valor da sessão do convênio do paciente, editável) ou confirma “Pagamento recebido na clínica” com descrição.",
+          "Pagamento identificado (aviso automático do Asaas ou confirmação manual) → “Aguardando formulário”: o formulário aparece na Área da família.",
+          "A família responde as 17 partes (identificação, responsáveis, gestação, alimentação, desenvolvimento, comunicação, comportamento, sensorial, autonomia, rotina, histórico clínico e terapêutico, tecnologia assistiva, rede de apoio, dados administrativos e prioridades). Tudo obrigatório, salvo CPF da criança e poucos campos marcados como opcionais.",
+          "No envio aparece o aviso da LGPD: o responsável declara a veracidade, confirma nome e parentesco e aceita o tratamento dos dados. Fica gravado com data/hora, aparelho, IP e um código de comprovante.",
+          "Formulário enviado → “Pronto para agendar”; o Painel avisa recepção, gestão e financeiro.",
+        ],
+      },
+      {
+        titulo: "Regras",
+        itens: [
+          "Pacientes antigos (cadastrados antes desta regra) e os importados pela Migração não passam pela avaliação.",
+          "Se a cobrança for estornada antes de a família enviar o formulário, a avaliação volta para “Aguardando pagamento”.",
+          "Formulário e parecer do profissional não podem ser alterados nem apagados. Respostas: só master e profissionais do paciente; auditoria desses registros só para o master.",
+          "Os aparelhos dos pais guardam um rascunho enquanto preenchem; o rascunho é apagado ao enviar ou ao tocar em Sair.",
+          "PDF da entrevista (com parecer e assinaturas eletrônicas) é gerado na aba Avaliação inicial.",
+          "Aviso aos pais: por enquanto pelo botão “Avisar pelo WhatsApp” (mensagem pronta com link e instruções). E-mails automáticos dependem de a clínica ter um domínio de e-mail próprio configurado.",
+        ],
+      },
+    ],
+    perguntas: [
+      { p: "A recepção não consegue agendar um paciente novo.", r: "Abrir a ficha: o quadro Avaliação inicial mostra o que falta (pagamento ou formulário). Só libera depois dos dois." },
+      { p: "A família pagou, mas o formulário não apareceu.", r: "Conferir se a cobrança está “Pago” (Financeiro › Cobranças, botão de verificar). Se pagou por fora, usar “Pagamento recebido na clínica”." },
+      { p: "O pai preencheu errado.", r: "O formulário não pode ser editado. O profissional registra a correção no parecer ou no prontuário." },
     ],
     atualizadoEm: "2026-10-30",
   },
@@ -427,6 +466,7 @@ export const ARTIGOS: Artigo[] = [
           "Vê só as próprias crianças e só informações próprias para os pais.",
           "Termos (tratamento e uso de imagem) são assinados com o dedo + nome e CPF; guarda data/hora, aparelho e cópia do texto.",
           "Relatórios aparecem quando a clínica gera o PDF e clica “Liberar para os responsáveis”.",
+          "Formulário de avaliação inicial: aparece depois do pagamento da avaliação; botão “Preencher formulário de avaliação” no topo da criança.",
         ],
       },
     ],
@@ -550,6 +590,7 @@ export const ARTIGOS: Artigo[] = [
 ];
 
 export const HISTORICO: { data: string; texto: string }[] = [
+  { data: "2026-10-30", texto: "Avaliação inicial: paciente novo só agenda após pagar a avaliação e a família enviar o formulário de entrevista (com aviso LGPD)." },
   { data: "2026-10-30", texto: "Agenda: legenda passa a dizer “Faltas justificadas” (cinza) e “Faltas não justificadas” (vermelho)." },
   { data: "2026-10-30", texto: "Aba Migração no /dev: importação de convênios e pacientes por planilha." },
   { data: "2026-10-30", texto: "Base de conhecimento criada no painel do desenvolvedor." },

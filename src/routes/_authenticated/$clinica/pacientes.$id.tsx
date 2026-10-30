@@ -6,7 +6,10 @@ import { format } from "date-fns";
 import { ArrowLeft, CalendarPlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { agendaPacienteQuery, conveniosQuery, pacienteQuery } from "@/lib/queries";
+import { agendaPacienteQuery, avaliacaoInicialQuery, conveniosQuery, pacienteQuery } from "@/lib/queries";
+import { bloqueiaAgendamento, STATUS_AVALIACAO, type StatusAvaliacao } from "@/lib/avaliacao-inicial";
+import { AvaliacaoInicialCard } from "@/components/avaliacao/AvaliacaoInicialCard";
+import { AnamneseTab } from "@/components/avaliacao/AnamneseTab";
 import { useMe } from "@/hooks/use-me";
 import { podeAgendar, podeEditarPaciente, podeVerDadosClinicos } from "@/lib/permissions";
 import { dadosClinicosQuery } from "@/services/pacientes";
@@ -26,7 +29,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
-const ABAS = ["prontuario", "plano", "cadastro", "documentos", "familia", "atendimentos"] as const;
+const ABAS = ["prontuario", "plano", "anamnese", "cadastro", "documentos", "familia", "atendimentos"] as const;
 
 export const Route = createFileRoute("/_authenticated/$clinica/pacientes/$id")({
   validateSearch: z.object({
@@ -37,6 +40,7 @@ export const Route = createFileRoute("/_authenticated/$clinica/pacientes/$id")({
     const [paciente] = await Promise.all([
       context.queryClient.ensureQueryData(pacienteQuery(params.id)),
       context.queryClient.ensureQueryData(conveniosQuery),
+      context.queryClient.ensureQueryData(avaliacaoInicialQuery(params.id)),
     ]);
     return paciente;
   },
@@ -60,6 +64,8 @@ function PacientePage() {
   const veClinico = podeVerDadosClinicos(me.papeis, me.especialidades);
   const { data: clinico } = useQuery({ ...dadosClinicosQuery(id), enabled: veClinico });
   const atualizar = useAtualizarPaciente(id);
+  const { data: avaliacao } = useSuspenseQuery(avaliacaoInicialQuery(id));
+  const bloqueado = bloqueiaAgendamento(avaliacao?.status as StatusAvaliacao | undefined);
   const [agendar, setAgendar] = useState(false);
   const aba = search.aba ?? "prontuario";
 
@@ -92,16 +98,24 @@ function PacientePage() {
           </div>
         </div>
         {podeAgendar(me.papeis) && (
-          <Button variant="secondary" onClick={() => setAgendar(true)}>
+          <Button
+            variant="secondary"
+            onClick={() => setAgendar(true)}
+            disabled={bloqueado}
+            title={bloqueado ? STATUS_AVALIACAO[avaliacao!.status as StatusAvaliacao].descricao : undefined}
+          >
             <CalendarPlus /> Agendar
           </Button>
         )}
       </div>
 
+      <AvaliacaoInicialCard paciente={p} onVerFormulario={() => navigate({ search: { aba: "anamnese" } })} />
+
       <Tabs value={aba} onValueChange={(v) => navigate({ search: { aba: v as (typeof ABAS)[number] } })}>
         <TabsList className="mb-5 h-auto w-full justify-start overflow-x-auto bg-surface p-1 sm:w-auto">
           <TabsTrigger value="prontuario" className="px-4 py-2">Prontuário</TabsTrigger>
           <TabsTrigger value="plano" className="px-4 py-2">Plano terapêutico</TabsTrigger>
+          {veClinico && avaliacao?.status === "concluida" && <TabsTrigger value="anamnese" className="px-4 py-2">Avaliação inicial</TabsTrigger>}
           <TabsTrigger value="cadastro" className="px-4 py-2">Cadastro</TabsTrigger>
           <TabsTrigger value="documentos" className="px-4 py-2">Documentos</TabsTrigger>
           <TabsTrigger value="familia" className="px-4 py-2">Família</TabsTrigger>
@@ -118,6 +132,13 @@ function PacientePage() {
             <PlanoTerapeuticoTab pacienteId={id} />
           </Suspense>
         </TabsContent>
+        {veClinico && (
+          <TabsContent value="anamnese">
+            <Suspense fallback={<Carregando />}>
+              <AnamneseTab pacienteId={id} pacienteNome={p.nome} />
+            </Suspense>
+          </TabsContent>
+        )}
         <TabsContent value="cadastro" className="space-y-5">
           <ConsentimentoLgpd paciente={p} />
           {veClinico && (

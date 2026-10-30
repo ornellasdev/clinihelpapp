@@ -535,6 +535,65 @@ export const MODULOS: Modulo[] = [
     ],
   },
 
+  {
+    id: "avaliacao-inicial",
+    versao: 1,
+    titulo: "Avaliação inicial do paciente novo",
+    resumo: "Pagamento da avaliação, formulário de entrevista dos pais e liberação da 1ª consulta.",
+    categoria: "Recepção",
+    minutos: 6,
+    papeis: ["recepcao", "financeiro", "profissional", "master", "administrador"],
+    secoes: [
+      {
+        titulo: "Por que existe",
+        texto: [
+          "Todo paciente cadastrado a partir de agora passa pela avaliação inicial: a família paga o valor de uma sessão normal (garantia de que não vai faltar) e preenche o formulário de entrevista inicial (anamnese).",
+          "Enquanto o pagamento ou o formulário estiverem pendentes, ninguém consegue agendar a primeira consulta — nem recepção, nem administrador. O bloqueio é do sistema, não dá para contornar.",
+        ],
+        atencao: "Pacientes que já estavam cadastrados antes desta regra, e os trazidos por migração, agendam normalmente.",
+      },
+      {
+        titulo: "Passo a passo",
+        itens: [
+          "1. Recepção cadastra o paciente. Na ficha aparece o quadro “Avaliação inicial — Aguardando pagamento”.",
+          "2. Financeiro (ou gestão) toca em “Gerar cobrança da avaliação”: o valor vem da tabela do convênio do paciente. Se a família pagou na clínica, use “Pagamento recebido na clínica” e descreva como foi pago.",
+          "3. Quando o pagamento é identificado, o formulário é liberado na Área da família. Use “Avisar pelo WhatsApp” para mandar o link e as instruções de acesso.",
+          "4. Os pais respondem todas as perguntas e confirmam a declaração de veracidade e o aviso da LGPD.",
+          "5. O Painel mostra “Formulários preenchidos — podem agendar”. A recepção agenda a primeira consulta.",
+        ],
+      },
+      {
+        titulo: "Quem vê o formulário",
+        itens: [
+          "As respostas são dados de saúde: só o master e os profissionais do paciente leem, na aba “Avaliação inicial” da ficha.",
+          "Recepção, administrador e financeiro veem apenas a situação (pagamento / formulário / pronto para agendar).",
+          "O profissional registra o parecer (encaminhamentos e condutas iniciais), que fica assinado com o nome e o registro dele e não pode ser alterado.",
+          "Nem o formulário nem o parecer podem ser alterados depois de enviados.",
+        ],
+      },
+    ],
+    questoes: [
+      {
+        pergunta: "Um paciente novo foi cadastrado hoje. Quando a primeira consulta pode ser agendada?",
+        opcoes: ["Logo após o cadastro", "Depois do pagamento da avaliação e do formulário preenchido pela família", "Só depois de assinar o termo de imagem", "Quando o administrador liberar manualmente"],
+        correta: 1,
+        explicacao: "O sistema só libera o agendamento com o pagamento confirmado e o formulário enviado.",
+      },
+      {
+        pergunta: "A família pagou a avaliação em dinheiro, na recepção. O que fazer?",
+        opcoes: ["Agendar mesmo assim", "Financeiro ou gestão usa “Pagamento recebido na clínica” e descreve o pagamento", "Pedir para pagarem de novo pelo link", "Nada, o sistema identifica sozinho"],
+        correta: 1,
+        explicacao: "A confirmação manual fica registrada na auditoria e libera o formulário para a família.",
+      },
+      {
+        pergunta: "Quem pode ler as respostas do formulário de avaliação?",
+        opcoes: ["Toda a equipe", "Só a recepção", "O master e os profissionais do paciente", "O financeiro"],
+        correta: 2,
+        explicacao: "São dados de saúde da criança (LGPD): acesso restrito à equipe de cuidado.",
+      },
+    ],
+  },
+
   // ======================= ATENDIMENTO CLÍNICO =======================
   {
     id: "meus-atendimentos",
