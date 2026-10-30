@@ -54,7 +54,8 @@ describe("formulário de avaliação inicial (anamnese)", () => {
   });
   it("respostas do 2º responsável escondido não são gravadas", () => {
     const v = validarAnamnese(completo({ resp2_existe: "Não", resp2_nome: "Fulano" }));
-    expect(v.ok && v.respostas["resp2_nome"]).toBe(false);
+    expect(v.ok).toBe(true);
+    if (v.ok) expect(v.respostas).not.toHaveProperty("resp2_nome");
   });
   it("confere e-mail, telefone com DDD, CPF e opções", () => {
     const campo = (id: string) => TODOS_CAMPOS.find((c) => c.id === id)!;
