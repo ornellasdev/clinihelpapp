@@ -1,5 +1,5 @@
 /** Endereços que não podem ser usados por clínicas (já são páginas do sistema). */
-export const SLUGS_RESERVADOS = ["auth", "dev", "api", "assets", "admin", "login", "entrar", "static"];
+export const SLUGS_RESERVADOS = ["auth", "dev", "api", "assets", "admin", "login", "entrar", "static", "familia", "pagar"];
 
 /** Gera o endereço da clínica a partir do nome: "Clínica Sol & Mar" → "clinica-sol-mar". */
 export function gerarSlug(nome: string): string {
