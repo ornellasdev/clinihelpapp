@@ -264,7 +264,7 @@ function Preencher({ pacienteId, ficha, clinica }: { pacienteId: string; ficha: 
   );
 }
 
-function CampoForm({ campo: c, valor, erro, onChange }: { campo: Campo; valor: string | string[] | undefined; erro?: string; onChange: (v: string | string[]) => void }) {
+function CampoForm({ campo: c, valor, erro, onChange }: { campo: Campo; valor: string | string[] | undefined; erro?: string | undefined; onChange: (v: string | string[]) => void }) {
   const id = `campo-${c.id}`;
   const texto = typeof valor === "string" ? valor : "";
   const lista = Array.isArray(valor) ? valor : [];

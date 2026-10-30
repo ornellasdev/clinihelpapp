@@ -513,14 +513,15 @@ export type FaturaLiminar = Awaited<ReturnType<NonNullable<typeof faturasLiminar
 export const avaliacaoInicialQuery = (pacienteId: string) =>
   queryOptions({
     queryKey: ["avaliacao-inicial", pacienteId],
-    queryFn: async () =>
-      ok(
-        await supabase
-          .from("avaliacoes_iniciais")
-          .select("*, cobranca:cobrancas(id, status, valor, vencimento, token_publico)")
-          .eq("paciente_id", pacienteId)
-          .maybeSingle(),
-      ),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("avaliacoes_iniciais")
+        .select("*, cobranca:cobrancas(id, status, valor, vencimento, token_publico)")
+        .eq("paciente_id", pacienteId)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      return data;
+    },
   });
 
 /** Avaliações em andamento ou recém-concluídas, para o aviso do Painel. */
@@ -552,6 +553,8 @@ export const anamneseQuery = (pacienteId: string) =>
           .eq("paciente_id", pacienteId)
           .order("created_at"),
       ]);
-      return { anamnese: ok(a), pareceres: ok(p) ?? [] };
+      if (a.error) throw new Error(a.error.message);
+      if (p.error) throw new Error(p.error.message);
+      return { anamnese: a.data, pareceres: p.data ?? [] };
     },
   });
