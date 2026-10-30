@@ -1,4 +1,4 @@
-import { calcularRepasse } from "./financeiro";
+import { repasseDevido, valorCobrado } from "./financeiro";
 
 export type LinhaFinanceiraOrigem = {
   inicio: string;
@@ -6,7 +6,7 @@ export type LinhaFinanceiraOrigem = {
   paciente?: { nome: string } | null;
   profissional?: { nome: string } | null;
   especialidade?: { nome: string } | null;
-  fin?: { valor: number | string; percentual_repasse: number | string; pagamento_status: string; repasse_pago: boolean } | null;
+  fin?: { valor: number | string; percentual_repasse: number | string; pagamento_status: string; repasse_pago: boolean; cobrar?: boolean; repassar?: boolean } | null;
 };
 
 export type LinhaExportacao = {
@@ -44,9 +44,9 @@ const pad = (n: number) => String(n).padStart(2, "0");
 export function montarLinhas(linhas: LinhaFinanceiraOrigem[], rotuloStatus: (s: string) => string): LinhaExportacao[] {
   return linhas.map((l) => {
     const d = new Date(l.inicio);
-    const valor = Number(l.fin?.valor ?? 0);
+    const valor = valorCobrado(l.fin);
     const percentual = Number(l.fin?.percentual_repasse ?? 0);
-    const repasse = calcularRepasse(valor, percentual);
+    const repasse = repasseDevido(l.fin);
     return {
       data: `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`,
       hora: `${pad(d.getHours())}:${pad(d.getMinutes())}`,

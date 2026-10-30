@@ -12,8 +12,8 @@ describe("ocupação das salas", () => {
   });
   it("faltas ocupam a sala, cancelados não", () => {
     const itens = [
-      { inicio: "2026-10-01T08:00:00Z", fim: "2026-10-01T08:50:00Z", status: "realizado" },
-      { inicio: "2026-10-01T09:00:00Z", fim: "2026-10-01T09:50:00Z", status: "falta" },
+      { inicio: "2026-10-01T08:00:00Z", fim: "2026-10-01T08:50:00Z", status: "finalizado" },
+      { inicio: "2026-10-01T09:00:00Z", fim: "2026-10-01T09:50:00Z", status: "falta_cobrada" },
       { inicio: "2026-10-01T10:00:00Z", fim: "2026-10-01T10:50:00Z", status: "cancelado" },
     ];
     expect(minutosOcupados(itens)).toBe(100);
@@ -25,22 +25,33 @@ describe("ocupação das salas", () => {
 });
 
 describe("faltas", () => {
-  it("taxa = faltas ÷ (faltas + realizados)", () => {
-    const r = taxaFaltas([{ status: "falta" }, { status: "realizado" }, { status: "realizado" }, { status: "realizado" }, { status: "agendado" }, { status: "cancelado" }]);
-    expect(r).toEqual({ faltas: 1, realizados: 3, taxa: 25 });
+  it("taxa = faltas do paciente ÷ (faltas do paciente + finalizados); falta do terapeuta fica de fora", () => {
+    const r = taxaFaltas([
+      { status: "falta_cobrada" },
+      { status: "falta_justificada" },
+      { status: "falta_terapeuta" },
+      { status: "finalizado" },
+      { status: "finalizado" },
+      { status: "agendado" },
+      { status: "cancelado" },
+    ]);
+    expect(r).toEqual({ faltas: 2, justificadas: 1, cobradas: 1, terapeuta: 1, realizados: 2, taxa: 50 });
   });
 });
 
 describe("faturamento e valores a receber", () => {
-  it("só sessões realizadas faturam; pendentes ficam a receber; agendadas são previsão", () => {
+  it("finalizadas e faltas cobradas faturam; faltas não cobradas não; agendadas e em andamento são previsão", () => {
     const r = resumoFinanceiro([
-      { status: "realizado", fin: { valor: 150, pagamento_status: "pago" } },
-      { status: "realizado", fin: { valor: "120", pagamento_status: "pendente" } },
-      { status: "falta", fin: { valor: 150, pagamento_status: "pendente" } },
+      { status: "finalizado", fin: { valor: 150, pagamento_status: "pago" } },
+      { status: "finalizado", fin: { valor: "120", pagamento_status: "pendente" } },
+      { status: "falta_cobrada", fin: { valor: 80, pagamento_status: "pendente" } },
+      { status: "falta_justificada", fin: { valor: 150, pagamento_status: "pendente", cobrar: false } },
+      { status: "falta_terapeuta", fin: { valor: 150, pagamento_status: "pendente", cobrar: false } },
       { status: "agendado", fin: { valor: 100, pagamento_status: "pendente" } },
+      { status: "aguardando", fin: { valor: 50, pagamento_status: "pendente" } },
       { status: "cancelado", fin: { valor: 100, pagamento_status: "pendente" } },
     ]);
-    expect(r).toEqual({ faturado: 270, recebido: 150, aReceber: 120, previsto: 100 });
+    expect(r).toEqual({ faturado: 350, recebido: 150, aReceber: 200, previsto: 150 });
   });
 });
 

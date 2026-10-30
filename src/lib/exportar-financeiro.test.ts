@@ -3,7 +3,7 @@ import { gerarCsv, montarLinhas, totalizar } from "./exportar-financeiro";
 
 const base = {
   inicio: "2026-10-05T14:30:00",
-  status: "realizado",
+  status: "finalizado",
   paciente: { nome: "Ana; Souza" },
   profissional: { nome: "Dra. Lia" },
   especialidade: { nome: "Psicologia" },
@@ -17,6 +17,17 @@ describe("exportação financeira", () => {
     expect(l.liquido).toBe(60);
     expect(l.pagoPaciente).toBe("Sim");
     expect(l.repassePago).toBe("Não");
+  });
+  it("falta não cobrada sai com valor e repasse zerados; falta cobrada sem repasse só zera o repasse", () => {
+    const [semCobranca, semRepasse] = montarLinhas(
+      [
+        { ...base, status: "falta_justificada", fin: { ...base.fin, cobrar: false, repassar: false } },
+        { ...base, status: "falta_cobrada", fin: { ...base.fin, cobrar: true, repassar: false } },
+      ],
+      (s) => s,
+    );
+    expect([semCobranca!.valor, semCobranca!.repasse, semCobranca!.liquido]).toEqual([0, 0, 0]);
+    expect([semRepasse!.valor, semRepasse!.repasse, semRepasse!.liquido]).toEqual([150, 0, 150]);
   });
   it("soma os totais das linhas exportadas", () => {
     const linhas = montarLinhas([base, { ...base, fin: { ...base.fin, valor: 200, percentual_repasse: 50 } }], (s) => s);
