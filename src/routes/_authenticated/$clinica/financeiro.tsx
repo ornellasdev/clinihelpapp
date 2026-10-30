@@ -35,27 +35,87 @@ const FILTROS: Record<string, { label: string; aceita: (s: StatusAgenda) => bool
   todos: { label: "Todos (exceto cancelados)", aceita: (s) => s !== "cancelado" },
 };
 
+const ABAS = ["atendimentos", "cobrancas"] as const;
+
 export const Route = createFileRoute("/_authenticated/$clinica/financeiro")({
   validateSearch: z.object({
+    aba: z.enum(ABAS).optional(),
     mes: z.string().regex(/^\d{4}-\d{2}$/).optional(),
     prof: z.string().optional(),
     status: z.string().optional(),
+    situacao: z.string().optional(),
   }),
-  loaderDeps: ({ search }) => ({ mes: search.mes ?? mesAtual() }),
-  loader: ({ context, deps }) => {
+  loaderDeps: ({ search }) => ({ mes: search.mes ?? mesAtual(), aba: search.aba ?? "atendimentos" }),
+  loader: async ({ context, deps }) => {
+    const qc = context.queryClient;
+    const me = await qc.ensureQueryData(meQuery);
+    if (deps.aba === "cobrancas" && podeGerirFinanceiro(me.papeis) && me.clinica) {
+      const p = periodoCobrancas(deps.mes);
+      await Promise.all([qc.ensureQueryData(cobrancasQuery(p.de, p.ate)), qc.ensureQueryData(recebimentosAtivosQuery(me.clinica.id))]);
+      return;
+    }
     const ini = startOfMonth(parseISO(`${deps.mes}-01`));
-    return Promise.all([
-      context.queryClient.ensureQueryData(financeiroQuery(ini.toISOString(), addMonths(ini, 1).toISOString())),
-      context.queryClient.ensureQueryData(equipeQuery),
-      context.queryClient.ensureQueryData(conveniosQuery),
-      context.queryClient.ensureQueryData(convenioValoresQuery),
+    await Promise.all([
+      qc.ensureQueryData(financeiroQuery(ini.toISOString(), addMonths(ini, 1).toISOString())),
+      qc.ensureQueryData(equipeQuery),
+      qc.ensureQueryData(conveniosQuery),
+      qc.ensureQueryData(convenioValoresQuery),
     ]);
   },
-  head: () => ({ meta: [{ title: "Financeiro — CliniHelp" }] }),
+  head: () => ({
+    meta: [
+      { title: "Financeiro — CliniHelp" },
+      { name: "description", content: "Atendimentos, repasses, tabela de convênios e cobranças aos responsáveis." },
+    ],
+  }),
   component: FinanceiroPage,
 });
 
 function FinanceiroPage() {
+  const me = useMe();
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+  const gestor = podeGerirFinanceiro(me.papeis);
+  const mes = search.mes ?? mesAtual();
+  const aba = gestor && search.aba === "cobrancas" ? "cobrancas" : "atendimentos";
+  const nomeMes = format(startOfMonth(parseISO(`${mes}-01`)), "MMMM 'de' yyyy", { locale: ptBR });
+
+  if (!gestor) {
+    return (
+      <div>
+        <PageHeader titulo="Meus repasses" descricao={nomeMes} />
+        <AbaAtendimentos />
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <PageHeader
+        titulo="Financeiro"
+        descricao={aba === "cobrancas" ? `Cobranças aos responsáveis · vencimentos de ${nomeMes}` : nomeMes}
+      />
+      <Tabs value={aba} onValueChange={(v) => navigate({ search: (s) => ({ ...s, aba: v === "cobrancas" ? "cobrancas" : undefined }) })}>
+        <TabsList className="mb-5 h-auto w-full justify-start overflow-x-auto bg-surface p-1 sm:w-auto">
+          <TabsTrigger value="atendimentos" className="gap-2 px-4 py-2">
+            <Wallet className="size-4" /> Atendimentos e repasses
+          </TabsTrigger>
+          <TabsTrigger value="cobrancas" className="gap-2 px-4 py-2">
+            <Receipt className="size-4" /> Cobranças
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="atendimentos">{aba === "atendimentos" && <AbaAtendimentos />}</TabsContent>
+        <TabsContent value="cobrancas">
+          {aba === "cobrancas" && (
+            <CobrancasAba mes={mes} situacao={search.situacao} onFiltro={(f) => navigate({ search: (s) => ({ ...s, ...f }) })} />
+          )}
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+function AbaAtendimentos() {
   const me = useMe();
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
@@ -135,30 +195,7 @@ function FinanceiroPage() {
 
   return (
     <div>
-      <PageHeader
-        titulo={gestor ? "Financeiro" : "Meus repasses"}
-        descricao={format(ini, "MMMM 'de' yyyy", { locale: ptBR })}
-        acoes={
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                <Download /> Exportar
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={() => exportar("pdf")}>
-                <FileText /> PDF
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => exportar("xlsx")}>
-                <FileSpreadsheet /> Excel (.xlsx)
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => exportar("csv")}>
-                <FileDown /> CSV
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        }
-      />
+
 
       <div className="mb-5 flex flex-wrap gap-2">
         <Input type="month" value={mes} onChange={(e) => e.target.value && navigate({ search: (s) => ({ ...s, mes: e.target.value }) })} className="w-auto" />
