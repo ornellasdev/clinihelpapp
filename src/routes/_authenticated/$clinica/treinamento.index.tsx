@@ -123,6 +123,7 @@ function CartaoTopico({ modulo, resultados }: { modulo: Modulo; resultados: Resu
 }
 
 function ProgressoEquipe() {
+  const clinica = useClinica();
   const { data: equipe = [] } = useQuery(equipeQuery);
   const { data: resultados = [] } = useQuery(resultadosEquipeQuery);
   const linhas = useMemo(
@@ -178,7 +179,7 @@ function ProgressoEquipe() {
         </table>
       </div>
       <Button asChild variant="link" size="sm" className="mt-2 px-0">
-        <Link to="/$clinica/seguranca" params={{ clinica: useClinica() }}>
+        <Link to="/$clinica/seguranca" params={{ clinica }}>
           Ver no painel de conformidade
         </Link>
       </Button>

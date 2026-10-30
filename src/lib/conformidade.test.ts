@@ -17,6 +17,7 @@ const base = (): PainelGovernanca => ({
     tabelas_auditadas: 29,
   },
   integridade: { finalizadas_sem_evolucao: 0, faltas_justificadas_sem_atestado: 0, excluidos: { guias: 0, glosas: 0, documentos: 0, relatorios: 0 }, adendos: 0 },
+  treinamento: { ativos: 3, concluiram: 3 },
   gerado_em: "2026-10-30T12:00:00Z",
 });
 const situacao = (p: PainelGovernanca, id: string) => avaliarControles(p).find((c) => c.id === id)!.situacao;
@@ -63,6 +64,12 @@ describe("controles de conformidade", () => {
     const p = base();
     p.equipe.sem_2fa = 1;
     expect(situacao(p, "iso-2fa")).toBe("atencao");
+  });
+
+  it("equipe sem o treinamento essencial pede atenção", () => {
+    const p = base();
+    p.treinamento.concluiram = 1;
+    expect(situacao(p, "iso-treinamento")).toBe("atencao");
   });
 
   it("prontuário que pode ser alterado é crítico", () => {
