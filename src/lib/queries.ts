@@ -233,8 +233,9 @@ export const recebimentosAtivosQuery = (clinicaId: string) =>
   queryOptions({
     queryKey: ["clinica", clinicaId, "recebimentos"],
     queryFn: async () => {
-      const r = ok(await supabase.from("clinicas").select("pagamentos_ativos").eq("id", clinicaId).single());
-      return r?.pagamentos_ativos ?? false;
+      const { data, error } = await supabase.from("clinicas").select("pagamentos_ativos").eq("id", clinicaId).maybeSingle();
+      if (error) throw new Error(error.message);
+      return data?.pagamentos_ativos ?? false;
     },
   });
 
