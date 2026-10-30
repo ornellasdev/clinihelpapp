@@ -139,7 +139,7 @@ export function LiberacoesDia({ data, onData, onAbrirGuia }: { data: string; onD
 
       {visiveis.length === 0 ? (
         <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-          {sessoes.length === 0 ? "Nenhuma sessão de convênio ou liminar neste dia." : "Tudo liberado neste dia."}
+          {sessoes.length === 0 ? "Nenhuma sessão de convênio neste dia." : "Tudo liberado neste dia."}
         </div>
       ) : (
         <ul className="grid gap-3">

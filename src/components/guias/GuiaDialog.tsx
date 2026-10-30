@@ -34,7 +34,7 @@ export function GuiaDialog({ open, onOpenChange, guia }: { open: boolean; onOpen
   const qc = useQueryClient();
   const { data: especialidades = [] } = useQuery(especialidadesQuery);
   const { data: convenios = [] } = useQuery(conveniosQuery);
-  const opcoesConvenio = convenios.filter((c) => c.tipo !== "particular" && (c.ativo || c.id === guia?.convenio_id));
+  const opcoesConvenio = convenios.filter((c) => exigeGuia(c.tipo) && (c.ativo || c.id === guia?.convenio_id));
 
   const [pacienteId, setPacienteId] = useState("");
   const [convenioId, setConvenioId] = useState("");

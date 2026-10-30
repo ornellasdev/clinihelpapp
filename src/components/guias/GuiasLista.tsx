@@ -93,7 +93,7 @@ export function GuiasLista({ onEditar, onGlosar }: { onEditar: (g: Guia) => void
           <SelectContent>
             <SelectItem value={TODAS}>Todos os convênios</SelectItem>
             {convenios
-              .filter((c) => c.tipo !== "particular")
+              .filter((c) => exigeGuia(c.tipo))
               .map((c) => (
                 <SelectItem key={c.id} value={c.id}>
                   {c.nome}

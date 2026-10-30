@@ -149,7 +149,7 @@ export function GlosaDialog({
                 </SelectTrigger>
                 <SelectContent>
                   {convenios
-                    .filter((c) => c.tipo !== "particular" || c.id === convenioId)
+                    .filter((c) => exigeGuia(c.tipo) || c.id === convenioId)
                     .map((c) => (
                       <SelectItem key={c.id} value={c.id}>
                         {c.nome}

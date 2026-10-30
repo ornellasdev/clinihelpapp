@@ -93,7 +93,7 @@ export function GlosasLista({ onEditar }: { onEditar: (g: Glosa) => void }) {
           <SelectContent>
             <SelectItem value={TODOS}>Todos os convênios</SelectItem>
             {convenios
-              .filter((c) => c.tipo !== "particular")
+              .filter((c) => exigeGuia(c.tipo))
               .map((c) => (
                 <SelectItem key={c.id} value={c.id}>
                   {c.nome}
