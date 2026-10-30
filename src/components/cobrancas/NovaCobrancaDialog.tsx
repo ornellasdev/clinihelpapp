@@ -5,7 +5,8 @@ import { addDays, addMonths, format, parseISO, startOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { AlertTriangle, Loader2 } from "lucide-react";
-import { pacienteQuery, sessoesParaCobrarQuery } from "@/lib/queries";
+import { convenioValoresQuery, pacienteQuery, sessoesParaCobrarQuery } from "@/lib/queries";
+import { descricaoCobrancaAvaliacao } from "@/lib/avaliacao-inicial";
 import { criarCobranca } from "@/lib/cobrancas.functions";
 import { novaCobrancaSchema } from "@/lib/cobranca-schema";
 import { errosPorCampo, mensagemDeErro } from "@/services/resultado";
@@ -32,11 +33,25 @@ import { cn } from "@/lib/utils";
 
 const mesAtual = () => format(new Date(), "yyyy-MM");
 
-export function NovaCobrancaDialog({ aberta, onClose, onCriada }: { aberta: boolean; onClose: () => void; onCriada: (id: string) => void }) {
+export function NovaCobrancaDialog({
+  aberta,
+  onClose,
+  onCriada,
+  pacienteFixo,
+  avaliacaoInicial = false,
+}: {
+  aberta: boolean;
+  onClose: () => void;
+  onCriada: (id: string) => void;
+  /** Abre já com este paciente (sem trocar). */
+  pacienteFixo?: string;
+  /** Cobrança da avaliação inicial: valor livre com o preço da sessão do convênio do paciente. */
+  avaliacaoInicial?: boolean;
+}) {
   const criar = useServerFn(criarCobranca);
   const qc = useQueryClient();
-  const [pacienteId, setPacienteId] = useState("");
-  const [modo, setModo] = useState<"sessoes" | "avulsa">("sessoes");
+  const [pacienteId, setPacienteId] = useState(pacienteFixo ?? "");
+  const [modo, setModo] = useState<"sessoes" | "avulsa">(avaliacaoInicial ? "avulsa" : "sessoes");
   const [mes, setMes] = useState(mesAtual());
   const [marcadas, setMarcadas] = useState<Set<string>>(new Set());
   const [valor, setValor] = useState("");
@@ -50,6 +65,11 @@ export function NovaCobrancaDialog({ aberta, onClose, onCriada }: { aberta: bool
 
   const ini = startOfMonth(parseISO(`${mes}-01`));
   const { data: paciente } = useQuery({ ...pacienteQuery(pacienteId), enabled: !!pacienteId });
+  const { data: precos = [] } = useQuery({ ...convenioValoresQuery, enabled: avaliacaoInicial });
+  const precoSessao = avaliacaoInicial ? precos.find((p) => p.convenio_id === paciente?.convenio_id)?.valor_sessao : undefined;
+  useEffect(() => {
+    if (avaliacaoInicial && !valorEditado && precoSessao != null) setValor(Number(precoSessao).toFixed(2).replace(".", ","));
+  }, [avaliacaoInicial, precoSessao, valorEditado]);
   const { data: sessoes = [], isFetching } = useQuery(
     sessoesParaCobrarQuery(modo === "sessoes" ? pacienteId : "", ini.toISOString(), addMonths(ini, 1).toISOString()),
   );
@@ -77,15 +97,16 @@ export function NovaCobrancaDialog({ aberta, onClose, onCriada }: { aberta: bool
   }, [soma, modo, valorEditado]);
   useEffect(() => {
     if (descEditada || !paciente) return;
-    if (modo === "avulsa") setDescricao(`Atendimento — ${paciente.nome}`);
+    if (avaliacaoInicial) setDescricao(descricaoCobrancaAvaliacao(paciente.nome));
+    else if (modo === "avulsa") setDescricao(`Atendimento — ${paciente.nome}`);
     else setDescricao(marcadas.size === 1 ? `Sessão de ${paciente.nome}` : `Sessões de ${nomeMes} — ${paciente.nome}`);
-  }, [modo, marcadas.size, paciente, nomeMes, descEditada]);
+  }, [modo, marcadas.size, paciente, nomeMes, descEditada, avaliacaoInicial]);
 
   const pagador = paciente ? pagadorDoPaciente(paciente) : null;
   const pagadorOk = !!pagador?.nome && cpfValido(pagador.cpf);
 
   function limpar() {
-    setPacienteId(""); setModo("sessoes"); setMes(mesAtual()); setMarcadas(new Set()); setValor(""); setValorEditado(false);
+    setPacienteId(pacienteFixo ?? ""); setModo(avaliacaoInicial ? "avulsa" : "sessoes"); setMes(mesAtual()); setMarcadas(new Set()); setValor(""); setValorEditado(false);
     setDescricao(""); setDescEditada(false); setVencimento(format(addDays(new Date(), 3), "yyyy-MM-dd")); setForma("todas");
   }
 
@@ -102,7 +123,15 @@ export function NovaCobrancaDialog({ aberta, onClose, onCriada }: { aberta: bool
     e.preventDefault();
     if (!pacienteId) { toast.error("Escolha o paciente."); return; }
     if (modo === "sessoes" && marcadas.size === 0) { toast.error("Marque ao menos uma sessão, ou use “Valor livre”."); return; }
-    const r0 = novaCobrancaSchema.safeParse({ pacienteId, sessoes: modo === "sessoes" ? [...marcadas] : [], valor, vencimento, descricao, forma });
+    const r0 = novaCobrancaSchema.safeParse({
+      pacienteId,
+      sessoes: modo === "sessoes" ? [...marcadas] : [],
+      valor,
+      vencimento,
+      descricao,
+      forma,
+      ...(avaliacaoInicial ? { avaliacaoInicial: true } : {}),
+    });
     if (!r0.success) {
       const campos = errosPorCampo(r0.error.issues);
       setErros(campos);
@@ -115,6 +144,7 @@ export function NovaCobrancaDialog({ aberta, onClose, onCriada }: { aberta: bool
       const r = await criar({ data: r0.data });
       toast.success("Cobrança gerada!");
       qc.invalidateQueries({ queryKey: ["cobrancas"] });
+      if (avaliacaoInicial) qc.invalidateQueries({ queryKey: ["avaliacao-inicial"] });
       limpar();
       onCriada(r.id);
       onClose();
@@ -129,14 +159,22 @@ export function NovaCobrancaDialog({ aberta, onClose, onCriada }: { aberta: bool
     <Dialog open={aberta} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-h-[92vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Nova cobrança</DialogTitle>
-          <DialogDescription>O responsável recebe um link do CliniHelp para pagar por Pix, boleto ou cartão.</DialogDescription>
+          <DialogTitle>{avaliacaoInicial ? "Cobrança da avaliação inicial" : "Nova cobrança"}</DialogTitle>
+          <DialogDescription>
+            {avaliacaoInicial
+              ? "Valor de uma sessão normal, como garantia. Quando for paga, o formulário de avaliação é liberado na Área da família."
+              : "O responsável recebe um link do CliniHelp para pagar por Pix, boleto ou cartão."}
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={salvar} className="min-w-0 space-y-4">
-          <div className="space-y-2">
-            <Label>Paciente</Label>
-            <PacienteCombobox value={pacienteId} onChange={(id) => { setPacienteId(id); setDescEditada(false); setValorEditado(false); }} />
-          </div>
+          {pacienteFixo ? (
+            paciente && <div className="text-sm"><span className="text-muted-foreground">Paciente: </span><span className="font-medium">{paciente.nome}</span></div>
+          ) : (
+            <div className="space-y-2">
+              <Label>Paciente</Label>
+              <PacienteCombobox value={pacienteId} onChange={(id) => { setPacienteId(id); setDescEditada(false); setValorEditado(false); }} />
+            </div>
+          )}
 
           {pagador && (
             <div className={cn("rounded-xl border p-3 text-sm", pagadorOk ? "bg-muted/40" : "border-warning/50 bg-warning/10")}>
@@ -155,12 +193,17 @@ export function NovaCobrancaDialog({ aberta, onClose, onCriada }: { aberta: bool
             </div>
           )}
 
-          <Tabs value={modo} onValueChange={(v) => { setModo(v as typeof modo); setValorEditado(false); setDescEditada(false); }}>
+          {avaliacaoInicial && paciente && precoSessao == null && (
+            <p className="rounded-xl border border-warning/50 bg-warning/10 p-3 text-sm">
+              O convênio do paciente não tem valor de sessão na tabela. Digite o valor da sessão normal.
+            </p>
+          )}
+          {!avaliacaoInicial && <Tabs value={modo} onValueChange={(v) => { setModo(v as typeof modo); setValorEditado(false); setDescEditada(false); }}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="sessoes">Sessões (uma ou o mês)</TabsTrigger>
               <TabsTrigger value="avulsa">Valor livre</TabsTrigger>
             </TabsList>
-          </Tabs>
+          </Tabs>}
 
           {modo === "sessoes" && (
             <div className="space-y-2">
