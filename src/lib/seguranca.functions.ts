@@ -69,6 +69,7 @@ export const definirMinhaSenha = createServerFn({ method: "POST" })
     let relogin = false;
     const falha = await trocarComSessao(data.senha);
     if (falha) {
+      console.warn("[seguranca] troca com sessão recusada:", falha.codigo, falha.mensagem);
       if (/same_password|different from the old/i.test(`${falha.codigo} ${falha.mensagem}`)) {
         throw new Error("A nova senha precisa ser diferente da senha temporária.");
       }
