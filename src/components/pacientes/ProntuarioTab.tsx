@@ -2,20 +2,24 @@ import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-quer
 import { useEffect, useMemo, useRef, useState } from "react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarSearch, FilePenLine, Loader2, Lock, Pencil, Plus, X } from "lucide-react";
+import { CalendarSearch, FilePenLine, FilePlus2, Loader2, Lock, Plus, ShieldCheck, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
-import { agendaPacienteQuery, especialidadesQuery, evolucoesQuery, metasQuery, progressoMetasQuery } from "@/lib/queries";
+import { agendaPacienteQuery, especialidadesQuery, evolucoesQuery, metasQuery } from "@/lib/queries";
+import { adendosQuery, agruparAdendos } from "@/services/prontuario";
+import { ErroServico, mensagemDeErro } from "@/services/resultado";
+import { useRegistrarEvolucao } from "@/hooks/use-prontuario";
 import { aplicarModelo } from "@/lib/plano-terapeutico";
 import { ehFalta, iniciaAoAbrirEvolucao } from "@/lib/agenda-status";
 import { ModelosEvolucao } from "./ModelosEvolucao";
 import { MetasNaEvolucao } from "./MetasNaEvolucao";
 import { VozEvolucao } from "./VozEvolucao";
 import { RelatorioPdfDialog } from "./RelatorioPdfDialog";
+import { AdendoDialog } from "./AdendoDialog";
 import { useMe } from "@/hooks/use-me";
-import { podeVerProntuario } from "@/lib/permissions";
-import { corEsp, erroAmigavel, fmtData, fmtHora } from "@/lib/ui-helpers";
+import { podeRegistrarAdendo, podeVerProntuario } from "@/lib/permissions";
+import { corEsp, fmtData, fmtHora } from "@/lib/ui-helpers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,15 +33,16 @@ export function ProntuarioTab({ pacienteId, agendamentoId }: { pacienteId: strin
   const me = useMe();
   const { data: especialidades } = useSuspenseQuery(especialidadesQuery);
   const { data: evolucoes } = useSuspenseQuery(evolucoesQuery(pacienteId));
+  const { data: adendos = [] } = useQuery(adendosQuery(pacienteId));
   const [esp, setEsp] = useState("todas");
   const [de, setDe] = useState("");
   const [ate, setAte] = useState("");
-  const [form, setForm] = useState<{ editar?: Evolucao | undefined; agendamentoId?: string | undefined } | null>(
-    agendamentoId ? { agendamentoId } : null,
-  );
+  const [form, setForm] = useState<{ agendamentoId?: string | undefined } | null>(agendamentoId ? { agendamentoId } : null);
+  const [adendoDe, setAdendoDe] = useState<Evolucao | null>(null);
 
   const visiveis = especialidades.filter((e) => podeVerProntuario(me.papeis, me.especialidades, e.id));
   const espMap = useMemo(() => Object.fromEntries(especialidades.map((e) => [e.id, e])), [especialidades]);
+  const adendosPorEvolucao = useMemo(() => agruparAdendos(adendos), [adendos]);
 
   const porEsp = evolucoes.filter((e) => esp === "todas" || e.especialidade_id === esp);
   const filtradas = porEsp.filter((e) => (!de || e.data_atendimento >= de) && (!ate || e.data_atendimento <= ate));
@@ -157,14 +162,7 @@ export function ProntuarioTab({ pacienteId, agendamentoId }: { pacienteId: strin
           )}
         </div>
 
-        {form && (
-          <EvolucaoForm
-            pacienteId={pacienteId}
-            editar={form.editar}
-            agendamentoId={form.agendamentoId}
-            onClose={() => setForm(null)}
-          />
-        )}
+        {form && <EvolucaoForm pacienteId={pacienteId} agendamentoId={form.agendamentoId} onClose={() => setForm(null)} />}
 
         <div className="text-sm text-muted-foreground">
           {filtradas.length} evolução(ões){filtroData && " no período"}
@@ -172,15 +170,18 @@ export function ProntuarioTab({ pacienteId, agendamentoId }: { pacienteId: strin
 
         {filtradas.map((e) => {
           const espe = espMap[e.especialidade_id];
-          const editada = new Date(e.updated_at).getTime() - new Date(e.created_at).getTime() > 60_000;
+          const lista = adendosPorEvolucao.get(e.id) ?? [];
           return (
             <article key={e.id} className="rounded-2xl border bg-card p-5">
               <header className="mb-3 flex flex-wrap items-center gap-2">
                 <span className="font-display text-lg font-semibold">{fmtData(e.data_atendimento, "dd/MM/yyyy")}</span>
                 <span className={cn("rounded-full border px-2.5 py-0.5 text-xs font-medium", corEsp(espe?.cor))}>{espe?.nome}</span>
-                {e.profissional_id === me.id && (
-                  <Button size="sm" variant="ghost" className="ml-auto" onClick={() => setForm({ editar: e })}>
-                    <Pencil /> Editar
+                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground" title="Evolução assinada: não pode ser alterada nem apagada">
+                  <Lock className="size-3" /> Assinada
+                </span>
+                {podeRegistrarAdendo(me.especialidades, e.especialidade_id) && (
+                  <Button size="sm" variant="ghost" className="ml-auto" onClick={() => setAdendoDe(e)}>
+                    <FilePlus2 /> Adendo
                   </Button>
                 )}
               </header>
@@ -190,65 +191,76 @@ export function ProntuarioTab({ pacienteId, agendamentoId }: { pacienteId: strin
                 <div className="text-xs text-muted-foreground">
                   {e.profissional_registro ?? "Registro profissional não informado"} · registrado em{" "}
                   {fmtData(e.created_at, "dd/MM/yyyy 'às' HH:mm")}
-                  {editada && ` · editado em ${fmtData(e.updated_at, "dd/MM/yyyy HH:mm")}`}
                 </div>
               </footer>
+              {lista.length > 0 && (
+                <div className="mt-4 space-y-3">
+                  {lista.map((a) => (
+                    <div key={a.id} className="rounded-xl border-l-4 border-primary/50 bg-surface p-3">
+                      <div className="mb-1 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary">
+                        <ShieldCheck className="size-3.5" /> Adendo{a.motivo ? ` · ${a.motivo}` : ""}
+                      </div>
+                      <p className="whitespace-pre-wrap text-sm leading-relaxed">{a.conteudo}</p>
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        {a.profissional_nome}
+                        {a.profissional_registro ? ` — ${a.profissional_registro}` : ""} · {fmtData(a.created_at, "dd/MM/yyyy 'às' HH:mm")}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </article>
           );
         })}
       </div>
+
+      <AdendoDialog evolucao={adendoDe} onClose={() => setAdendoDe(null)} />
     </div>
   );
 }
 
 function EvolucaoForm({
   pacienteId,
-  editar,
   agendamentoId,
   onClose,
 }: {
   pacienteId: string;
-  editar?: Evolucao | undefined;
   agendamentoId?: string | undefined;
   onClose: () => void;
 }) {
   const me = useMe();
   const qc = useQueryClient();
+  const registrar = useRegistrarEvolucao(pacienteId);
   const { data: especialidades } = useSuspenseQuery(especialidadesQuery);
   const { data: metas } = useSuspenseQuery(metasQuery(pacienteId));
-  const { data: progresso } = useSuspenseQuery(progressoMetasQuery(pacienteId));
   const { data: agenda = [] } = useQuery(agendaPacienteQuery(pacienteId));
   const minhas = especialidades.filter((e) => me.especialidades.includes(e.id));
   const meusAtend = agenda.filter((a) => a.profissional_id === me.id && a.status !== "cancelado" && !ehFalta(a.status));
 
-  const [espId, setEspId] = useState(editar?.especialidade_id ?? (minhas.length === 1 ? minhas[0]!.id : ""));
-  const [data, setData] = useState(editar?.data_atendimento ?? format(new Date(), "yyyy-MM-dd"));
-  const [agId, setAgId] = useState(editar?.agendamento_id ?? agendamentoId ?? "");
-  const [texto, setTexto] = useState(editar?.conteudo ?? "");
+  const [espId, setEspId] = useState(minhas.length === 1 ? minhas[0]!.id : "");
+  const [data, setData] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [agId, setAgId] = useState(agendamentoId ?? "");
+  const [texto, setTexto] = useState("");
   const [modeloUsado, setModeloUsado] = useState("");
-  const [niveis, setNiveis] = useState<Record<string, number>>(() =>
-    editar ? Object.fromEntries(progresso.filter((p) => p.evolucao_id === editar.id).map((p) => [p.meta_id, p.nivel])) : {},
-  );
-  const [salvando, setSalvando] = useState(false);
+  const [niveis, setNiveis] = useState<Record<string, number>>({});
+  const [erroCampo, setErroCampo] = useState<string | null>(null);
 
-  const metasDaEsp = metas.filter(
-    (m) => m.especialidade_id === espId && (m.status === "ativa" || niveis[m.id] !== undefined),
-  );
+  const metasDaEsp = metas.filter((m) => m.especialidade_id === espId && m.status === "ativa");
   const espNome = especialidades.find((e) => e.id === espId)?.nome ?? "";
 
   useEffect(() => {
-    if (!agId || editar) return;
+    if (!agId) return;
     const a = agenda.find((x) => x.id === agId);
     if (a) {
       setData(format(parseISO(a.inicio), "yyyy-MM-dd"));
       if (me.especialidades.includes(a.especialidade_id)) setEspId(a.especialidade_id);
     }
-  }, [agId, agenda, editar, me.especialidades]);
+  }, [agId, agenda, me.especialidades]);
 
   // Abrir a evolução da sessão de hoje inicia o atendimento ("Em atendimento").
   const iniciado = useRef<string | null>(null);
   useEffect(() => {
-    if (!agId || editar || iniciado.current === agId) return;
+    if (!agId || iniciado.current === agId) return;
     const a = agenda.find((x) => x.id === agId);
     if (!a || a.profissional_id !== me.id || !iniciaAoAbrirEvolucao(a.status)) return;
     if (format(parseISO(a.inicio), "yyyy-MM-dd") !== format(new Date(), "yyyy-MM-dd")) return;
@@ -260,71 +272,43 @@ function EvolucaoForm({
       .then(({ error }) => {
         if (!error) qc.invalidateQueries({ queryKey: ["agenda"] });
       });
-  }, [agId, agenda, editar, me.id, qc]);
+  }, [agId, agenda, me.id, qc]);
 
   async function salvar() {
-    if (!espId || !texto.trim()) { toast.error("Escolha a especialidade e escreva a evolução."); return; }
-    setSalvando(true);
-    const payload = { data_atendimento: data, conteudo: texto.trim(), agendamento_id: agId || null };
-    const res = editar
-      ? await supabase.from("evolucoes").update(payload).eq("id", editar.id).select("id").single()
-      : await supabase.from("evolucoes").insert({ ...payload, paciente_id: pacienteId, especialidade_id: espId }).select("id").single();
-    const error = res.error;
-    const evolucaoId = res.data?.id;
-    let erroMetas: string | null = null;
-    if (!error && evolucaoId) {
-      const marcadas = metasDaEsp.filter((m) => niveis[m.id] !== undefined);
-      const desmarcadas = editar
-        ? progresso.filter((p) => p.evolucao_id === evolucaoId && niveis[p.meta_id] === undefined).map((p) => p.id)
-        : [];
-      if (marcadas.length) {
-        const { error: e1 } = await supabase.from("evolucao_metas").upsert(
-          marcadas.map((m) => ({
-            evolucao_id: evolucaoId,
-            meta_id: m.id,
-            paciente_id: pacienteId,
-            especialidade_id: espId,
-            nivel: niveis[m.id]!,
-          })),
-          { onConflict: "evolucao_id,meta_id" },
-        );
-        if (e1) erroMetas = e1.message;
-      }
-      if (desmarcadas.length) {
-        const { error: e2 } = await supabase.from("evolucao_metas").delete().in("id", desmarcadas);
-        if (e2) erroMetas = e2.message;
-      }
+    setErroCampo(null);
+    const sessao = agenda.find((x) => x.id === agId);
+    try {
+      await registrar.mutateAsync({
+        pacienteId,
+        especialidadeId: espId,
+        data,
+        conteudo: texto,
+        agendamentoId: agId || null,
+        metas: metasDaEsp.filter((m) => niveis[m.id] !== undefined).map((m) => ({ meta_id: m.id, nivel: niveis[m.id]! })),
+      });
+      const finalizou = !!sessao && (sessao.status === "agendado" || sessao.status === "aguardando" || sessao.status === "em_atendimento");
+      toast.success(finalizou ? "Evolução registrada e atendimento finalizado." : "Evolução registrada.");
+      onClose();
+    } catch (e) {
+      if (e instanceof ErroServico && e.campo) setErroCampo(e.campo);
+      toast.error(mensagemDeErro(e));
     }
-    // Salvar a evolução vinculada finaliza a sessão no banco (cobrança, guia e repasse seguem o status).
-    if (!error && agId) {
-      for (const k of [["agenda"], ["financeiro"], ["guias"], ["indicadores"]]) qc.invalidateQueries({ queryKey: k });
-    }
-    setSalvando(false);
-    if (error) { toast.error(erroAmigavel(error.message)); return; }
-    if (erroMetas) toast.error(`Evolução salva, mas o progresso das metas não: ${erroAmigavel(erroMetas)}`);
-    else {
-      const sessao = agenda.find((x) => x.id === agId);
-      const finalizou = !editar && !!sessao && (sessao.status === "agendado" || sessao.status === "aguardando" || sessao.status === "em_atendimento");
-      toast.success(editar ? "Evolução atualizada." : finalizou ? "Evolução registrada e atendimento finalizado." : "Evolução registrada.");
-    }
-    qc.invalidateQueries({ queryKey: ["evolucoes", pacienteId] });
-    onClose();
   }
 
   return (
     <div className="rounded-2xl border-2 border-primary/30 bg-card p-4 shadow-sm sm:p-5">
       <div className="mb-4 flex items-center gap-2">
         <FilePenLine className="size-5 text-primary" />
-        <h3 className="font-semibold">{editar ? "Editar evolução" : "Nova evolução"}</h3>
+        <h3 className="font-semibold">Nova evolução</h3>
         <Button variant="ghost" size="icon" className="ml-auto" onClick={onClose} aria-label="Fechar">
           <X />
         </Button>
       </div>
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="grid gap-1.5">
-          <Label className="text-xs text-muted-foreground">Especialidade</Label>
-          <Select value={espId} onValueChange={setEspId} disabled={!!editar}>
-            <SelectTrigger>
+          <Label className={cn("text-xs text-muted-foreground", erroCampo === "especialidadeId" && "text-destructive")}>Especialidade</Label>
+          <Select value={espId} onValueChange={setEspId}>
+            <SelectTrigger aria-invalid={erroCampo === "especialidadeId"}>
               <SelectValue placeholder="Selecione" />
             </SelectTrigger>
             <SelectContent>
@@ -337,8 +321,8 @@ function EvolucaoForm({
           </Select>
         </div>
         <div className="grid gap-1.5">
-          <Label className="text-xs text-muted-foreground">Data do atendimento</Label>
-          <Input type="date" value={data} onChange={(e) => setData(e.target.value)} />
+          <Label className={cn("text-xs text-muted-foreground", erroCampo === "data" && "text-destructive")}>Data do atendimento</Label>
+          <Input type="date" value={data} max={format(new Date(), "yyyy-MM-dd")} onChange={(e) => setData(e.target.value)} aria-invalid={erroCampo === "data"} />
         </div>
         <div className="grid gap-1.5">
           <Label className="text-xs text-muted-foreground">Vincular a atendimento</Label>
@@ -377,9 +361,10 @@ function EvolucaoForm({
       </div>
 
       <Textarea
-        className="mt-3 min-h-52 text-[15px] leading-relaxed"
+        className={cn("mt-3 min-h-52 text-[15px] leading-relaxed", erroCampo === "conteudo" && "border-destructive")}
         placeholder="Descreva a sessão: objetivos trabalhados, estratégias, resposta da criança, orientações à família..."
         value={texto}
+        maxLength={20000}
         onChange={(e) => setTexto(e.target.value)}
       />
 
@@ -396,13 +381,19 @@ function EvolucaoForm({
         }
       />
 
+      <p className="mt-4 flex items-start gap-2 rounded-lg bg-muted p-3 text-xs text-muted-foreground">
+        <Lock className="mt-0.5 size-3.5 shrink-0" />
+        Ao salvar, a evolução e o progresso das metas ficam assinados e não podem mais ser editados nem apagados. Correções
+        posteriores são feitas por adendo.
+      </p>
+
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <p className="text-xs text-muted-foreground">
           Assinatura: <span className="font-medium text-foreground">{me.nome}</span>
           {me.conselho || me.registro ? ` — ${[me.conselho, me.registro].filter(Boolean).join(" ")}` : " — registro não cadastrado"}
         </p>
-        <Button onClick={salvar} disabled={salvando} className="w-full sm:w-auto">
-          {salvando && <Loader2 className="animate-spin" />} Salvar evolução
+        <Button onClick={salvar} disabled={registrar.isPending} className="w-full sm:w-auto">
+          {registrar.isPending && <Loader2 className="animate-spin" />} Assinar e salvar evolução
         </Button>
       </div>
     </div>
