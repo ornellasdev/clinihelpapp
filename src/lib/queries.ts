@@ -373,3 +373,35 @@ export const listaEsperaQuery = queryOptions({
     ),
 });
 export type ItemEspera = Awaited<ReturnType<NonNullable<typeof listaEsperaQuery.queryFn>>>[number];
+
+export const termosPacienteQuery = (pacienteId: string) =>
+  queryOptions({
+    queryKey: ["termos", pacienteId],
+    queryFn: async () =>
+      ok(
+        await supabase
+          .from("termos_assinaturas")
+          .select("id, tipo, titulo, status, created_at, solicitado_por_nome, assinado_em, assinante_nome, assinante_parentesco, decisao")
+          .eq("paciente_id", pacienteId)
+          .order("created_at", { ascending: false }),
+      ),
+  });
+
+export const termosModelosQuery = queryOptions({
+  queryKey: ["termos_modelos"],
+  staleTime: 5 * 60_000,
+  queryFn: async () => ok(await supabase.from("termos_modelos").select("*").eq("ativo", true).order("titulo")),
+});
+
+export const relatoriosLiberadosQuery = (pacienteId: string) =>
+  queryOptions({
+    queryKey: ["relatorios_liberados", pacienteId],
+    queryFn: async () =>
+      ok(
+        await supabase
+          .from("relatorios_liberados")
+          .select("*")
+          .eq("paciente_id", pacienteId)
+          .order("created_at", { ascending: false }),
+      ),
+  });
