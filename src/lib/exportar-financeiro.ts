@@ -72,12 +72,23 @@ export function totalizar(linhas: LinhaExportacao[]) {
 const numBR = (n: number) => n.toFixed(2).replace(".", ",");
 
 /** CSV no padrão brasileiro: separador ";" e vírgula decimal, para abrir direto no Excel. */
+const esc = (bruto: string) => {
+  // Impede que textos começando com = + - @ (ou tab/CR) virem fórmulas ao abrir no Excel.
+  const v = /^[=+\-@\t\r]/.test(bruto) ? `'${bruto}` : bruto;
+  return /[";\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+};
+
+/** CSV genérico (mesma proteção contra fórmulas), para outros relatórios. */
+export function gerarCsvTabela(cabecalho: string[], linhas: (string | number)[][]): string {
+  const corpo = linhas.map((l) => l.map((v) => (typeof v === "number" ? numBR(v) : esc(v))).join(";"));
+  return "\uFEFF" + [cabecalho.map(esc).join(";"), ...corpo].join("\r\n");
+}
+
+export function exportarCsvTabela(cabecalho: string[], linhas: (string | number)[][], nomeBase: string) {
+  baixar(new Blob([gerarCsvTabela(cabecalho, linhas)], { type: "text/csv;charset=utf-8" }), `${nomeBase}.csv`);
+}
+
 export function gerarCsv(linhas: LinhaExportacao[]): string {
-  const esc = (bruto: string) => {
-    // Impede que textos começando com = + - @ (ou tab/CR) virem fórmulas ao abrir no Excel.
-    const v = /^[=+\-@\t\r]/.test(bruto) ? `'${bruto}` : bruto;
-    return /[";\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
-  };
   const cab = COLUNAS.map((c) => esc(c.titulo)).join(";");
   const corpo = linhas.map((l) =>
     COLUNAS.map((c) => {

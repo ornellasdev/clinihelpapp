@@ -18,6 +18,9 @@ export const AREAS_AUDITORIA: Record<string, string> = {
   convenio_valores: "Valores de convênio",
   cobrancas: "Cobranças",
   lista_espera: "Lista de espera",
+  guias_convenio: "Guias de convênio",
+  liberacoes_atendimento: "Liberações do dia",
+  glosas: "Glosas",
 };
 
 /** Áreas que aparecem no filtro; o prontuário só para quem pode ver esses registros. */
@@ -92,10 +95,27 @@ const CAMPOS: Record<string, string> = {
   horario_obs: "Horário preferido",
   prioridade: "Prioridade",
   encerrado_em: "Encerrado em",
+  codigo_tuss: "Código TUSS",
+  codigo_guia: "Código da guia",
+  codigo_faturamento: "Código de faturamento",
+  sessoes_solicitadas: "Sessões solicitadas",
+  sessoes_autorizadas: "Sessões autorizadas",
+  data_solicitacao: "Data da solicitação",
+  data_liberacao: "Data da liberação",
+  validade: "Validade",
+  anexo_nome: "Anexo",
+  guia_id: "Guia",
+  token: "Token / senha",
+  liberado_por_nome: "Liberado por",
+  liberado_em: "Liberado em",
+  motivo: "Motivo da glosa",
+  motivo_detalhe: "Detalhe do motivo",
+  data_glosa: "Data da glosa",
+  resolvido_em: "Resolvido em",
 };
 
 /** Campos técnicos que não ajudam quem lê a auditoria. */
-const OCULTOS = new Set(["id", "created_at", "updated_at", "criado_por", "enviado_por", "storage_path", "agendamento_id", "convenio_id_old"]);
+const OCULTOS = new Set(["id", "created_at", "updated_at", "criado_por", "enviado_por", "storage_path", "agendamento_id", "convenio_id_old", "anexo_path", "anexo_mime", "liberado_por"]);
 
 export function rotuloCampo(k: string) {
   if (CAMPOS[k]) return CAMPOS[k];

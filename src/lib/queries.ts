@@ -218,8 +218,9 @@ export const modelosEvolucaoQuery = queryOptions({
   queryFn: async () => ok(await supabase.from("modelos_evolucao").select("*").order("nome")),
 });
 
+// liberacao: só vem preenchida para quem pode ver guias (recepção/gestão/financeiro); para os demais o RLS devolve null.
 const AGENDA_SELECT =
-  "*, paciente:pacientes(id, nome), profissional:profiles(id, nome), sala:salas(id, nome), especialidade:especialidades(id, nome, cor)";
+  "*, liberacao:liberacoes_atendimento(status, token, guia_id), paciente:pacientes(id, nome, convenio_id), profissional:profiles(id, nome), sala:salas(id, nome), especialidade:especialidades(id, nome, cor)";
 
 async function fetchAgenda(inicioISO: string, fimISO: string) {
   return ok(
@@ -405,3 +406,61 @@ export const relatoriosLiberadosQuery = (pacienteId: string) =>
           .order("created_at", { ascending: false }),
       ),
   });
+
+/** Guias de convênio da clínica (recepção, gestão e financeiro). */
+export const guiasQuery = queryOptions({
+  queryKey: ["guias", "lista"],
+  queryFn: () =>
+    todasAsPaginas((de, ate) =>
+      supabase
+        .from("guias_convenio")
+        .select("*, paciente:pacientes(id, nome, carteirinha), convenio:convenios(id, nome, tipo), especialidade:especialidades(id, nome, cor)")
+        .order("created_at", { ascending: false })
+        .order("id")
+        .range(de, ate),
+    ),
+});
+export type Guia = Awaited<ReturnType<NonNullable<typeof guiasQuery.queryFn>>>[number];
+
+/** Sessões confirmadas/realizadas (usadas) e agendadas (reservadas) por guia. */
+export const guiasUsoQuery = queryOptions({
+  queryKey: ["guias", "uso"],
+  queryFn: () =>
+    todasAsPaginas((de, ate) => supabase.from("guias_uso").select("guia_id, usadas, reservadas").order("guia_id").range(de, ate)),
+});
+
+/** Sessões realizadas no período com os códigos da guia, para conferência e lançamento no portal da operadora. */
+export const faturamentoGuiasQuery = (inicioISO: string, fimISO: string) =>
+  queryOptions({
+    queryKey: ["guias", "faturamento", inicioISO, fimISO],
+    queryFn: () =>
+      todasAsPaginas((de, ate) =>
+        supabase
+          .from("agendamentos")
+          .select(
+            "id, inicio, paciente_id, especialidade_id, paciente:pacientes(id, nome, convenio_id, carteirinha), profissional:profiles(nome, conselho, registro_profissional), especialidade:especialidades(nome), liberacao:liberacoes_atendimento(status, token, guia:guias_convenio(id, codigo_tuss, codigo_guia, codigo_faturamento, convenio_id, status)), fin:atendimento_financeiro(valor)",
+          )
+          .eq("status", "realizado")
+          .gte("inicio", inicioISO)
+          .lt("inicio", fimISO)
+          .order("inicio")
+          .order("id")
+          .range(de, ate),
+      ),
+  });
+export type LinhaFaturamento = Awaited<ReturnType<NonNullable<ReturnType<typeof faturamentoGuiasQuery>["queryFn"]>>>[number];
+
+/** Glosas (só gestão e financeiro pelo RLS). */
+export const glosasQuery = queryOptions({
+  queryKey: ["glosas"],
+  queryFn: () =>
+    todasAsPaginas((de, ate) =>
+      supabase
+        .from("glosas")
+        .select("*, paciente:pacientes(id, nome), convenio:convenios(id, nome), guia:guias_convenio(id, codigo_guia), agendamento:agendamentos(id, inicio)")
+        .order("data_glosa", { ascending: false })
+        .order("id")
+        .range(de, ate),
+    ),
+});
+export type Glosa = Awaited<ReturnType<NonNullable<typeof glosasQuery.queryFn>>>[number];

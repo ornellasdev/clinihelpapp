@@ -631,6 +631,258 @@ export type Database = {
           },
         ]
       }
+      glosas: {
+        Row: {
+          agendamento_id: string | null
+          clinica_id: string
+          convenio_id: string
+          created_at: string
+          criado_por: string | null
+          data_glosa: string
+          guia_id: string | null
+          id: string
+          motivo: string
+          motivo_detalhe: string | null
+          paciente_id: string
+          resolvido_em: string | null
+          status: string
+          updated_at: string
+          valor: number
+        }
+        Insert: {
+          agendamento_id?: string | null
+          clinica_id?: string
+          convenio_id: string
+          created_at?: string
+          criado_por?: string | null
+          data_glosa?: string
+          guia_id?: string | null
+          id?: string
+          motivo: string
+          motivo_detalhe?: string | null
+          paciente_id: string
+          resolvido_em?: string | null
+          status?: string
+          updated_at?: string
+          valor: number
+        }
+        Update: {
+          agendamento_id?: string | null
+          clinica_id?: string
+          convenio_id?: string
+          created_at?: string
+          criado_por?: string | null
+          data_glosa?: string
+          guia_id?: string | null
+          id?: string
+          motivo?: string
+          motivo_detalhe?: string | null
+          paciente_id?: string
+          resolvido_em?: string | null
+          status?: string
+          updated_at?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "glosas_agendamento_id_fkey"
+            columns: ["agendamento_id"]
+            isOneToOne: false
+            referencedRelation: "agendamentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "glosas_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "glosas_convenio_id_fkey"
+            columns: ["convenio_id"]
+            isOneToOne: false
+            referencedRelation: "convenios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "glosas_guia_id_fkey"
+            columns: ["guia_id"]
+            isOneToOne: false
+            referencedRelation: "guias_convenio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "glosas_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "pacientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guias_convenio: {
+        Row: {
+          anexo_mime: string | null
+          anexo_nome: string | null
+          anexo_path: string | null
+          clinica_id: string
+          codigo_faturamento: string
+          codigo_guia: string
+          codigo_tuss: string
+          convenio_id: string
+          created_at: string
+          criado_por: string | null
+          data_liberacao: string | null
+          data_solicitacao: string
+          especialidade_id: string
+          id: string
+          observacoes: string | null
+          paciente_id: string
+          sessoes_autorizadas: number | null
+          sessoes_solicitadas: number
+          status: string
+          updated_at: string
+          validade: string | null
+        }
+        Insert: {
+          anexo_mime?: string | null
+          anexo_nome?: string | null
+          anexo_path?: string | null
+          clinica_id?: string
+          codigo_faturamento: string
+          codigo_guia: string
+          codigo_tuss: string
+          convenio_id: string
+          created_at?: string
+          criado_por?: string | null
+          data_liberacao?: string | null
+          data_solicitacao?: string
+          especialidade_id: string
+          id?: string
+          observacoes?: string | null
+          paciente_id: string
+          sessoes_autorizadas?: number | null
+          sessoes_solicitadas: number
+          status?: string
+          updated_at?: string
+          validade?: string | null
+        }
+        Update: {
+          anexo_mime?: string | null
+          anexo_nome?: string | null
+          anexo_path?: string | null
+          clinica_id?: string
+          codigo_faturamento?: string
+          codigo_guia?: string
+          codigo_tuss?: string
+          convenio_id?: string
+          created_at?: string
+          criado_por?: string | null
+          data_liberacao?: string | null
+          data_solicitacao?: string
+          especialidade_id?: string
+          id?: string
+          observacoes?: string | null
+          paciente_id?: string
+          sessoes_autorizadas?: number | null
+          sessoes_solicitadas?: number
+          status?: string
+          updated_at?: string
+          validade?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guias_convenio_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guias_convenio_convenio_id_fkey"
+            columns: ["convenio_id"]
+            isOneToOne: false
+            referencedRelation: "convenios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guias_convenio_especialidade_id_fkey"
+            columns: ["especialidade_id"]
+            isOneToOne: false
+            referencedRelation: "especialidades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guias_convenio_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "pacientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      liberacoes_atendimento: {
+        Row: {
+          agendamento_id: string
+          clinica_id: string
+          created_at: string
+          guia_id: string | null
+          liberado_em: string | null
+          liberado_por: string | null
+          liberado_por_nome: string | null
+          status: string
+          token: string | null
+          updated_at: string
+        }
+        Insert: {
+          agendamento_id: string
+          clinica_id?: string
+          created_at?: string
+          guia_id?: string | null
+          liberado_em?: string | null
+          liberado_por?: string | null
+          liberado_por_nome?: string | null
+          status?: string
+          token?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agendamento_id?: string
+          clinica_id?: string
+          created_at?: string
+          guia_id?: string | null
+          liberado_em?: string | null
+          liberado_por?: string | null
+          liberado_por_nome?: string | null
+          status?: string
+          token?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "liberacoes_atendimento_agendamento_id_fkey"
+            columns: ["agendamento_id"]
+            isOneToOne: true
+            referencedRelation: "agendamentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "liberacoes_atendimento_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "liberacoes_atendimento_guia_id_fkey"
+            columns: ["guia_id"]
+            isOneToOne: false
+            referencedRelation: "guias_convenio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lista_espera: {
         Row: {
           clinica_id: string
@@ -1476,7 +1728,22 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      guias_uso: {
+        Row: {
+          guia_id: string | null
+          reservadas: number | null
+          usadas: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "liberacoes_atendimento_guia_id_fkey"
+            columns: ["guia_id"]
+            isOneToOne: false
+            referencedRelation: "guias_convenio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       can_view_especialidade: {

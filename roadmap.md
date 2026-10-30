@@ -31,3 +31,10 @@
 - [x] Área da família (/familia): entrada por código no e-mail; agenda, cobranças, recibos e relatórios liberados
 - [x] Termos com assinatura no dedo (consentimento de tratamento e uso de imagem); comprovante em PDF
 - [ ] E-mails com a marca da clínica e aviso de termo novo (depende de um domínio de e-mail próprio)
+
+## Guias de convênio e glosas (controle interno)
+- [x] Guias com os 3 códigos (TUSS, guia, faturamento), sessões solicitadas/autorizadas, datas e anexo
+- [x] Liberações do dia para a recepção (pendente / aguardando / liberado + token) e baixa automática do saldo
+- [x] Alertas na agenda e avisos de renovação (vencimento e poucas sessões)
+- [x] Conferência mensal do faturamento (planilha) e controle de glosas
+- [x] Glosas no painel de Indicadores (KPI)
