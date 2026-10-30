@@ -6,8 +6,9 @@ import { ptBR } from "date-fns/locale";
 import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { convenioValoresQuery, conveniosQuery, equipeQuery, financeiroQuery } from "@/lib/queries";
+import { cobrancasQuery, convenioValoresQuery, conveniosQuery, equipeQuery, financeiroQuery, meQuery, recebimentosAtivosQuery } from "@/lib/queries";
 import { TabelaConvenios } from "@/components/financeiro/TabelaConvenios";
+import { CobrancasAba, periodoCobrancas } from "@/components/cobrancas/CobrancasAba";
 import { useMe } from "@/hooks/use-me";
 import { podeGerirFinanceiro } from "@/lib/permissions";
 import { formatarMoeda, repasseDevido, valorCobrado } from "@/lib/financeiro";
@@ -17,11 +18,12 @@ import { PageHeader } from "@/components/PageHeader";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import { Download, FileDown, FileSpreadsheet, FileText } from "lucide-react";
+import { Download, FileDown, FileSpreadsheet, FileText, Receipt, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { exportarCsv, exportarPdf, exportarXlsx, gerarCsv, montarLinhas } from "@/lib/exportar-financeiro";
+import { exportarCsv, exportarPdf, exportarXlsx, montarLinhas } from "@/lib/exportar-financeiro";
 
 const mesAtual = () => format(new Date(), "yyyy-MM");
 
@@ -195,10 +197,8 @@ function AbaAtendimentos() {
 
   return (
     <div>
-
-
       <div className="mb-5 flex flex-wrap gap-2">
-        <Input type="month" value={mes} onChange={(e) => e.target.value && navigate({ search: (s) => ({ ...s, mes: e.target.value }) })} className="w-auto" />
+        <Input type="month" value={mes} onChange={(e) => e.target.value && navigate({ search: (s) => ({ ...s, mes: e.target.value }) })} className="w-auto" aria-label="Mês" />
         <Select value={status} onValueChange={(v) => navigate({ search: (s) => ({ ...s, status: v }) })}>
           <SelectTrigger className="w-full sm:w-80">
             <SelectValue />
@@ -228,6 +228,24 @@ function AbaAtendimentos() {
             </SelectContent>
           </Select>
         )}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="ml-auto">
+              <Download /> Exportar
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onSelect={() => exportar("pdf")}>
+              <FileText /> PDF
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => exportar("xlsx")}>
+              <FileSpreadsheet /> Excel (.xlsx)
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => exportar("csv")}>
+              <FileDown /> CSV
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className={cn("mb-6 grid gap-3", gestor ? "grid-cols-2 lg:grid-cols-4" : "grid-cols-1 sm:grid-cols-3")}>
