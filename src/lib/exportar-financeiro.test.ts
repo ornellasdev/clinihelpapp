@@ -29,3 +29,16 @@ describe("exportação financeira", () => {
     expect(linha).toContain(";150,00;60,00;90,00;60,00;Sim;Não");
   });
 });
+
+describe("CSV seguro contra fórmulas", () => {
+  it("neutraliza nomes que começam com = + - @", () => {
+    const linhas = montarLinhas(
+      [{ ...base, paciente: { nome: '=HYPERLINK("http://x")' }, profissional: { nome: "@SUM(A1)" } }],
+      () => "Realizado",
+    );
+    const csv = gerarCsv(linhas);
+    expect(csv).toContain(`"'=HYPERLINK(""http://x"")"`);
+    expect(csv).toContain("'@SUM(A1)");
+    expect(csv).not.toMatch(/;=|;@/);
+  });
+});
