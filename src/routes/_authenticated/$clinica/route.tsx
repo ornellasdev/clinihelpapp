@@ -88,19 +88,23 @@ function ClinicLayout() {
   const queryClient = useQueryClient();
   const [menuAberto, setMenuAberto] = useState(false);
 
-  async function sair() {
-    if (me.dev) {
+  async function sair(motivo?: "inatividade") {
+    if (me.dev && !motivo) {
       await queryClient.cancelQueries();
       queryClient.clear();
       navigate({ to: "/dev", replace: true });
       return;
     }
-    await supabase.rpc("registrar_acesso", { _acao: "logout" });
+    if (!me.dev) await supabase.rpc("registrar_acesso", { _acao: motivo === "inatividade" ? "logout_inatividade" : "logout" });
     await queryClient.cancelQueries();
     queryClient.clear();
     await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
+    if (motivo === "inatividade") toast.info("Por segurança, a sessão foi encerrada após 15 minutos sem uso. Entre novamente.");
+    navigate({ to: me.dev ? "/dev" : "/auth", replace: true });
   }
+
+  // Saída automática após 15 minutos sem uso (vale para todas as abas abertas).
+  const { restante, continuar } = useLogoffInatividade(() => void sair("inatividade"));
 
   if (me.papeis.length === 0 || !me.clinica) {
     return (
