@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { MSG_SENHA_FRACA, senhaForte } from "./senha";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { slugValido } from "./clinica-slug";
 
@@ -46,7 +47,7 @@ const novaClinicaSchema = z.object({
   slug: z.string().trim().refine(slugValido, "Endereço inválido"),
   masterNome: z.string().trim().min(2).max(120),
   masterEmail: z.string().trim().email().max(255),
-  masterSenha: z.string().min(8).max(72),
+  masterSenha: z.string().refine(senhaForte, MSG_SENHA_FRACA),
 });
 
 export const criarClinica = createServerFn({ method: "POST" })
@@ -80,7 +81,7 @@ export const criarClinica = createServerFn({ method: "POST" })
     const id = created.user.id;
     await supabaseAdmin
       .from("profiles")
-      .upsert({ id, nome: data.masterNome, email: data.masterEmail, clinica_id: clinica.id });
+      .upsert({ id, nome: data.masterNome, email: data.masterEmail, clinica_id: clinica.id, senha_temporaria: true });
     await supabaseAdmin.from("user_roles").insert({ user_id: id, role: "master", clinica_id: clinica.id });
     await supabaseAdmin
       .from("especialidades")

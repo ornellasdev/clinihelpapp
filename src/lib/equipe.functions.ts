@@ -1,6 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { MSG_SENHA_FRACA, senhaForte } from "./senha";
+
+const senhaTemporariaSchema = z.string().refine(senhaForte, MSG_SENHA_FRACA);
 
 const papelSchema = z.enum(["master", "administrador", "recepcao", "profissional", "financeiro"]);
 
@@ -33,7 +36,7 @@ async function bloquearAlvoMaster(supabase: any, isMaster: boolean, alvoId: stri
 const membroSchema = z.object({
   nome: z.string().trim().min(2).max(120),
   email: z.string().trim().email().max(255),
-  password: z.string().min(8).max(72),
+  password: senhaTemporariaSchema,
   telefone: z.string().trim().max(30).optional().default(""),
   conselho: z.string().trim().max(20).optional().default(""),
   registro: z.string().trim().max(40).optional().default(""),
@@ -70,6 +73,7 @@ export const criarMembro = createServerFn({ method: "POST" })
       telefone: data.telefone || null,
       conselho: data.conselho || null,
       registro_profissional: data.registro || null,
+      senha_temporaria: true,
     });
     await supabaseAdmin.from("user_roles").insert(data.papeis.map((role) => ({ user_id: id, role, clinica_id: clinicaId })));
     if (data.especialidades.length) {
@@ -127,7 +131,7 @@ export const definirAtivo = createServerFn({ method: "POST" })
 export const redefinirSenha = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { userId: string; password: string }) =>
-    z.object({ userId: z.string().uuid(), password: z.string().min(8).max(72) }).parse(input),
+    z.object({ userId: z.string().uuid(), password: senhaTemporariaSchema }).parse(input),
   )
   .handler(async ({ data, context }) => {
     const { isMaster, clinicaId, nome: nomeAutor } = await exigirGestor(context.supabase, context.userId);
@@ -136,6 +140,8 @@ export const redefinirSenha = createServerFn({ method: "POST" })
     await exigirMesmaClinica(supabaseAdmin, clinicaId, data.userId);
     const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, { password: data.password });
     if (error) throw new Error(error.message);
+    // Senha temporária: no próximo login a pessoa precisa criar a própria senha.
+    await supabaseAdmin.from("profiles").update({ senha_temporaria: true }).eq("id", data.userId);
     const { registrarAuditoria } = await import("./auditoria.server");
     const { data: alvo } = await supabaseAdmin.from("profiles").select("nome, email").eq("id", data.userId).maybeSingle();
     await registrarAuditoria(supabaseAdmin, {
@@ -143,6 +149,35 @@ export const redefinirSenha = createServerFn({ method: "POST" })
       usuarioNome: nomeAutor,
       usuarioId: context.userId,
       acao: "redefiniu_senha",
+      registroId: data.userId,
+      descricao: [alvo?.nome, alvo?.email].filter(Boolean).join(" · "),
+    });
+    return { ok: true };
+  });
+
+/** Apaga o autenticador cadastrado (celular perdido/trocado). No próximo login a pessoa cadastra outro. */
+export const redefinirDuasEtapas = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { userId: string }) => z.object({ userId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { isMaster, clinicaId, nome: nomeAutor } = await exigirGestor(context.supabase, context.userId);
+    await bloquearAlvoMaster(context.supabase, isMaster, data.userId);
+    if (data.userId === context.userId) throw new Error("Você não pode apagar a verificação em duas etapas da própria conta.");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await exigirMesmaClinica(supabaseAdmin, clinicaId, data.userId);
+    const { data: lista, error } = await supabaseAdmin.auth.admin.mfa.listFactors({ userId: data.userId });
+    if (error) throw new Error(error.message);
+    for (const f of lista?.factors ?? []) {
+      const r = await supabaseAdmin.auth.admin.mfa.deleteFactor({ userId: data.userId, id: f.id });
+      if (r.error) throw new Error(r.error.message);
+    }
+    const { registrarAuditoria } = await import("./auditoria.server");
+    const { data: alvo } = await supabaseAdmin.from("profiles").select("nome, email").eq("id", data.userId).maybeSingle();
+    await registrarAuditoria(supabaseAdmin, {
+      clinicaId,
+      usuarioNome: nomeAutor,
+      usuarioId: context.userId,
+      acao: "redefiniu_2fa",
       registroId: data.userId,
       descricao: [alvo?.nome, alvo?.email].filter(Boolean).join(" · "),
     });
