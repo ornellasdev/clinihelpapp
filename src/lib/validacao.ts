@@ -162,3 +162,9 @@ export function vencimentoValido(iso: string, hoje = new Date()): boolean {
 
 /** Valor para mostrar num campo editável: 150 → "150,00". */
 export const valorParaCampo = (n: number | string | null | undefined) => Number(n ?? 0).toFixed(2).replace(".", ",");
+
+/** "Hoje" no fuso de São Paulo (vale igual no navegador e no servidor). */
+export function hojeEmSaoPaulo(agora = new Date()): Date {
+  const iso = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit" }).format(agora);
+  return new Date(`${iso}T12:00:00`);
+}
