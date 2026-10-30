@@ -51,8 +51,8 @@ Este projeto foi construído utilizando o que há de mais moderno no ecossistema
 
 1. **Clone o repositório:**
    ```sh
-   git clone https://github.com/SEU-USUARIO/clinihelp.git
-   cd clinihelp
+   git clone https://github.com/ornellasdev/clinihelpapp.git
+   cd clinihelpapp
    ```
 
 2. **Instale as dependências:**
