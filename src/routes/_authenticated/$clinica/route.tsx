@@ -13,7 +13,7 @@ import {
   LogOut,
   Menu,
   ShieldAlert,
-  ScrollText,
+  ShieldCheck,
   Users,
   UserRoundCog,
   Wallet,
@@ -66,7 +66,7 @@ type Item = {
     | "/$clinica/indicadores"
     | "/$clinica/equipe"
     | "/$clinica/salas"
-    | "/$clinica/auditoria";
+    | "/$clinica/seguranca";
   label: string;
   icon: LucideIcon;
   papeis?: Papel[];
@@ -82,7 +82,7 @@ const ITENS: Item[] = [
   { to: "/$clinica/indicadores", label: "Indicadores (KPI)", icon: ChartColumn, papeis: ["master", "administrador", "financeiro"] },
   { to: "/$clinica/equipe", label: "Equipe", icon: UserRoundCog, papeis: ["master", "administrador"] },
   { to: "/$clinica/salas", label: "Salas", icon: DoorOpen, papeis: ["master", "administrador"] },
-  { to: "/$clinica/auditoria", label: "Auditoria", icon: ScrollText, papeis: ["master", "administrador"] },
+  { to: "/$clinica/seguranca", label: "Segurança e auditoria", icon: ShieldCheck, papeis: ["master", "administrador"] },
 ];
 
 function ClinicLayout() {

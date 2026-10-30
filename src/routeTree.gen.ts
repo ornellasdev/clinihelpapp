@@ -33,6 +33,7 @@ import { Route as AuthenticatedClinicaSalasRouteImport } from './routes/_authent
 import { Route as AuthenticatedClinicaPacientesIndexRouteImport } from './routes/_authenticated/$clinica/pacientes.index'
 import { Route as AuthenticatedClinicaPacientesIdRouteImport } from './routes/_authenticated/$clinica/pacientes.$id'
 import { Route as AuthenticatedClinicaPacientesNovoRouteImport } from './routes/_authenticated/$clinica/pacientes.novo'
+import { Route as AuthenticatedClinicaSegurancaAuditoriaRouteImport } from './routes/_authenticated/$clinica/seguranca.auditoria'
 import { Route as ApiPublicAsaasWebhookRouteImport } from './routes/api/public/asaas/webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -170,6 +171,12 @@ const AuthenticatedClinicaPacientesNovoRoute =
     path: '/pacientes/novo',
     getParentRoute: () => AuthenticatedClinicaRouteRoute,
   } as any)
+const AuthenticatedClinicaSegurancaAuditoriaRoute =
+  AuthenticatedClinicaSegurancaAuditoriaRouteImport.update({
+    id: '/seguranca/auditoria',
+    path: '/seguranca/auditoria',
+    getParentRoute: () => AuthenticatedClinicaRouteRoute,
+  } as any)
 const ApiPublicAsaasWebhookRoute = ApiPublicAsaasWebhookRouteImport.update({
   id: '/api/public/asaas/webhook',
   path: '/api/public/asaas/webhook',
@@ -199,6 +206,7 @@ export interface FileRoutesByFullPath {
   '/$clinica/': typeof AuthenticatedClinicaIndexRoute
   '/$clinica/pacientes/$id': typeof AuthenticatedClinicaPacientesIdRoute
   '/$clinica/pacientes/novo': typeof AuthenticatedClinicaPacientesNovoRoute
+  '/$clinica/seguranca/auditoria': typeof AuthenticatedClinicaSegurancaAuditoriaRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/$clinica/pacientes/': typeof AuthenticatedClinicaPacientesIndexRoute
 }
@@ -223,6 +231,7 @@ export interface FileRoutesByTo {
   '/$clinica': typeof AuthenticatedClinicaIndexRoute
   '/$clinica/pacientes/$id': typeof AuthenticatedClinicaPacientesIdRoute
   '/$clinica/pacientes/novo': typeof AuthenticatedClinicaPacientesNovoRoute
+  '/$clinica/seguranca/auditoria': typeof AuthenticatedClinicaSegurancaAuditoriaRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/$clinica/pacientes': typeof AuthenticatedClinicaPacientesIndexRoute
 }
@@ -251,6 +260,7 @@ export interface FileRoutesById {
   '/_authenticated/$clinica/': typeof AuthenticatedClinicaIndexRoute
   '/_authenticated/$clinica/pacientes/$id': typeof AuthenticatedClinicaPacientesIdRoute
   '/_authenticated/$clinica/pacientes/novo': typeof AuthenticatedClinicaPacientesNovoRoute
+  '/_authenticated/$clinica/seguranca/auditoria': typeof AuthenticatedClinicaSegurancaAuditoriaRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/_authenticated/$clinica/pacientes/': typeof AuthenticatedClinicaPacientesIndexRoute
 }
@@ -279,6 +289,7 @@ export interface FileRouteTypes {
     | '/$clinica/'
     | '/$clinica/pacientes/$id'
     | '/$clinica/pacientes/novo'
+    | '/$clinica/seguranca/auditoria'
     | '/api/public/asaas/webhook'
     | '/$clinica/pacientes/'
   fileRoutesByTo: FileRoutesByTo
@@ -303,6 +314,7 @@ export interface FileRouteTypes {
     | '/$clinica'
     | '/$clinica/pacientes/$id'
     | '/$clinica/pacientes/novo'
+    | '/$clinica/seguranca/auditoria'
     | '/api/public/asaas/webhook'
     | '/$clinica/pacientes'
   id:
@@ -330,6 +342,7 @@ export interface FileRouteTypes {
     | '/_authenticated/$clinica/'
     | '/_authenticated/$clinica/pacientes/$id'
     | '/_authenticated/$clinica/pacientes/novo'
+    | '/_authenticated/$clinica/seguranca/auditoria'
     | '/api/public/asaas/webhook'
     | '/_authenticated/$clinica/pacientes/'
   fileRoutesById: FileRoutesById
@@ -515,6 +528,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClinicaPacientesNovoRouteImport
       parentRoute: typeof AuthenticatedClinicaRouteRoute
     }
+    '/_authenticated/$clinica/seguranca/auditoria': {
+      id: '/_authenticated/$clinica/seguranca/auditoria'
+      path: '/seguranca/auditoria'
+      fullPath: '/$clinica/seguranca/auditoria'
+      preLoaderRoute: typeof AuthenticatedClinicaSegurancaAuditoriaRouteImport
+      parentRoute: typeof AuthenticatedClinicaRouteRoute
+    }
     '/api/public/asaas/webhook': {
       id: '/api/public/asaas/webhook'
       path: '/api/public/asaas/webhook'
@@ -540,6 +560,7 @@ interface AuthenticatedClinicaRouteRouteChildren {
   AuthenticatedClinicaIndexRoute: typeof AuthenticatedClinicaIndexRoute
   AuthenticatedClinicaPacientesIdRoute: typeof AuthenticatedClinicaPacientesIdRoute
   AuthenticatedClinicaPacientesNovoRoute: typeof AuthenticatedClinicaPacientesNovoRoute
+  AuthenticatedClinicaSegurancaAuditoriaRoute: typeof AuthenticatedClinicaSegurancaAuditoriaRoute
   AuthenticatedClinicaPacientesIndexRoute: typeof AuthenticatedClinicaPacientesIndexRoute
 }
 
@@ -560,6 +581,8 @@ const AuthenticatedClinicaRouteRouteChildren: AuthenticatedClinicaRouteRouteChil
     AuthenticatedClinicaPacientesIdRoute: AuthenticatedClinicaPacientesIdRoute,
     AuthenticatedClinicaPacientesNovoRoute:
       AuthenticatedClinicaPacientesNovoRoute,
+    AuthenticatedClinicaSegurancaAuditoriaRoute:
+      AuthenticatedClinicaSegurancaAuditoriaRoute,
     AuthenticatedClinicaPacientesIndexRoute:
       AuthenticatedClinicaPacientesIndexRoute,
   }
