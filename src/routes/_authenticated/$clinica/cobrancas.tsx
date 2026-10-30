@@ -7,7 +7,7 @@ import { ptBR } from "date-fns/locale";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Ban, Copy, ExternalLink, MessageCircle, MoreHorizontal, Plus, RefreshCw, Receipt } from "lucide-react";
-import { cobrancasQuery, recebimentosAtivosQuery } from "@/lib/queries";
+import { cobrancasQuery, meQuery, recebimentosAtivosQuery } from "@/lib/queries";
 import { cancelarCobranca, sincronizarCobranca } from "@/lib/cobrancas.functions";
 import { STATUS_COBRANCA, linkPagamento, mensagemWhatsapp, podeCancelar, rotuloForma, type StatusCobranca } from "@/lib/cobrancas";
 import { formatarMoeda } from "@/lib/financeiro";
@@ -22,7 +22,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import { meQuery } from "@/lib/queries";
 
 const mesAtual = () => format(new Date(), "yyyy-MM");
 const periodo = (mes: string) => {
