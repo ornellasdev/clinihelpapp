@@ -26,15 +26,15 @@ export type { StatusAgenda } from "./agenda-status";
  * cinza = faltas não cobradas, vermelho = falta não justificada (cobrada).
  * className = etiqueta; bloco = cartão na grade da agenda.
  */
-export const STATUS_AGENDA: Record<StatusAgenda, { label: string; curto: string; className: string; bloco: string }> = {
-  agendado: { label: "Agendado", curto: "Agendado", className: "bg-status-agendado/15 text-status-agendado", bloco: "bg-status-agendado/10 border-status-agendado/45" },
-  aguardando: { label: "Aguardando atendimento", curto: "Aguardando", className: "bg-status-aguardando/25 text-warning-foreground", bloco: "bg-status-aguardando/20 border-status-aguardando/70" },
-  em_atendimento: { label: "Em atendimento", curto: "Em atendimento", className: "bg-status-atendimento/15 text-status-atendimento", bloco: "bg-status-atendimento/15 border-status-atendimento/60" },
-  finalizado: { label: "Finalizado", curto: "Finalizado", className: "bg-status-finalizado/15 text-status-finalizado", bloco: "bg-status-finalizado/12 border-status-finalizado/50" },
-  falta_justificada: { label: "Falta justificada", curto: "Falta justif.", className: "bg-status-sem-cobranca/15 text-status-sem-cobranca", bloco: "bg-status-sem-cobranca/12 border-status-sem-cobranca/45" },
-  falta_terapeuta: { label: "Falta do terapeuta", curto: "Falta terapeuta", className: "bg-status-sem-cobranca/15 text-status-sem-cobranca", bloco: "bg-status-sem-cobranca/12 border-status-sem-cobranca/45" },
-  falta_cobrada: { label: "Falta não justificada", curto: "Falta cobrada", className: "bg-status-falta/15 text-status-falta", bloco: "bg-status-falta/12 border-status-falta/55" },
-  cancelado: { label: "Cancelado", curto: "Cancelado", className: "bg-muted text-muted-foreground line-through", bloco: "bg-muted border-border opacity-50" },
+export const STATUS_AGENDA: Record<StatusAgenda, { label: string; curto: string; className: string; bloco: string; ponto: string }> = {
+  agendado: { label: "Agendado", curto: "Agendado", className: "bg-status-agendado/15 text-status-agendado", bloco: "bg-status-agendado/10 border-status-agendado/45", ponto: "bg-status-agendado" },
+  aguardando: { label: "Aguardando atendimento", curto: "Aguardando", className: "bg-status-aguardando/25 text-warning-foreground", bloco: "bg-status-aguardando/20 border-status-aguardando/70", ponto: "bg-status-aguardando" },
+  em_atendimento: { label: "Em atendimento", curto: "Em atendimento", className: "bg-status-atendimento/15 text-status-atendimento", bloco: "bg-status-atendimento/15 border-status-atendimento/60", ponto: "bg-status-atendimento" },
+  finalizado: { label: "Finalizado", curto: "Finalizado", className: "bg-status-finalizado/15 text-status-finalizado", bloco: "bg-status-finalizado/12 border-status-finalizado/50", ponto: "bg-status-finalizado" },
+  falta_justificada: { label: "Falta justificada", curto: "Falta justif.", className: "bg-status-sem-cobranca/15 text-status-sem-cobranca", bloco: "bg-status-sem-cobranca/12 border-status-sem-cobranca/45", ponto: "bg-status-sem-cobranca" },
+  falta_terapeuta: { label: "Falta do terapeuta", curto: "Falta terapeuta", className: "bg-status-sem-cobranca/15 text-status-sem-cobranca", bloco: "bg-status-sem-cobranca/12 border-status-sem-cobranca/45", ponto: "bg-status-sem-cobranca" },
+  falta_cobrada: { label: "Falta não justificada", curto: "Falta cobrada", className: "bg-status-falta/15 text-status-falta", bloco: "bg-status-falta/12 border-status-falta/55", ponto: "bg-status-falta" },
+  cancelado: { label: "Cancelado", curto: "Cancelado", className: "bg-muted text-muted-foreground line-through", bloco: "bg-muted border-border opacity-50", ponto: "bg-muted-foreground" },
 };
 
 export function idade(dataNascimento?: string | null) {

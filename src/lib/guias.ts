@@ -33,7 +33,7 @@ export type GuiaBase = {
   created_at: string;
 };
 
-/** Sessões confirmadas ou realizadas vinculadas a cada guia. */
+/** Sessões finalizadas vinculadas a cada guia (faltas não descontam). */
 export type UsoGuias = ReadonlyMap<string, number>;
 
 export function usoPorGuia(linhas: readonly { guia_id: string | null; usadas: number | null }[]): Map<string, number> {

@@ -225,7 +225,7 @@ export function AgendamentoDetalhe({ item, onClose }: { item: AgendaItem | null;
 function BotaoStatus({ s, rotulo, onClick, carregando, disabled }: { s: StatusAgenda; rotulo?: string | undefined; onClick: () => void; carregando?: boolean; disabled?: boolean }) {
   return (
     <Button size="sm" variant="outline" onClick={onClick} disabled={disabled} className="gap-1.5">
-      {carregando ? <Loader2 className="animate-spin" /> : <span className={cn("size-2 rounded-full", STATUS_AGENDA[s].className)} aria-hidden />}
+      {carregando ? <Loader2 className="animate-spin" /> : <span className={cn("size-2 rounded-full", STATUS_AGENDA[s].ponto)} aria-hidden />}
       {rotulo ?? STATUS_AGENDA[s].label}
     </Button>
   );
