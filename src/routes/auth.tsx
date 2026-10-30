@@ -177,7 +177,7 @@ function AuthPage() {
               1,
               "Crie sua senha",
               "Por segurança, troque a senha temporária que você recebeu por uma senha só sua.",
-              <DefinirSenha onOk={irParaClinica} />,
+              <DefinirSenha onOk={async () => { await irParaClinica(); }} />,
             )}
 
           {modo === "cadastro_2fa" &&

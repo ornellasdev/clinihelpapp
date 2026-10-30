@@ -104,7 +104,7 @@ function EquipePage() {
                   <span className="font-medium">{m.nome}</span>
                   {!m.ativo && <span className="rounded bg-destructive/10 px-1.5 text-[10px] uppercase text-destructive">inativo</span>}
                   {m.ativo && m.senha_temporaria && (
-                    <span className="rounded bg-warning/15 px-1.5 text-[10px] uppercase text-warning-foreground">senha temporária</span>
+                    <span className="rounded bg-warning/20 px-1.5 text-[10px] uppercase text-foreground">senha temporária</span>
                   )}
                 </div>
                 <div className="text-xs text-muted-foreground">
