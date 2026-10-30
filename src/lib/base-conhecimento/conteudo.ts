@@ -368,7 +368,7 @@ export const ARTIGOS: Artigo[] = [
       {
         itens: [
           "Repasse = percentual por sessão; o padrão vem do “repasse de profissional” e pode ser editado em cada atendimento.",
-          "Cobra: Finalizado e Falta cobrada. Não cobra: faltas justificada/do terapeuta e cancelado.",
+          "Cobra: Finalizado e Falta não justificada. Não cobra: faltas justificada/do terapeuta e cancelado.",
           "Exporta PDF, CSV e Excel com os dados que a pessoa já está vendo.",
           "Valores aceitam vírgula, até 2 casas, até R$ 1.000.000; repasse de 0 a 100%.",
         ],

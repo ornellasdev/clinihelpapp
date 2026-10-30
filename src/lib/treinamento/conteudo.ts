@@ -296,7 +296,7 @@ export const MODULOS: Modulo[] = [
       },
       {
         pergunta: "O terapeuta faltou. Qual tipo de falta registrar?",
-        opcoes: ["Falta justificada", "Falta cobrada", "Falta do terapeuta, podendo marcar reposição", "Cancelar a sessão"],
+        opcoes: ["Falta justificada", "Falta não justificada", "Falta do terapeuta, podendo marcar reposição", "Cancelar a sessão"],
         correta: 2,
         explicacao: "“Falta do terapeuta” não cobra, não gera repasse e permite sinalizar reposição.",
       },
