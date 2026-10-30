@@ -20,3 +20,9 @@
 ## Indicadores e lista de espera
 - [x] Página Indicadores: ocupação das salas, faltas, faturamento do mês e valores a receber
 - [x] Lista de espera: pacientes aguardando vaga por especialidade, dias e horário
+
+## Prontuário mais completo
+- [ ] Plano terapêutico com metas por especialidade e gráfico de progresso a partir das evoluções
+- [ ] Modelos de evolução por especialidade (preenchimento rápido no celular)
+- [ ] Evolução por voz: grava no celular, IA escreve, profissional revisa antes de salvar
+- [ ] Relatório do paciente em PDF por período (escola, médico, convênio)
