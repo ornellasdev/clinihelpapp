@@ -14,7 +14,7 @@ describe("migração de dados", () => {
   it("modelo de pacientes é válido sem erros", () => {
     const { linhas } = validarPlanilha("pacientes", lerCsv(modeloCsv("pacientes")));
     expect(linhas).toHaveLength(1);
-    expect(linhas[0].erros).toEqual([]);
+    expect(linhas[0]?.erros).toEqual([]);
   });
 
   it("aponta CPF e telefone inválidos com o número da linha", () => {
@@ -22,17 +22,17 @@ describe("migração de dados", () => {
       ["nome", "responsavel_cpf", "responsavel_telefone"],
       ["Ana", "111.111.111-11", "91234"],
     ]);
-    expect(linhas[0].linha).toBe(2);
-    expect(linhas[0].erros).toEqual(["Responsável 1: CPF inválido.", "Responsável 1: telefone sem DDD."]);
+    expect(linhas[0]?.linha).toBe(2);
+    expect(linhas[0]?.erros).toEqual(["Responsável 1: CPF inválido.", "Responsável 1: telefone sem DDD."]);
   });
 
   it("tipo de convênio precisa ser convenio, particular ou liminar", () => {
     const { linhas } = validarPlanilha("convenios", [["nome", "tipo"], ["X Saúde", "plano"]]);
-    expect(linhas[0].erros).toHaveLength(1);
+    expect(linhas[0]?.erros).toHaveLength(1);
   });
 
   it("detecta linha repetida", () => {
     const { linhas } = validarPlanilha("convenios", [["nome"], ["Unimed"], ["Unimed"]]);
-    expect(linhas[1].erros).toContain("Linha repetida no arquivo.");
+    expect(linhas[1]?.erros).toContain("Linha repetida no arquivo.");
   });
 });

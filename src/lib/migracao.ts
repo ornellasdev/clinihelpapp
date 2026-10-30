@@ -96,19 +96,19 @@ export function validarPlanilha(tipo: TipoMigracao, tabela: string[][]): { linha
     const dados: Record<string, string | null> = {};
     for (const c of COLUNAS[tipo]) dados[c] = bruto[c] ? bruto[c].slice(0, 500) : null;
     const erros: string[] = [];
-    const nome = dados.nome ?? "";
+    const nome = dados["nome"] ?? "";
     if (nome.length < 2) erros.push("Nome obrigatório.");
 
     if (tipo === "convenios") {
-      const t = (dados.tipo ?? "convenio").toLowerCase();
+      const t = (dados["tipo"] ?? "convenio").toLowerCase();
       if (!(TIPOS_CONVENIO as readonly string[]).includes(t)) erros.push("Tipo deve ser convenio, particular ou liminar.");
-      dados.tipo = t;
+      dados["tipo"] = t;
       if (nome.length > 80) erros.push("Nome do convênio até 80 caracteres.");
     } else {
-      if (dados.data_nascimento) {
-        const d = lerData(dados.data_nascimento);
+      if (dados["data_nascimento"]) {
+        const d = lerData(dados["data_nascimento"]);
         if (!d) erros.push("Data de nascimento inválida (use DD/MM/AAAA).");
-        dados.data_nascimento = d;
+        dados["data_nascimento"] = d;
       }
       for (const p of ["", "responsavel_", "responsavel2_", "responsavel_financeiro_"]) {
         const cpf = dados[`${p}cpf`];
@@ -121,17 +121,17 @@ export function validarPlanilha(tipo: TipoMigracao, tabela: string[][]): { linha
           if (em) dados[`${p}email`] = em.toLowerCase();
         }
       }
-      if (dados.cep && !cepValido(dados.cep)) erros.push("CEP inválido.");
-      if (dados.uf) {
-        dados.uf = dados.uf.toUpperCase();
-        if (!/^[A-Z]{2}$/.test(dados.uf)) erros.push("UF deve ter 2 letras.");
+      if (dados["cep"] && !cepValido(dados["cep"])) erros.push("CEP inválido.");
+      if (dados["uf"]) {
+        dados["uf"] = dados["uf"].toUpperCase();
+        if (!/^[A-Z]{2}$/.test(dados["uf"])) erros.push("UF deve ter 2 letras.");
       }
-      if (dados.sexo) {
-        const s = dados.sexo.toUpperCase()[0];
-        dados.sexo = s === "M" || s === "F" ? s : null;
+      if (dados["sexo"]) {
+        const s = dados["sexo"].toUpperCase()[0];
+        dados["sexo"] = s === "M" || s === "F" ? s : null;
       }
     }
-    const chave = normCab(nome) + "|" + (dados.data_nascimento ?? dados.cpf ?? "");
+    const chave = normCab(nome) + "|" + (dados["data_nascimento"] ?? dados["cpf"] ?? "");
     if (nome && nomesVistos.has(chave)) erros.push("Linha repetida no arquivo.");
     nomesVistos.add(chave);
     return { linha: i + 2, dados, erros };

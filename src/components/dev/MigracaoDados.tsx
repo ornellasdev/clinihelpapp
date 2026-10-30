@@ -126,7 +126,7 @@ export default function MigracaoDados() {
           </p>
           {erros.length > 0 && (
             <ul className="max-h-48 overflow-auto rounded-md border bg-destructive/5 p-3 text-sm text-destructive space-y-1">
-              {erros.slice(0, 100).map((l) => <li key={l.linha}>Linha {l.linha} ({l.dados.nome ?? "sem nome"}): {l.erros.join(" ")}</li>)}
+              {erros.slice(0, 100).map((l) => <li key={l.linha}>Linha {l.linha} ({l.dados["nome"] ?? "sem nome"}): {l.erros.join(" ")}</li>)}
             </ul>
           )}
           <div className="max-h-80 overflow-auto rounded-md border">

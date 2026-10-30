@@ -38,8 +38,8 @@ export const importarDados = createServerFn({ method: "POST" })
       const { data: existentes } = await supabaseAdmin.from("convenios").select("nome").eq("clinica_id", clinica.id);
       const vistos = new Set((existentes ?? []).map((c) => chave(c.nome)));
       const novos = linhas
-        .filter((l) => !vistos.has(chave(l.dados.nome!)))
-        .map((l) => ({ clinica_id: clinica.id, nome: l.dados.nome!, tipo: l.dados.tipo ?? "convenio", criado_por: context.userId }));
+        .filter((l) => !vistos.has(chave(l.dados["nome"]!)))
+        .map((l) => ({ clinica_id: clinica.id, nome: l.dados["nome"]!, tipo: l.dados["tipo"] ?? "convenio", criado_por: context.userId }));
       ignorados = linhas.length - novos.length;
       for (const parte of lote(novos)) {
         const { error } = await supabaseAdmin.from("convenios").insert(parte);
@@ -54,11 +54,11 @@ export const importarDados = createServerFn({ method: "POST" })
       const vistos = new Set((existentes ?? []).map((p) => chave(p.nome, p.data_nascimento)));
       const porNome = new Map((convenios ?? []).map((c) => [chave(c.nome), c.id]));
       const novos = linhas
-        .filter((l) => !vistos.has(chave(l.dados.nome!, l.dados.data_nascimento)))
+        .filter((l) => !vistos.has(chave(l.dados["nome"]!, l.dados["data_nascimento"])))
         .map((l) => {
           const d = l.dados;
-          const convenioId = d.convenio ? (porNome.get(chave(d.convenio)) ?? null) : null;
-          return { ...d, nome: d.nome!, convenio_id: convenioId, clinica_id: clinica.id, criado_por: context.userId };
+          const convenioId = d["convenio"] ? (porNome.get(chave(d["convenio"])) ?? null) : null;
+          return { ...d, nome: d["nome"]!, convenio_id: convenioId, clinica_id: clinica.id, criado_por: context.userId };
         });
       ignorados = linhas.length - novos.length;
       for (const parte of lote(novos)) {
