@@ -4,7 +4,6 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { novaCobrancaSchema, type NovaCobranca } from "./cobranca-schema";
 import {
   STATUS_QUE_PRENDEM_SESSAO,
-  VALOR_MINIMO_COBRANCA,
   billingTypeAsaas,
   cpfValido,
   pagadorDoPaciente,
