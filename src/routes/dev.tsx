@@ -33,14 +33,33 @@ export const Route = createFileRoute("/dev")({
 
 type Etapa = "carregando" | "entrar" | "negado" | "verificar" | "painel";
 
+/** Erro devolvido pelo login Google na URL (fluxo com redirecionamento), já removido da barra de endereço. */
+function lerErroDaUrl(): string | null {
+  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  const busca = new URLSearchParams(window.location.search);
+  const erro = hash.get("error_description") ?? hash.get("error") ?? busca.get("error_description") ?? busca.get("error");
+  if (erro) window.history.replaceState(null, "", window.location.pathname);
+  return erro;
+}
+
+function loginCancelado(msg: string) {
+  return /cancel|closed|fechad/i.test(msg);
+}
+
 function DevPage() {
   const qc = useQueryClient();
   const [etapa, setEtapa] = useState<Etapa>("carregando");
   const [email, setEmail] = useState<string | null>(null);
 
   async function avaliar() {
+    const erroUrl = lerErroDaUrl();
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) {
+      if (erroUrl && !loginCancelado(erroUrl)) {
+        setEmail(null);
+        setEtapa("negado");
+        return;
+      }
       setEtapa("entrar");
       return;
     }
@@ -59,6 +78,7 @@ function DevPage() {
     await qc.cancelQueries();
     qc.clear();
     await supabase.auth.signOut();
+    setEmail(null);
     setEtapa("entrar");
   }
 
@@ -69,7 +89,7 @@ function DevPage() {
           <Logo />
           <span className="rounded-full bg-sidebar-accent px-3 py-1 text-xs font-medium">Desenvolvedor</span>
         </div>
-        {etapa !== "entrar" && etapa !== "carregando" && (
+        {etapa !== "entrar" && etapa !== "carregando" && email && (
           <Button variant="ghost" size="sm" onClick={sair} className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground">
             <LogOut className="size-4" /> Sair
           </Button>
@@ -77,14 +97,24 @@ function DevPage() {
       </header>
       <main className="mx-auto max-w-5xl p-6">
         {etapa === "carregando" && <Loader2 className="mx-auto mt-24 size-6 animate-spin text-muted-foreground" />}
-        {etapa === "entrar" && <Entrar />}
+        {etapa === "entrar" && (
+          <Entrar onNegado={() => { setEmail(null); setEtapa("negado"); }} />
+        )}
         {etapa === "negado" && (
-          <Cartao titulo="Sem acesso de desenvolvedor">
-            <p className="text-sm text-muted-foreground">
-              A conta {email ? <strong>{email}</strong> : "atual"} não está autorizada para esta área.
+          <div role="alert" className="mx-auto mt-16 max-w-md rounded-2xl border border-destructive/40 bg-card p-8 shadow-sm">
+            <div className="flex size-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+              <ShieldX className="size-6" />
+            </div>
+            <h1 className="mt-4 text-xl font-semibold">Acesso negado</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {email ? <>A conta <strong className="text-foreground">{email}</strong></> : "Esta conta Google"} não possui
+              autorização para acessar a área de desenvolvedor do CliniHelp.
             </p>
-            <Button className="mt-6" variant="outline" onClick={sair}>Entrar com outra conta</Button>
-          </Cartao>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Se você trabalha em uma clínica, entre pela página de login da sua clínica.
+            </p>
+            <Button className="mt-6 w-full" variant="outline" onClick={sair}>Entrar com outra conta</Button>
+          </div>
         )}
         {etapa === "verificar" && <Verificar onOk={avaliar} />}
         {etapa === "painel" && <PainelClinicas />}
@@ -102,14 +132,18 @@ function Cartao({ titulo, children }: { titulo: string; children: React.ReactNod
   );
 }
 
-function Entrar() {
+function Entrar({ onNegado }: { onNegado: () => void }) {
   const [enviando, setEnviando] = useState(false);
   async function google() {
     setEnviando(true);
     const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: `${window.location.origin}/dev` });
     if (r.error) {
-      toast.error("Não foi possível entrar com o Google. Confira se o e-mail é de um desenvolvedor autorizado.");
       setEnviando(false);
+      if (loginCancelado(r.error.message ?? "")) {
+        toast.info("Login com o Google cancelado.");
+        return;
+      }
+      onNegado();
       return;
     }
     if (r.redirected) return;
