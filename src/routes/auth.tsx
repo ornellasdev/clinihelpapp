@@ -7,6 +7,8 @@ import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { erroAmigavel } from "@/lib/ui-helpers";
 import { Logo } from "@/components/Logo";
+import { DefinirSenha } from "@/components/seguranca/DefinirSenha";
+import { VerificacaoDuasEtapas } from "@/components/seguranca/VerificacaoDuasEtapas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -163,6 +165,35 @@ function AuthPage() {
                 <Button asChild><Link to="/familia">Área da família</Link></Button>
                 <Button variant="outline" onClick={sair}>Sair</Button>
               </div>
+            </div>
+          )}
+
+          {modo === "senha" &&
+            etapa(
+              1,
+              "Crie sua senha",
+              "Por segurança, troque a senha temporária que você recebeu por uma senha só sua.",
+              <DefinirSenha onOk={irParaClinica} />,
+            )}
+
+          {modo === "cadastro_2fa" &&
+            etapa(
+              2,
+              "Ative a verificação em duas etapas",
+              "Obrigatória para todos da equipe. Depois, a cada login, será pedido o código do aplicativo.",
+              <VerificacaoDuasEtapas onOk={verificado} />,
+            )}
+
+          {modo === "codigo" && (
+            <div className="space-y-5">
+              <div>
+                <h2 className="text-2xl font-semibold">Verificação em duas etapas</h2>
+                <p className="mt-1 text-sm text-muted-foreground">Perdeu ou trocou de celular? Peça ao master para redefinir a sua verificação.</p>
+              </div>
+              <VerificacaoDuasEtapas onOk={verificado} />
+              <Button variant="ghost" className="w-full text-muted-foreground" onClick={sair}>
+                Sair e entrar com outra conta
+              </Button>
             </div>
           )}
         </div>
