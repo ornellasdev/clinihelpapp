@@ -46,3 +46,10 @@ export function papeisAtribuiveis(meusPapeis: readonly Papel[]): Papel[] {
 /** Auditoria: master e administrador; os registros de prontuário só aparecem para o master. */
 export const podeVerAuditoria = (p: readonly Papel[]) => ehGestor(p);
 export const veAuditoriaDoProntuario = (p: readonly Papel[]) => p.includes("master");
+
+/** Guias de convênio: recepção, gestão e financeiro veem e cadastram; liberação do dia é da recepção/gestão. */
+export const podeVerGuias = (p: readonly Papel[]) => ehGestor(p) || temPapel(p, "recepcao", "financeiro");
+export const podeLiberarSessao = (p: readonly Papel[]) => ehGestor(p) || temPapel(p, "recepcao");
+export const podeRemoverGuia = (p: readonly Papel[]) => ehGestor(p) || temPapel(p, "recepcao");
+/** Glosas envolvem valores: só gestão e financeiro. */
+export const podeGerirGlosas = (p: readonly Papel[]) => ehGestor(p) || temPapel(p, "financeiro");

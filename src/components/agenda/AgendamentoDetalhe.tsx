@@ -29,6 +29,7 @@ export function AgendamentoDetalhe({ item, onClose }: { item: AgendaItem | null;
     toast.success(`Status: ${STATUS_AGENDA[status].label}`);
     qc.invalidateQueries({ queryKey: ["agenda"] });
     qc.invalidateQueries({ queryKey: ["financeiro"] });
+    qc.invalidateQueries({ queryKey: ["guias"] });
     onClose();
   }
 
