@@ -134,6 +134,20 @@
       "when": 1793367451516,
       "tag": "0018_guias_convenio_glosas",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1793369156258,
+      "tag": "0019_fechamento_liminar",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1793369181123,
+      "tag": "0020_fechamento_liminar_total_por_comando",
+      "breakpoints": true
     }
   ]
 }

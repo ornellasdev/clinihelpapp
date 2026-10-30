@@ -27,6 +27,7 @@ import { Route as AuthenticatedClinicaEsperaRouteImport } from './routes/_authen
 import { Route as AuthenticatedClinicaFinanceiroRouteImport } from './routes/_authenticated/$clinica/financeiro'
 import { Route as AuthenticatedClinicaGuiasRouteImport } from './routes/_authenticated/$clinica/guias'
 import { Route as AuthenticatedClinicaIndicadoresRouteImport } from './routes/_authenticated/$clinica/indicadores'
+import { Route as AuthenticatedClinicaLiminaresRouteImport } from './routes/_authenticated/$clinica/liminares'
 import { Route as AuthenticatedClinicaPainelRouteImport } from './routes/_authenticated/$clinica/painel'
 import { Route as AuthenticatedClinicaSalasRouteImport } from './routes/_authenticated/$clinica/salas'
 import { Route as AuthenticatedClinicaPacientesIndexRouteImport } from './routes/_authenticated/$clinica/pacientes.index'
@@ -133,6 +134,12 @@ const AuthenticatedClinicaIndicadoresRoute =
     path: '/indicadores',
     getParentRoute: () => AuthenticatedClinicaRouteRoute,
   } as any)
+const AuthenticatedClinicaLiminaresRoute =
+  AuthenticatedClinicaLiminaresRouteImport.update({
+    id: '/liminares',
+    path: '/liminares',
+    getParentRoute: () => AuthenticatedClinicaRouteRoute,
+  } as any)
 const AuthenticatedClinicaPainelRoute =
   AuthenticatedClinicaPainelRouteImport.update({
     id: '/painel',
@@ -186,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/$clinica/financeiro': typeof AuthenticatedClinicaFinanceiroRoute
   '/$clinica/guias': typeof AuthenticatedClinicaGuiasRoute
   '/$clinica/indicadores': typeof AuthenticatedClinicaIndicadoresRoute
+  '/$clinica/liminares': typeof AuthenticatedClinicaLiminaresRoute
   '/$clinica/painel': typeof AuthenticatedClinicaPainelRoute
   '/$clinica/salas': typeof AuthenticatedClinicaSalasRoute
   '/$clinica/': typeof AuthenticatedClinicaIndexRoute
@@ -209,6 +217,7 @@ export interface FileRoutesByTo {
   '/$clinica/financeiro': typeof AuthenticatedClinicaFinanceiroRoute
   '/$clinica/guias': typeof AuthenticatedClinicaGuiasRoute
   '/$clinica/indicadores': typeof AuthenticatedClinicaIndicadoresRoute
+  '/$clinica/liminares': typeof AuthenticatedClinicaLiminaresRoute
   '/$clinica/painel': typeof AuthenticatedClinicaPainelRoute
   '/$clinica/salas': typeof AuthenticatedClinicaSalasRoute
   '/$clinica': typeof AuthenticatedClinicaIndexRoute
@@ -236,6 +245,7 @@ export interface FileRoutesById {
   '/_authenticated/$clinica/financeiro': typeof AuthenticatedClinicaFinanceiroRoute
   '/_authenticated/$clinica/guias': typeof AuthenticatedClinicaGuiasRoute
   '/_authenticated/$clinica/indicadores': typeof AuthenticatedClinicaIndicadoresRoute
+  '/_authenticated/$clinica/liminares': typeof AuthenticatedClinicaLiminaresRoute
   '/_authenticated/$clinica/painel': typeof AuthenticatedClinicaPainelRoute
   '/_authenticated/$clinica/salas': typeof AuthenticatedClinicaSalasRoute
   '/_authenticated/$clinica/': typeof AuthenticatedClinicaIndexRoute
@@ -263,6 +273,7 @@ export interface FileRouteTypes {
     | '/$clinica/financeiro'
     | '/$clinica/guias'
     | '/$clinica/indicadores'
+    | '/$clinica/liminares'
     | '/$clinica/painel'
     | '/$clinica/salas'
     | '/$clinica/'
@@ -286,6 +297,7 @@ export interface FileRouteTypes {
     | '/$clinica/financeiro'
     | '/$clinica/guias'
     | '/$clinica/indicadores'
+    | '/$clinica/liminares'
     | '/$clinica/painel'
     | '/$clinica/salas'
     | '/$clinica'
@@ -312,6 +324,7 @@ export interface FileRouteTypes {
     | '/_authenticated/$clinica/financeiro'
     | '/_authenticated/$clinica/guias'
     | '/_authenticated/$clinica/indicadores'
+    | '/_authenticated/$clinica/liminares'
     | '/_authenticated/$clinica/painel'
     | '/_authenticated/$clinica/salas'
     | '/_authenticated/$clinica/'
@@ -460,6 +473,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClinicaIndicadoresRouteImport
       parentRoute: typeof AuthenticatedClinicaRouteRoute
     }
+    '/_authenticated/$clinica/liminares': {
+      id: '/_authenticated/$clinica/liminares'
+      path: '/liminares'
+      fullPath: '/$clinica/liminares'
+      preLoaderRoute: typeof AuthenticatedClinicaLiminaresRouteImport
+      parentRoute: typeof AuthenticatedClinicaRouteRoute
+    }
     '/_authenticated/$clinica/painel': {
       id: '/_authenticated/$clinica/painel'
       path: '/painel'
@@ -514,6 +534,7 @@ interface AuthenticatedClinicaRouteRouteChildren {
   AuthenticatedClinicaFinanceiroRoute: typeof AuthenticatedClinicaFinanceiroRoute
   AuthenticatedClinicaGuiasRoute: typeof AuthenticatedClinicaGuiasRoute
   AuthenticatedClinicaIndicadoresRoute: typeof AuthenticatedClinicaIndicadoresRoute
+  AuthenticatedClinicaLiminaresRoute: typeof AuthenticatedClinicaLiminaresRoute
   AuthenticatedClinicaPainelRoute: typeof AuthenticatedClinicaPainelRoute
   AuthenticatedClinicaSalasRoute: typeof AuthenticatedClinicaSalasRoute
   AuthenticatedClinicaIndexRoute: typeof AuthenticatedClinicaIndexRoute
@@ -532,6 +553,7 @@ const AuthenticatedClinicaRouteRouteChildren: AuthenticatedClinicaRouteRouteChil
     AuthenticatedClinicaFinanceiroRoute: AuthenticatedClinicaFinanceiroRoute,
     AuthenticatedClinicaGuiasRoute: AuthenticatedClinicaGuiasRoute,
     AuthenticatedClinicaIndicadoresRoute: AuthenticatedClinicaIndicadoresRoute,
+    AuthenticatedClinicaLiminaresRoute: AuthenticatedClinicaLiminaresRoute,
     AuthenticatedClinicaPainelRoute: AuthenticatedClinicaPainelRoute,
     AuthenticatedClinicaSalasRoute: AuthenticatedClinicaSalasRoute,
     AuthenticatedClinicaIndexRoute: AuthenticatedClinicaIndexRoute,

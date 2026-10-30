@@ -38,3 +38,9 @@
 - [x] Alertas na agenda e avisos de renovação (vencimento e poucas sessões)
 - [x] Conferência mensal do faturamento (planilha) e controle de glosas
 - [x] Glosas no painel de Indicadores (KPI)
+
+## Liminar (sem guia)
+- [x] Fechamento mensal por paciente com lista de presença em PDF
+- [x] Nota fiscal (número + emissão) com vencimento automático em 30 dias
+- [x] Registro do pagamento marca as sessões do mês como pagas
+- [x] Liminares a receber / vencidas nos Indicadores (KPI)

@@ -5,8 +5,9 @@ import { addMonths, format, parseISO, startOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { z } from "zod";
 import { DoorOpen, Hourglass, UserX, Wallet, CircleDollarSign } from "lucide-react";
-import { aReceberQuery, glosasQuery, indicadoresQuery, listaEsperaQuery, meQuery, salasQuery } from "@/lib/queries";
+import { aReceberQuery, faturasLiminarQuery, glosasQuery, indicadoresQuery, listaEsperaQuery, meQuery, salasQuery } from "@/lib/queries";
 import { resumoGlosas } from "@/lib/guias";
+import { diasParaVencer, resumoLiminar, situacaoFatura } from "@/lib/liminar";
 import { useClinica } from "@/hooks/use-clinica";
 import { useMe } from "@/hooks/use-me";
 import { podeGerirFinanceiro } from "@/lib/permissions";
@@ -40,6 +41,7 @@ export const Route = createFileRoute("/_authenticated/$clinica/indicadores")({
       context.queryClient.ensureQueryData(salasQuery),
       context.queryClient.ensureQueryData(listaEsperaQuery),
       context.queryClient.ensureQueryData(glosasQuery),
+      context.queryClient.ensureQueryData(faturasLiminarQuery),
     ]);
   },
   head: () => ({ meta: [{ title: "Indicadores (KPI) — CliniHelp" }] }),
@@ -81,6 +83,7 @@ function IndicadoresPage() {
   const { data: salas } = useSuspenseQuery(salasQuery);
   const { data: espera } = useSuspenseQuery(listaEsperaQuery);
   const { data: glosas } = useSuspenseQuery(glosasQuery);
+  const { data: faturasLiminar } = useSuspenseQuery(faturasLiminarQuery);
   const [horario, setHorario] = useHorario(`clinihelp:horario:${me.clinica?.id ?? clinica}`);
 
   const salasAtivas = salas.filter((s) => s.ativa);
@@ -133,6 +136,12 @@ function IndicadoresPage() {
   // Retido = glosas ainda em aberto (de qualquer mês); o mês mostra o que foi glosado nele.
   const glosasGeral = useMemo(() => resumoGlosas(glosas), [glosas]);
   const glosasMes = useMemo(() => resumoGlosas(glosas.filter((g) => g.data_glosa.startsWith(mes))), [glosas, mes]);
+  const hojeISO = format(new Date(), "yyyy-MM-dd");
+  const liminar = useMemo(() => resumoLiminar(faturasLiminar, hojeISO, mes), [faturasLiminar, hojeISO, mes]);
+  const proximasNotas = useMemo(
+    () => faturasLiminar.filter((f) => f.status === "nf_emitida" && f.vencimento).sort((x, y) => x.vencimento!.localeCompare(y.vencimento!)).slice(0, 5),
+    [faturasLiminar],
+  );
   const aguardando = espera.filter((e) => e.status === "aguardando").length;
   const nomeMes = format(parseISO(`${mes}-01`), "MMMM 'de' yyyy", { locale: ptBR });
 
@@ -254,6 +263,43 @@ function IndicadoresPage() {
                 ))}
               </ul>
             )}
+          </div>
+        </Secao>
+
+        <Secao titulo="Liminares a receber" className="lg:col-span-2">
+          <dl className="mb-4 grid grid-cols-2 gap-2 md:grid-cols-4">
+            <Valor label="NF emitida, a receber" v={liminar.aReceber.valor} />
+            <Valor label="Vencidas" v={liminar.vencidas.valor} />
+            <Valor label="Aguardando emissão da NF" v={liminar.aguardandoNf.valor} />
+            <Valor label="Recebido neste mês" v={liminar.recebidoNoMes.valor} />
+          </dl>
+          {proximasNotas.length === 0 ? (
+            <Vazio>Nenhuma nota fiscal de liminar a receber.</Vazio>
+          ) : (
+            <ul className="divide-y text-sm">
+              {proximasNotas.map((f) => {
+                const dias = diasParaVencer(f.vencimento!, hojeISO);
+                const vencida = situacaoFatura(f, hojeISO) === "vencida";
+                return (
+                  <li key={f.id} className="flex items-center justify-between gap-2 py-2">
+                    <span className="min-w-0 truncate">
+                      {f.paciente?.nome} <span className="text-muted-foreground">· NF {f.nf_numero}</span>
+                    </span>
+                    <span className="shrink-0 tabular-nums">
+                      <span className={cn("mr-2 text-xs", vencida ? "text-destructive" : "text-muted-foreground")}>
+                        {format(parseISO(f.vencimento!), "dd/MM/yyyy")} · {dias === 0 ? "vence hoje" : dias > 0 ? `em ${dias} d` : `vencida há ${-dias} d`}
+                      </span>
+                      <strong>{formatarMoeda(f.valor)}</strong>
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          <div className="mt-4 text-right">
+            <Link to="/$clinica/liminares" params={{ clinica }} className="text-sm font-medium text-primary">
+              Ver liminares
+            </Link>
           </div>
         </Secao>
 

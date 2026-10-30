@@ -7,6 +7,7 @@ import {
   ChartColumn,
   DoorOpen,
   FileCheck2,
+  Scale,
   Hourglass,
   LayoutDashboard,
   LogOut,
@@ -58,6 +59,7 @@ type Item = {
     | "/$clinica/cobrancas"
     | "/$clinica/espera"
     | "/$clinica/guias"
+    | "/$clinica/liminares"
     | "/$clinica/indicadores"
     | "/$clinica/equipe"
     | "/$clinica/salas"
@@ -73,6 +75,7 @@ const ITENS: Item[] = [
   { to: "/$clinica/financeiro", label: "Financeiro", icon: Wallet, papeis: ["master", "administrador", "financeiro", "profissional"] },
   { to: "/$clinica/cobrancas", label: "Cobranças", icon: Receipt, papeis: ["master", "administrador", "financeiro"] },
   { to: "/$clinica/guias", label: "Guias de convênio", icon: FileCheck2, papeis: ["master", "administrador", "recepcao", "financeiro"] },
+  { to: "/$clinica/liminares", label: "Liminares", icon: Scale, papeis: ["master", "administrador", "financeiro"] },
   { to: "/$clinica/espera", label: "Lista de espera", icon: Hourglass },
   { to: "/$clinica/indicadores", label: "Indicadores (KPI)", icon: ChartColumn, papeis: ["master", "administrador", "financeiro"] },
   { to: "/$clinica/equipe", label: "Equipe", icon: UserRoundCog, papeis: ["master", "administrador"] },

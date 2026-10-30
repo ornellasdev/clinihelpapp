@@ -21,6 +21,7 @@ export const AREAS_AUDITORIA: Record<string, string> = {
   guias_convenio: "Guias de convênio",
   liberacoes_atendimento: "Liberações do dia",
   glosas: "Glosas",
+  faturas_liminar: "Liminares",
 };
 
 /** Áreas que aparecem no filtro; o prontuário só para quem pode ver esses registros. */
@@ -112,6 +113,13 @@ const CAMPOS: Record<string, string> = {
   motivo_detalhe: "Detalhe do motivo",
   data_glosa: "Data da glosa",
   resolvido_em: "Resolvido em",
+  competencia: "Competência",
+  quantidade_sessoes: "Sessões",
+  nf_numero: "Nº da nota fiscal",
+  nf_emissao: "Emissão da NF",
+  vencimento: "Vencimento",
+  pago_em: "Pago em",
+  valor_pago: "Valor pago",
 };
 
 /** Campos técnicos que não ajudam quem lê a auditoria. */
