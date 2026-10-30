@@ -24,6 +24,7 @@ import { Route as AuthenticatedClinicaSalasRouteImport } from './routes/_authent
 import { Route as AuthenticatedClinicaPacientesIndexRouteImport } from './routes/_authenticated/$clinica/pacientes.index'
 import { Route as AuthenticatedClinicaPacientesIdRouteImport } from './routes/_authenticated/$clinica/pacientes.$id'
 import { Route as AuthenticatedClinicaPacientesNovoRouteImport } from './routes/_authenticated/$clinica/pacientes.novo'
+import { Route as ApiPublicAsaasWebhookRouteImport } from './routes/api/public/asaas/webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -110,6 +111,11 @@ const AuthenticatedClinicaPacientesNovoRoute =
     path: '/pacientes/novo',
     getParentRoute: () => AuthenticatedClinicaRouteRoute,
   } as any)
+const ApiPublicAsaasWebhookRoute = ApiPublicAsaasWebhookRouteImport.update({
+  id: '/api/public/asaas/webhook',
+  path: '/api/public/asaas/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -125,6 +131,7 @@ export interface FileRoutesByFullPath {
   '/$clinica/': typeof AuthenticatedClinicaIndexRoute
   '/$clinica/pacientes/$id': typeof AuthenticatedClinicaPacientesIdRoute
   '/$clinica/pacientes/novo': typeof AuthenticatedClinicaPacientesNovoRoute
+  '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/$clinica/pacientes/': typeof AuthenticatedClinicaPacientesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -140,6 +147,7 @@ export interface FileRoutesByTo {
   '/$clinica': typeof AuthenticatedClinicaIndexRoute
   '/$clinica/pacientes/$id': typeof AuthenticatedClinicaPacientesIdRoute
   '/$clinica/pacientes/novo': typeof AuthenticatedClinicaPacientesNovoRoute
+  '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/$clinica/pacientes': typeof AuthenticatedClinicaPacientesIndexRoute
 }
 export interface FileRoutesById {
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/_authenticated/$clinica/': typeof AuthenticatedClinicaIndexRoute
   '/_authenticated/$clinica/pacientes/$id': typeof AuthenticatedClinicaPacientesIdRoute
   '/_authenticated/$clinica/pacientes/novo': typeof AuthenticatedClinicaPacientesNovoRoute
+  '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/_authenticated/$clinica/pacientes/': typeof AuthenticatedClinicaPacientesIndexRoute
 }
 export interface FileRouteTypes {
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
     | '/$clinica/'
     | '/$clinica/pacientes/$id'
     | '/$clinica/pacientes/novo'
+    | '/api/public/asaas/webhook'
     | '/$clinica/pacientes/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -191,6 +201,7 @@ export interface FileRouteTypes {
     | '/$clinica'
     | '/$clinica/pacientes/$id'
     | '/$clinica/pacientes/novo'
+    | '/api/public/asaas/webhook'
     | '/$clinica/pacientes'
   id:
     | '__root__'
@@ -208,6 +219,7 @@ export interface FileRouteTypes {
     | '/_authenticated/$clinica/'
     | '/_authenticated/$clinica/pacientes/$id'
     | '/_authenticated/$clinica/pacientes/novo'
+    | '/api/public/asaas/webhook'
     | '/_authenticated/$clinica/pacientes/'
   fileRoutesById: FileRoutesById
 }
@@ -216,6 +228,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   DevRoute: typeof DevRoute
+  ApiPublicAsaasWebhookRoute: typeof ApiPublicAsaasWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -325,6 +338,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClinicaPacientesNovoRouteImport
       parentRoute: typeof AuthenticatedClinicaRouteRoute
     }
+    '/api/public/asaas/webhook': {
+      id: '/api/public/asaas/webhook'
+      path: '/api/public/asaas/webhook'
+      fullPath: '/api/public/asaas/webhook'
+      preLoaderRoute: typeof ApiPublicAsaasWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -378,6 +398,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   DevRoute: DevRoute,
+  ApiPublicAsaasWebhookRoute: ApiPublicAsaasWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
