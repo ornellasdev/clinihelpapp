@@ -2,7 +2,8 @@ import { useClinica } from "@/hooks/use-clinica";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Clock, DoorOpen, FilePenLine, Loader2, Paperclip, Play, RotateCcw, Trash2, User, UserCheck, UserRound } from "lucide-react";
+import { Clock, DoorOpen, FilePenLine, Loader2, MessageCircle, Paperclip, Play, RotateCcw, Trash2, User, UserCheck, UserRound } from "lucide-react";
+import { linkWhatsapp, mensagemLembrete, numeroWhatsapp } from "@/lib/lembrete-whatsapp";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { conveniosQuery, type AgendaItem } from "@/lib/queries";
@@ -77,6 +78,24 @@ export function AgendamentoDetalhe({ item, onClose }: { item: AgendaItem | null;
     if (error) { toast.error(erroAmigavel(error.message)); return; }
     qc.invalidateQueries({ queryKey: ["agenda"] });
     onClose();
+  }
+
+  const p = item.paciente;
+  const contatos = [
+    { nome: p?.responsavel_nome ?? "", numero: numeroWhatsapp(p?.responsavel_telefone) },
+    { nome: p?.responsavel2_nome ?? "", numero: numeroWhatsapp(p?.responsavel2_telefone) },
+  ].filter((c, i, arr) => c.numero && arr.findIndex((x) => x.numero === c.numero) === i);
+
+  function enviarLembrete(responsavel: string, numero: string) {
+    const texto = mensagemLembrete({
+      responsavel,
+      crianca: item!.paciente?.nome ?? "",
+      especialidade: item!.especialidade?.nome,
+      profissional: item!.profissional?.nome,
+      clinica: me.clinica?.nome ?? "clínica",
+      inicio: new Date(item!.inicio),
+    });
+    window.open(linkWhatsapp(numero, texto), "_blank", "noopener");
   }
 
   const podeChegar = podeAgendar(me.papeis) && atual === "agendado";
@@ -193,6 +212,21 @@ export function AgendamentoDetalhe({ item, onClose }: { item: AgendaItem | null;
                   {atual !== "cancelado" && <BotaoStatus s="cancelado" onClick={() => mudarStatus("cancelado")} carregando={salvando === "cancelado"} disabled={!!salvando} />}
                 </div>
               </div>
+            </div>
+          )}
+
+          {podeAgendar(me.papeis) && (atual === "agendado" || atual === "aguardando") && (
+            <div className="grid gap-2 border-t pt-4">
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Lembrete por WhatsApp</div>
+              {contatos.length === 0 ? (
+                <p className="text-xs text-muted-foreground">Nenhum telefone válido de responsável na ficha do paciente.</p>
+              ) : (
+                contatos.map((c) => (
+                  <Button key={c.numero} variant="outline" size="sm" className="justify-start" onClick={() => enviarLembrete(c.nome, c.numero)}>
+                    <MessageCircle /> Enviar para {c.nome || "responsável"}
+                  </Button>
+                ))
+              )}
             </div>
           )}
 
