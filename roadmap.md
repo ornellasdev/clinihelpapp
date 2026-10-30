@@ -53,3 +53,8 @@
 - [x] Falta justificada com motivo e atestado (sessão + documentos do paciente), clipe na agenda
 - [x] Falta do terapeuta (sem cobrança/repasse, reposição pendente) e falta cobrada (repasse opcional)
 - [x] Cores por status na agenda, financeiro, indicadores e cobranças ajustados
+
+## Segurança e conformidade (LGPD / ISO 27001 / HIPAA / SOC 2)
+- [x] Etapa 1: banco — vínculos que preservam histórico, exclusão lógica, índices, dados clínicos separados, consentimento LGPD, adendos, auditoria imutável, acesso por papel, views de indicadores
+- [ ] Etapa 2: ficha do paciente grava dados clínicos na tabela própria (e limpar os campos antigos); agenda/lista sem diagnóstico para recepção; tela de adendo + bloquear edição de evolução finalizada; saída automática após 15 min parado; serviços/hooks com validação Zod
+- [ ] Etapa 3: painel de Segurança, Banco e Auditoria (filtros, pacientes sem termo LGPD, integridade)
