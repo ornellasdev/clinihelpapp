@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Loader2, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,8 +16,12 @@ export function VerificacaoDuasEtapas({ onOk }: { onOk: () => void | Promise<voi
   const [codigo, setCodigo] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
+  const iniciado = useRef(false);
 
   useEffect(() => {
+    // Evita dois cadastros simultâneos (o segundo apagaria o QR code mostrado).
+    if (iniciado.current) return;
+    iniciado.current = true;
     (async () => {
       const { data, error } = await supabase.auth.mfa.listFactors();
       if (error) { setErro(error.message); return; }
