@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Building2, ExternalLink, KeyRound, Loader2, LogOut, Plus, ShieldCheck } from "lucide-react";
+import { Building2, ExternalLink, KeyRound, Loader2, LogOut, Plus, ShieldCheck, ShieldX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { meQuery, type Me } from "@/lib/queries";
