@@ -12,7 +12,6 @@ import { errosPorCampo, mensagemDeErro } from "@/services/resultado";
 import {
   FORMAS_COBRANCA,
   STATUS_QUE_PRENDEM_SESSAO,
-  VALOR_MINIMO_COBRANCA,
   cpfValido,
   pagadorDoPaciente,
   type FormaCobranca,
@@ -20,7 +19,7 @@ import {
 } from "@/lib/cobrancas";
 import { formatarMoeda } from "@/lib/financeiro";
 import { ehFaturavel } from "@/lib/agenda-status";
-import { STATUS_AGENDA, erroAmigavel, fmtData, fmtHora } from "@/lib/ui-helpers";
+import { STATUS_AGENDA, fmtData, fmtHora } from "@/lib/ui-helpers";
 import { PacienteCombobox } from "@/components/PacienteCombobox";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
