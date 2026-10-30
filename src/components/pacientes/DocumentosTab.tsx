@@ -78,7 +78,10 @@ export function DocumentosTab({ pacienteId }: { pacienteId: string }) {
         <Upload className="hidden size-8 text-primary sm:block" />
         <div className="flex-1">
           <div className="font-medium">Anexar documentos</div>
-          <div className="text-sm text-muted-foreground">PDF, imagens ou documentos de até 20 MB. Pode tirar foto pelo celular.</div>
+          <div className="text-sm text-muted-foreground">PDF, foto, Word ou Excel de até 20 MB. Pode tirar foto pelo celular.</div>
+          {CLINICAS.has(categoria) && (
+            <div className="mt-1 text-xs text-muted-foreground">{categoria}: visível só para o master e a equipe terapêutica do paciente (e para quem enviou).</div>
+          )}
         </div>
         <Select value={categoria} onValueChange={setCategoria}>
           <SelectTrigger className="sm:w-48">
