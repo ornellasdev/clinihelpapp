@@ -22,12 +22,13 @@ export const enviarCodigoFamilia = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const email = normalizarEmail(data.email);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const filtro = email.replace(/[\\%_]/g, (c) => `\\${c}`);
     const { data: pacientes } = await supabaseAdmin
       .from("pacientes")
       .select("id, clinica:clinicas!inner(ativa)")
       .eq("ativo", true)
       .eq("clinica.ativa", true)
-      .or(`responsavel_email.ilike.${email},responsavel2_email.ilike.${email},responsavel_financeiro_email.ilike.${email}`)
+      .or(`responsavel_email.ilike.${filtro},responsavel2_email.ilike.${filtro},responsavel_financeiro_email.ilike.${filtro}`)
       .limit(1);
     if (!pacientes?.length) return { mensagem: MSG_ENVIO };
 
