@@ -16,46 +16,64 @@ export type Database = {
     Tables: {
       agendamentos: {
         Row: {
+          atendimento_iniciado_em: string | null
+          chegada_em: string | null
           clinica_id: string
           created_at: string
           criado_por: string | null
           especialidade_id: string
+          falta_motivo: string | null
+          falta_repasse: boolean | null
           fim: string
+          finalizado_em: string | null
           id: string
           inicio: string
           observacoes: string | null
           paciente_id: string
           profissional_id: string
+          reposicao_pendente: boolean
           sala_id: string
           status: Database["public"]["Enums"]["agendamento_status"]
           updated_at: string
         }
         Insert: {
+          atendimento_iniciado_em?: string | null
+          chegada_em?: string | null
           clinica_id?: string
           created_at?: string
           criado_por?: string | null
           especialidade_id: string
+          falta_motivo?: string | null
+          falta_repasse?: boolean | null
           fim: string
+          finalizado_em?: string | null
           id?: string
           inicio: string
           observacoes?: string | null
           paciente_id: string
           profissional_id: string
+          reposicao_pendente?: boolean
           sala_id: string
           status?: Database["public"]["Enums"]["agendamento_status"]
           updated_at?: string
         }
         Update: {
+          atendimento_iniciado_em?: string | null
+          chegada_em?: string | null
           clinica_id?: string
           created_at?: string
           criado_por?: string | null
           especialidade_id?: string
+          falta_motivo?: string | null
+          falta_repasse?: boolean | null
           fim?: string
+          finalizado_em?: string | null
           id?: string
           inicio?: string
           observacoes?: string | null
           paciente_id?: string
           profissional_id?: string
+          reposicao_pendente?: boolean
           sala_id?: string
           status?: Database["public"]["Enums"]["agendamento_status"]
           updated_at?: string
@@ -102,9 +120,11 @@ export type Database = {
         Row: {
           agendamento_id: string
           clinica_id: string
+          cobrar: boolean
           observacoes: string | null
           pagamento_status: string
           percentual_repasse: number
+          repassar: boolean
           repasse_pago: boolean
           updated_at: string
           valor: number
@@ -113,9 +133,11 @@ export type Database = {
         Insert: {
           agendamento_id: string
           clinica_id?: string
+          cobrar?: boolean
           observacoes?: string | null
           pagamento_status?: string
           percentual_repasse?: number
+          repassar?: boolean
           repasse_pago?: boolean
           updated_at?: string
           valor?: number
@@ -124,9 +146,11 @@ export type Database = {
         Update: {
           agendamento_id?: string
           clinica_id?: string
+          cobrar?: boolean
           observacoes?: string | null
           pagamento_status?: string
           percentual_repasse?: number
+          repassar?: boolean
           repasse_pago?: boolean
           updated_at?: string
           valor?: number
@@ -1138,6 +1162,7 @@ export type Database = {
       }
       paciente_documentos: {
         Row: {
+          agendamento_id: string | null
           categoria: string
           clinica_id: string
           created_at: string
@@ -1150,6 +1175,7 @@ export type Database = {
           tamanho: number | null
         }
         Insert: {
+          agendamento_id?: string | null
           categoria?: string
           clinica_id?: string
           created_at?: string
@@ -1162,6 +1188,7 @@ export type Database = {
           tamanho?: number | null
         }
         Update: {
+          agendamento_id?: string | null
           categoria?: string
           clinica_id?: string
           created_at?: string
@@ -1174,6 +1201,13 @@ export type Database = {
           tamanho?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "paciente_documentos_agendamento_id_fkey"
+            columns: ["agendamento_id"]
+            isOneToOne: false
+            referencedRelation: "agendamentos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "paciente_documentos_clinica_id_fkey"
             columns: ["clinica_id"]
@@ -1973,9 +2007,12 @@ export type Database = {
     Enums: {
       agendamento_status:
         | "agendado"
-        | "confirmado"
-        | "realizado"
-        | "falta"
+        | "aguardando"
+        | "em_atendimento"
+        | "finalizado"
+        | "falta_justificada"
+        | "falta_terapeuta"
+        | "falta_cobrada"
         | "cancelado"
       app_role:
         | "master"
@@ -2112,9 +2149,12 @@ export const Constants = {
     Enums: {
       agendamento_status: [
         "agendado",
-        "confirmado",
-        "realizado",
-        "falta",
+        "aguardando",
+        "em_atendimento",
+        "finalizado",
+        "falta_justificada",
+        "falta_terapeuta",
+        "falta_cobrada",
         "cancelado",
       ],
       app_role: [

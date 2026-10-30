@@ -148,6 +148,13 @@
       "when": 1793369181123,
       "tag": "0020_fechamento_liminar_total_por_comando",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1793370451121,
+      "tag": "0021_agenda_status_atendimento_faltas",
+      "breakpoints": true
     }
   ]
 }
