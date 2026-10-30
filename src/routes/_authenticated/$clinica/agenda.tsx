@@ -171,7 +171,7 @@ function AgendaPage() {
               </div>
               <div className="truncate text-xs text-muted-foreground">{i.sala?.nome}</div>
             </div>
-            <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium", STATUS_AGENDA[i.status].className, i.documentos?.length && "mr-7")}>
+            <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium", STATUS_AGENDA[i.status].className, i.status === "falta_justificada" && !!i.documentos?.length && "mr-7")}>
               {STATUS_AGENDA[i.status].curto}
             </span>
           </button>
