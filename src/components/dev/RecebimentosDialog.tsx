@@ -14,21 +14,21 @@ const SITUACAO: Record<string, { label: string; texto: string; icone: React.Reac
 
 type Clinica = { id: string; nome: string; pagamentos_ativos: boolean };
 
-/** Desenvolvedor só consulta: quem conecta a conta Asaas é a própria clínica, em Cobranças. */
+/** Desenvolvedor só consulta: quem conecta a conta Asaas é a própria clínica, em Financeiro › Cobranças. */
 export function RecebimentosDialog({ clinica, onClose }: { clinica: Clinica | null; onClose: () => void }) {
   return (
     <Dialog open={!!clinica} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Recebimentos — {clinica?.nome}</DialogTitle>
-          <DialogDescription>Cada clínica conecta a própria conta Asaas na página Cobranças. O dinheiro vai direto para ela.</DialogDescription>
+          <DialogDescription>Cada clínica conecta a própria conta Asaas em Financeiro › Cobranças. O dinheiro vai direto para ela.</DialogDescription>
         </DialogHeader>
         {clinica &&
           (clinica.pagamentos_ativos ? (
             <Situacao clinicaId={clinica.id} />
           ) : (
             <p className="rounded-xl border border-dashed p-4 text-sm text-muted-foreground">
-              Esta clínica ainda não conectou a conta Asaas. O master ou o administrador faz isso em Cobranças.
+              Esta clínica ainda não conectou a conta Asaas. O master ou o administrador faz isso em Financeiro › Cobranças.
             </p>
           ))}
         <DialogFooter>
