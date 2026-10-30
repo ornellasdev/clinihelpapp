@@ -464,3 +464,39 @@ export const glosasQuery = queryOptions({
     ),
 });
 export type Glosa = Awaited<ReturnType<NonNullable<typeof glosasQuery.queryFn>>>[number];
+
+/** Sessões realizadas no mês com o que a lista de presença e o fechamento da liminar precisam (filtra-se o tipo liminar na tela). */
+export const sessoesLiminarQuery = (inicioISO: string, fimISO: string) =>
+  queryOptions({
+    queryKey: ["liminar", "sessoes", inicioISO, fimISO],
+    queryFn: () =>
+      todasAsPaginas((de, ate) =>
+        supabase
+          .from("agendamentos")
+          .select(
+            "id, inicio, fim, paciente_id, paciente:pacientes(id, nome, data_nascimento, cpf, carteirinha, convenio_id, responsavel_nome, responsavel_cpf), profissional:profiles(nome, conselho, registro_profissional), especialidade:especialidades(nome), fin:atendimento_financeiro(valor), item:fatura_liminar_itens(fatura_id)",
+          )
+          .eq("status", "realizado")
+          .gte("inicio", inicioISO)
+          .lt("inicio", fimISO)
+          .order("inicio")
+          .order("id")
+          .range(de, ate),
+      ),
+  });
+export type SessaoLiminar = Awaited<ReturnType<NonNullable<ReturnType<typeof sessoesLiminarQuery>["queryFn"]>>>[number];
+
+/** Fechamentos da liminar (NF, vencimento, pagamento) — só gestão e financeiro pelo RLS. */
+export const faturasLiminarQuery = queryOptions({
+  queryKey: ["liminar", "faturas"],
+  queryFn: () =>
+    todasAsPaginas((de, ate) =>
+      supabase
+        .from("faturas_liminar")
+        .select("*, paciente:pacientes(id, nome), convenio:convenios(id, nome)")
+        .order("competencia", { ascending: false })
+        .order("id")
+        .range(de, ate),
+    ),
+});
+export type FaturaLiminar = Awaited<ReturnType<NonNullable<typeof faturasLiminarQuery.queryFn>>>[number];
