@@ -2411,6 +2411,17 @@ export type Database = {
         Returns: undefined
       }
       registrar_acesso: { Args: { _acao: string }; Returns: undefined }
+      registrar_evolucao: {
+        Args: {
+          _agendamento?: string
+          _conteudo: string
+          _data: string
+          _especialidade: string
+          _metas?: Json
+          _paciente: string
+        }
+        Returns: string
+      }
       responsavel_de: { Args: { _paciente: string }; Returns: boolean }
       tem_especialidade: { Args: { _user_id: string }; Returns: boolean }
       ve_cadastro_completo: { Args: { _uid: string }; Returns: boolean }
