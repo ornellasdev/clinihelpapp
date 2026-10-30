@@ -4,7 +4,7 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { erroAmigavel } from "@/lib/ui-helpers";
 import { percentualRepasse, valorReais } from "@/lib/validacao";
-import { ErroServico, garantir, validar } from "./resultado";
+import { ErroServico, garantir, semIndefinidos, validar } from "./resultado";
 
 const mensagemConvenio = (msg: string) =>
   msg.includes("convenios_nome_unico") ? "Já existe um convênio com esse nome." : erroAmigavel(msg);
@@ -26,15 +26,16 @@ export type NovoConvenio = z.input<typeof convenioSchema>;
 
 export async function criarConvenio(entrada: NovoConvenio) {
   const d = validar(convenioSchema, entrada);
-  const criado = comMensagemConvenio(await supabase.from("convenios").insert({ nome: d.nome, tipo: d.tipo }).select("id").single());
-  comMensagemConvenio(await supabase.from("convenio_valores").insert({ convenio_id: criado!.id, valor_sessao: d.valor }));
+  const { data: criado, error } = await supabase.from("convenios").insert({ nome: d.nome, tipo: d.tipo }).select("id").single();
+  if (error || !criado) throw new ErroServico(mensagemConvenio(error?.message ?? "Não foi possível criar o convênio."));
+  comMensagemConvenio(await supabase.from("convenio_valores").insert({ convenio_id: criado.id, valor_sessao: d.valor }));
 }
 
 const alteracaoConvenioSchema = convenioSchema.pick({ nome: true, tipo: true }).partial().extend({ ativo: z.boolean().optional() });
 
 export async function atualizarConvenio(id: string, patch: z.input<typeof alteracaoConvenioSchema>) {
   const d = validar(alteracaoConvenioSchema, patch);
-  comMensagemConvenio(await supabase.from("convenios").update(d).eq("id", id));
+  comMensagemConvenio(await supabase.from("convenios").update(semIndefinidos(d)).eq("id", id));
 }
 
 export async function definirValorConvenio(id: string, valor: string | number) {
@@ -62,7 +63,7 @@ export type AjusteSessao = z.input<typeof ajusteSessaoSchema>;
 
 export async function ajustarFinanceiroSessao(agendamentoId: string, patch: AjusteSessao) {
   const d = validar(ajusteSessaoSchema, patch);
-  garantir(await supabase.from("atendimento_financeiro").update(d).eq("agendamento_id", agendamentoId));
+  garantir(await supabase.from("atendimento_financeiro").update(semIndefinidos(d)).eq("agendamento_id", agendamentoId));
 }
 
 // ---------- Repasse padrão do profissional ----------
