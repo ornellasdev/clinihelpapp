@@ -120,6 +120,13 @@
       "when": 1793360910440,
       "tag": "0016_termo_hash_no_banco",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1793362030801,
+      "tag": "0017_familia_somente_contas_de_responsavel",
+      "breakpoints": true
     }
   ]
 }
