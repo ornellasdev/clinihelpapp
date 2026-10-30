@@ -64,7 +64,7 @@ function DevPage() {
   const [email, setEmail] = useState<string | null>(null);
 
   async function avaliar() {
-    const erroUrl = lerErroDaUrl();
+    const erroUrl = await lerErroDaUrl();
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) {
       if (erroUrl && !loginCancelado(erroUrl)) {
