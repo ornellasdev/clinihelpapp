@@ -40,7 +40,7 @@ export const Route = createFileRoute("/_authenticated/$clinica/indicadores")({
       context.queryClient.ensureQueryData(listaEsperaQuery),
     ]);
   },
-  head: () => ({ meta: [{ title: "Indicadores — CliniHelp" }] }),
+  head: () => ({ meta: [{ title: "Indicadores (KPI) — CliniHelp" }] }),
   component: IndicadoresPage,
 });
 
@@ -133,7 +133,7 @@ function IndicadoresPage() {
   return (
     <div>
       <PageHeader
-        titulo="Indicadores"
+        titulo="Indicadores (KPI)"
         descricao={nomeMes}
         acoes={<Input type="month" value={mes} aria-label="Mês" onChange={(e) => e.target.value && navigate({ search: { mes: e.target.value } })} className="w-auto" />}
       />

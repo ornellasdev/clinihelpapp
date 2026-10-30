@@ -71,7 +71,7 @@ const ITENS: Item[] = [
   { to: "/$clinica/financeiro", label: "Financeiro", icon: Wallet, papeis: ["master", "administrador", "financeiro", "profissional"] },
   { to: "/$clinica/cobrancas", label: "Cobranças", icon: Receipt, papeis: ["master", "administrador", "financeiro"] },
   { to: "/$clinica/espera", label: "Lista de espera", icon: Hourglass },
-  { to: "/$clinica/indicadores", label: "Indicadores", icon: ChartColumn, papeis: ["master", "administrador", "financeiro"] },
+  { to: "/$clinica/indicadores", label: "Indicadores (KPI)", icon: ChartColumn, papeis: ["master", "administrador", "financeiro"] },
   { to: "/$clinica/equipe", label: "Equipe", icon: UserRoundCog, papeis: ["master", "administrador"] },
   { to: "/$clinica/salas", label: "Salas", icon: DoorOpen, papeis: ["master", "administrador"] },
   { to: "/$clinica/auditoria", label: "Auditoria", icon: ScrollText, papeis: ["master", "administrador"] },
