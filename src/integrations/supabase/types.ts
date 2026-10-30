@@ -2399,6 +2399,7 @@ export type Database = {
       meu_contexto: { Args: never; Returns: Json }
       minha_clinica: { Args: never; Returns: string }
       nome_auditoria: { Args: never; Returns: string }
+      painel_governanca: { Args: never; Returns: Json }
       pode_ler_arquivo_documento: { Args: { _path: string }; Returns: boolean }
       pode_ver_dados_clinicos: { Args: { _paciente: string }; Returns: boolean }
       pode_ver_documento: {
