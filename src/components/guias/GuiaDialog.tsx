@@ -8,7 +8,7 @@ import { conveniosQuery, especialidadesQuery, type Guia } from "@/lib/queries";
 import { useMe } from "@/hooks/use-me";
 import { STATUS_GRAVADOS, exigeGuia } from "@/lib/guias";
 import { erroAmigavel } from "@/lib/ui-helpers";
-import { REGRA_GUIA } from "@/lib/validacao";
+import { REGRA_GUIA, problemaNoArquivo } from "@/lib/validacao";
 import { BUCKETS, abrirArquivoPrivado, caminhoArquivo, desfazerEnvio, enviarArquivo } from "@/services/arquivos";
 import { codigosGuiaSchema } from "@/services/guias";
 import { mensagemDeErro, validar } from "@/services/resultado";
@@ -249,7 +249,13 @@ export function GuiaDialog({ open, onOpenChange, guia }: { open: boolean; onOpen
                 accept="application/pdf,image/*"
                 className="hidden"
                 onChange={(e) => {
-                  setArquivo(e.target.files?.[0] ?? null);
+                  const f = e.target.files?.[0] ?? null;
+                  const problema = f && problemaNoArquivo(f, REGRA_GUIA);
+                  if (problema) {
+                    e.target.value = "";
+                    return void toast.error(problema);
+                  }
+                  setArquivo(f);
                   e.target.value = "";
                 }}
               />
