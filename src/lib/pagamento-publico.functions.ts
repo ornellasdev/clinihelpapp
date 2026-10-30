@@ -38,11 +38,11 @@ export const obterPagamento = createServerFn({ method: "POST" })
 
     const { chaveDaClinica, aplicarSituacao } = await import("./pagamentos.server");
     const { asaas } = await import("./asaas.server");
-    const apiKey = await chaveDaClinica(admin, c.clinica_id);
+    const apiKey = await chaveDaClinica(admin, c.clinica_id).catch(() => null);
 
     let status = c.status as StatusCobranca;
     let pdf: string | null = null;
-    if (status !== "cancelada") {
+    if (apiKey && status !== "cancelada") {
       try {
         const pg = await asaas(apiKey, `/payments/${c.asaas_cobranca_id}`);
         status = await aplicarSituacao(admin, c, pg, { usuarioNome: "Serviço de pagamentos" });
@@ -55,7 +55,7 @@ export const obterPagamento = createServerFn({ method: "POST" })
     const forma = c.forma as FormaCobranca;
     let pix: PagamentoPublico["pix"] = null;
     let boleto: PagamentoPublico["boleto"] = null;
-    if (podePagar(status)) {
+    if (apiKey && podePagar(status)) {
       if (forma === "pix" || forma === "todas" || forma === "boleto") {
         try {
           const q = await asaas<{ encodedImage: string; payload: string }>(apiKey, `/payments/${c.asaas_cobranca_id}/pixQrCode`);
@@ -86,7 +86,7 @@ export const obterPagamento = createServerFn({ method: "POST" })
       pagoEm: c.pago_em,
       pix,
       boleto,
-      cartao: podePagar(status) && (forma === "cartao" || forma === "todas"),
+      cartao: !!apiKey && podePagar(status) && (forma === "cartao" || forma === "todas"),
     };
   });
 
