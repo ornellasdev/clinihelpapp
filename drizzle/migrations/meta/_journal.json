@@ -127,6 +127,13 @@
       "when": 1793362030801,
       "tag": "0017_familia_somente_contas_de_responsavel",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1793367451516,
+      "tag": "0018_guias_convenio_glosas",
+      "breakpoints": true
     }
   ]
 }
