@@ -16,6 +16,7 @@ export const AREAS_AUDITORIA: Record<string, string> = {
   especialidades: "Especialidades",
   convenios: "Convênios",
   convenio_valores: "Valores de convênio",
+  cobrancas: "Cobranças",
 };
 
 /** Áreas que aparecem no filtro; o prontuário só para quem pode ver esses registros. */
