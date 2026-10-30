@@ -1,13 +1,16 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { addDays, differenceInMinutes, format, parseISO, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { z } from "zod";
 import { agendaQuery, equipeQuery, especialidadesQuery, salasQuery, type AgendaItem } from "@/lib/queries";
 import { useMe } from "@/hooks/use-me";
-import { podeAgendar } from "@/lib/permissions";
+import { podeAgendar, podeVerGuias } from "@/lib/permissions";
+import { ALERTA_SESSAO } from "@/lib/guias";
+import { useSessoesConvenio, type SessaoConvenio } from "@/components/guias/LiberacoesDia";
+import { useClinica } from "@/hooks/use-clinica";
 import { STATUS_AGENDA, barraEsp, corEsp, fmtHora } from "@/lib/ui-helpers";
 import { PageHeader } from "@/components/PageHeader";
 import { AgendamentoDialog, type NovoAgendamentoPadrao } from "@/components/agenda/AgendamentoDialog";
@@ -68,6 +71,12 @@ function AgendaPage() {
   );
   const salasAtivas = salas.filter((s) => s.ativa);
   const podeCriar = podeAgendar(me.papeis);
+  const clinica = useClinica();
+  const veGuias = podeVerGuias(me.papeis);
+  const { sessoes: sessoesConvenio } = useSessoesConvenio(itens, data, veGuias);
+  const guiaPorItem = useMemo(() => new Map(sessoesConvenio.map((s) => [s.item.id, s])), [sessoesConvenio]);
+  const comPendencia = sessoesConvenio.filter((s) => s.alerta || s.status !== "liberado");
+  const comRisco = sessoesConvenio.filter((s) => s.alerta).length;
 
   const irPara = (d: string) => navigate({ search: (s) => ({ ...s, data: d }) });
   const dataObj = parseISO(data);
@@ -117,6 +126,25 @@ function AgendaPage() {
         </Select>
       </div>
 
+      {veGuias && comPendencia.length > 0 && (
+        <Link
+          to="/$clinica/guias"
+          params={{ clinica }}
+          search={{ aba: "dia", data }}
+          className={cn(
+            "mb-4 flex items-center gap-2 rounded-xl border px-4 py-3 text-sm transition-colors hover:bg-card",
+            comRisco ? "border-destructive/40 bg-destructive/5 text-destructive" : "border-warning/50 bg-warning/10",
+          )}
+        >
+          <AlertTriangle className="size-4 shrink-0" />
+          <span className="flex-1">
+            {comRisco > 0 && `${comRisco} ${comRisco === 1 ? "sessão de convênio sem guia válida ou com saldo zerado" : "sessões de convênio sem guia válida ou com saldo zerado"}. `}
+            {comPendencia.length} {comPendencia.length === 1 ? "sessão ainda não liberada" : "sessões ainda não liberadas"} na operadora.
+          </span>
+          <span className="shrink-0 font-medium underline">Ver liberações</span>
+        </Link>
+      )}
+
       {/* Mobile: lista */}
       <div className="space-y-2 md:hidden">
         {filtrados.length === 0 && <Vazio />}
@@ -131,7 +159,10 @@ function AgendaPage() {
               <div className="text-xs text-muted-foreground">{fmtHora(i.fim)}</div>
             </div>
             <div className="min-w-0 flex-1">
-              <div className="truncate font-medium">{i.paciente?.nome}</div>
+              <div className="flex items-center gap-1.5 truncate font-medium">
+                <MarcaGuia s={guiaPorItem.get(i.id)} />
+                {i.paciente?.nome}
+              </div>
               <div className="truncate text-xs text-muted-foreground">
                 {i.especialidade?.nome} · {i.profissional?.nome}
               </div>
@@ -192,7 +223,10 @@ function AgendaPage() {
                       )}
                       style={{ top: top + 1, height: h }}
                     >
-                      <div className="truncate font-semibold text-foreground">{i.paciente?.nome}</div>
+                      <div className="flex items-center gap-1 truncate font-semibold text-foreground">
+                        <MarcaGuia s={guiaPorItem.get(i.id)} />
+                        {i.paciente?.nome}
+                      </div>
                       <div className="truncate text-foreground/70">
                         {fmtHora(i.inicio)} · {i.profissional?.nome}
                       </div>
@@ -209,6 +243,24 @@ function AgendaPage() {
       <AgendamentoDetalhe item={detalhe} onClose={() => setDetalhe(null)} />
     </div>
   );
+}
+
+/** Ícone na sessão de convênio: alerta (sem guia/saldo/vencida) ou liberada na operadora. */
+function MarcaGuia({ s }: { s: SessaoConvenio | undefined }) {
+  if (!s) return null;
+  if (s.alerta)
+    return (
+      <span title={ALERTA_SESSAO[s.alerta]} className="shrink-0 text-destructive">
+        <AlertTriangle className="size-3.5" aria-label={ALERTA_SESSAO[s.alerta]} />
+      </span>
+    );
+  if (s.status === "liberado")
+    return (
+      <span title="Liberado na operadora" className="shrink-0 text-success">
+        <CheckCircle2 className="size-3.5" aria-label="Liberado na operadora" />
+      </span>
+    );
+  return null;
 }
 
 function Vazio() {
