@@ -23,21 +23,29 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+type Modo = "carregando" | "login" | "sem-clinica" | "senha" | "codigo" | "cadastro_2fa";
+
 function AuthPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const [modo, setModo] = useState<"carregando" | "login" | "sem-clinica">("carregando");
+  const [modo, setModo] = useState<Modo>("carregando");
+  const [primeiroAcesso, setPrimeiroAcesso] = useState(false);
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [enviando, setEnviando] = useState(false);
 
-  /** Leva cada pessoa para o endereço da própria clínica (ou para a área do desenvolvedor). */
+  /** Leva cada pessoa para o endereço da própria clínica (ou para a área do desenvolvedor), depois das etapas de segurança. */
   async function irParaClinica(): Promise<boolean> {
     // staleTime 0 força dados novos sem descartar uma busca já em andamento (evita CancelledError).
     const me = await qc.fetchQuery({ ...meQuery, staleTime: 0 });
     if (me.dev || me.dev_pendente) {
       navigate({ to: "/dev", replace: true });
       return true;
+    }
+    if (me.pendencia) {
+      if (me.pendencia === "senha") setPrimeiroAcesso(true);
+      setModo(me.pendencia);
+      return false;
     }
     if (me.clinica) {
       navigate({ to: "/$clinica/painel", params: { clinica: me.clinica.slug }, replace: true });
@@ -60,16 +68,38 @@ function AuthPage() {
     setEnviando(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
     if (error) { setEnviando(false); toast.error(erroAmigavel(error.message)); return; }
-    await supabase.rpc("registrar_acesso", { _acao: "login" });
-    await irParaClinica();
+    setSenha("");
+    await irParaClinica().catch((err) => toast.error(erroAmigavel((err as Error).message)));
     setEnviando(false);
   }
 
+  /** Código do autenticador confirmado: a sessão passa a ser segura e o login conta na auditoria. */
+  async function verificado() {
+    await supabase.rpc("registrar_acesso", { _acao: "login" });
+    await irParaClinica();
+  }
+
   async function sair() {
+    await qc.cancelQueries();
     qc.clear();
     await supabase.auth.signOut();
+    setPrimeiroAcesso(false);
     setModo("login");
   }
+
+  const etapa = (n: number, titulo: string, texto: string, conteudo: React.ReactNode) => (
+    <div className="space-y-5">
+      <div>
+        {primeiroAcesso && <p className="text-xs font-medium uppercase tracking-wide text-primary">Primeiro acesso · etapa {n} de 2</p>}
+        <h2 className="mt-1 text-2xl font-semibold">{titulo}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{texto}</p>
+      </div>
+      {conteudo}
+      <Button variant="ghost" className="w-full text-muted-foreground" onClick={sair}>
+        Sair e entrar com outra conta
+      </Button>
+    </div>
+  );
 
   return (
     <div className="grid min-h-screen lg:grid-cols-[1.1fr_1fr]">
