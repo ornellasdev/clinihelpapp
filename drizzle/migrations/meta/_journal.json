@@ -176,6 +176,13 @@
       "when": 1793376025053,
       "tag": "0024_exclusao_logica_e_retencao",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1793376109622,
+      "tag": "0025_segregacao_dados_clinicos_lgpd_adendos",
+      "breakpoints": true
     }
   ]
 }
