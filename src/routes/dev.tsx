@@ -33,12 +33,24 @@ export const Route = createFileRoute("/dev")({
 
 type Etapa = "carregando" | "entrar" | "negado" | "verificar" | "painel";
 
-/** Erro devolvido pelo login Google na URL (fluxo com redirecionamento), já removido da barra de endereço. */
-function lerErroDaUrl(): string | null {
+/**
+ * Erro devolvido pelo login Google na URL (fluxo com redirecionamento). Lido assim que o app carrega,
+ * antes de o roteador limpar o endereço, e consumido uma única vez.
+ */
+let erroLoginPendente: string | null = (() => {
+  if (typeof window === "undefined") return null;
   const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
   const busca = new URLSearchParams(window.location.search);
-  const erro = hash.get("error_description") ?? hash.get("error") ?? busca.get("error_description") ?? busca.get("error");
-  if (erro) window.history.replaceState(null, "", window.location.pathname);
+  return hash.get("error_description") ?? hash.get("error") ?? busca.get("error_description") ?? busca.get("error");
+})();
+
+async function lerErroDaUrl(): Promise<string | null> {
+  const { error } = await supabase.auth.initialize();
+  const erro = erroLoginPendente ?? error?.message ?? null;
+  erroLoginPendente = null;
+  if (erro && (window.location.hash || window.location.search)) {
+    window.history.replaceState(null, "", window.location.pathname);
+  }
   return erro;
 }
 
