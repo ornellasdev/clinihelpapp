@@ -177,6 +177,47 @@ export const evolucoesQuery = (pacienteId: string) =>
       ),
   });
 
+export const metasQuery = (pacienteId: string) =>
+  queryOptions({
+    queryKey: ["metas", pacienteId],
+    queryFn: async () =>
+      ok(
+        await supabase
+          .from("plano_metas")
+          .select("*")
+          .eq("paciente_id", pacienteId)
+          .order("status")
+          .order("created_at"),
+      ),
+  });
+
+/** Progresso das metas com a data da evolução em que foi registrado. */
+export const progressoMetasQuery = (pacienteId: string) =>
+  queryOptions({
+    queryKey: ["evolucoes", pacienteId, "metas"],
+    queryFn: async () => {
+      const rows = ok(
+        await supabase
+          .from("evolucao_metas")
+          .select("id, meta_id, evolucao_id, nivel, evolucao:evolucoes(data_atendimento)")
+          .eq("paciente_id", pacienteId),
+      );
+      return rows.map((r) => ({
+        id: r.id,
+        meta_id: r.meta_id,
+        evolucao_id: r.evolucao_id,
+        nivel: r.nivel,
+        data: r.evolucao?.data_atendimento ?? "",
+      }));
+    },
+  });
+
+export const modelosEvolucaoQuery = queryOptions({
+  queryKey: ["modelos_evolucao"],
+  staleTime: 5 * 60_000,
+  queryFn: async () => ok(await supabase.from("modelos_evolucao").select("*").order("nome")),
+});
+
 const AGENDA_SELECT =
   "*, paciente:pacientes(id, nome), profissional:profiles(id, nome), sala:salas(id, nome), especialidade:especialidades(id, nome, cor)";
 
