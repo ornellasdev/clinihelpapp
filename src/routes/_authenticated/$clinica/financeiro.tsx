@@ -5,7 +5,6 @@ import { addMonths, format, parseISO, startOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { z } from "zod";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { cobrancasQuery, convenioValoresQuery, conveniosQuery, equipeQuery, financeiroQuery, meQuery, recebimentosAtivosQuery } from "@/lib/queries";
 import { TabelaConvenios } from "@/components/financeiro/TabelaConvenios";
 import { CobrancasAba, periodoCobrancas } from "@/components/cobrancas/CobrancasAba";
@@ -13,7 +12,11 @@ import { useMe } from "@/hooks/use-me";
 import { podeGerirFinanceiro } from "@/lib/permissions";
 import { formatarMoeda, repasseDevido, valorCobrado } from "@/lib/financeiro";
 import { STATUS_FATURAVEIS, STATUS_PREVISTOS, type StatusAgenda } from "@/lib/agenda-status";
-import { STATUS_AGENDA, erroAmigavel, fmtData, fmtHora } from "@/lib/ui-helpers";
+import { STATUS_AGENDA, fmtData, fmtHora } from "@/lib/ui-helpers";
+import { lerValorReais, valorParaCampo } from "@/lib/validacao";
+import { useAjustarSessao } from "@/hooks/use-financeiro";
+import type { AjusteSessao } from "@/services/financeiro";
+import { mensagemDeErro } from "@/services/resultado";
 import { PageHeader } from "@/components/PageHeader";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -157,10 +160,17 @@ function AbaAtendimentos() {
     return [...m.values()].sort((a, b) => a.nome.localeCompare(b.nome));
   }, [filtradas]);
 
-  async function atualizar(id: string, patch: { valor?: number; percentual_repasse?: number; pagamento_status?: string; repasse_pago?: boolean; repassar?: boolean }) {
-    const { error } = await supabase.from("atendimento_financeiro").update(patch).eq("agendamento_id", id);
-    if (error) { toast.error(erroAmigavel(error.message)); return; }
-    qc.invalidateQueries({ queryKey: q.queryKey });
+  const ajustar = useAjustarSessao();
+  /** Grava o ajuste validado; devolve false quando não deu (o campo volta ao valor anterior). */
+  async function atualizar(id: string, patch: AjusteSessao): Promise<boolean> {
+    try {
+      await ajustar.mutateAsync({ id, patch });
+      qc.invalidateQueries({ queryKey: q.queryKey });
+      return true;
+    } catch (e) {
+      toast.error(mensagemDeErro(e));
+      return false;
+    }
   }
 
   const cards = gestor
@@ -330,14 +340,14 @@ function AbaAtendimentos() {
                     {!fin.cobrar ? (
                       <span className="text-xs text-muted-foreground">Não cobrada</span>
                     ) : gestor ? (
-                      <CampoNumero valor={Number(fin.valor)} onSalvar={(v) => atualizar(l.id, { valor: v })} />
+                      <CampoNumero rotulo="Valor da sessão" valor={Number(fin.valor)} onSalvar={(v) => atualizar(l.id, { valor: v })} />
                     ) : (
                       formatarMoeda(fin.valor)
                     )}
                   </td>
                   <td className="p-3 text-right">
                     {gestor ? (
-                      <CampoNumero valor={Number(fin.percentual_repasse)} max={100} onSalvar={(v) => atualizar(l.id, { percentual_repasse: v })} />
+                      <CampoNumero rotulo="Repasse (%)" percentual valor={Number(fin.percentual_repasse)} onSalvar={(v) => atualizar(l.id, { percentual_repasse: v })} />
                     ) : (
                       `${Number(fin.percentual_repasse)}%`
                     )}
@@ -379,19 +389,30 @@ function AbaAtendimentos() {
   );
 }
 
-function CampoNumero({ valor, max, onSalvar }: { valor: number; max?: number; onSalvar: (v: number) => void }) {
+/** Campo de valor (R$) ou percentual editável na tabela; aceita vírgula e volta ao valor anterior se for inválido. */
+function CampoNumero({
+  valor,
+  percentual,
+  rotulo,
+  onSalvar,
+}: {
+  valor: number;
+  percentual?: boolean;
+  rotulo: string;
+  onSalvar: (texto: string) => Promise<boolean>;
+}) {
+  const mostrar = (n: number) => (percentual ? String(n).replace(".", ",") : valorParaCampo(n));
   return (
     <Input
       key={valor}
-      type="number"
-      step="0.01"
-      min={0}
-      max={max}
-      defaultValue={valor}
+      inputMode="decimal"
+      defaultValue={mostrar(valor)}
+      aria-label={rotulo}
       className="ml-auto h-8 w-24 text-right"
-      onBlur={(e) => {
-        const v = Number(e.target.value);
-        if (Number.isFinite(v) && v !== valor && v >= 0 && (!max || v <= max)) onSalvar(v);
+      onBlur={async (e) => {
+        const campo = e.target;
+        if (lerValorReais(campo.value.replace("%", "")) === valor) return void (campo.value = mostrar(valor));
+        if (!(await onSalvar(campo.value))) campo.value = mostrar(valor);
       }}
       onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
     />

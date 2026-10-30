@@ -7,10 +7,11 @@ import { toast } from "sonner";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { pacienteQuery, sessoesParaCobrarQuery } from "@/lib/queries";
 import { criarCobranca } from "@/lib/cobrancas.functions";
+import { novaCobrancaSchema } from "@/lib/cobranca-schema";
+import { errosPorCampo, mensagemDeErro } from "@/services/resultado";
 import {
   FORMAS_COBRANCA,
   STATUS_QUE_PRENDEM_SESSAO,
-  VALOR_MINIMO_COBRANCA,
   cpfValido,
   pagadorDoPaciente,
   type FormaCobranca,
@@ -18,7 +19,7 @@ import {
 } from "@/lib/cobrancas";
 import { formatarMoeda } from "@/lib/financeiro";
 import { ehFaturavel } from "@/lib/agenda-status";
-import { STATUS_AGENDA, erroAmigavel, fmtData, fmtHora } from "@/lib/ui-helpers";
+import { STATUS_AGENDA, fmtData, fmtHora } from "@/lib/ui-helpers";
 import { PacienteCombobox } from "@/components/PacienteCombobox";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -45,6 +46,7 @@ export function NovaCobrancaDialog({ aberta, onClose, onCriada }: { aberta: bool
   const [vencimento, setVencimento] = useState(format(addDays(new Date(), 3), "yyyy-MM-dd"));
   const [forma, setForma] = useState<FormaCobranca>("todas");
   const [enviando, setEnviando] = useState(false);
+  const [erros, setErros] = useState<Record<string, string>>({});
 
   const ini = startOfMonth(parseISO(`${mes}-01`));
   const { data: paciente } = useQuery({ ...pacienteQuery(pacienteId), enabled: !!pacienteId });
@@ -98,22 +100,26 @@ export function NovaCobrancaDialog({ aberta, onClose, onCriada }: { aberta: bool
 
   async function salvar(e: React.FormEvent) {
     e.preventDefault();
-    const v = Number(valor.replace(",", "."));
     if (!pacienteId) { toast.error("Escolha o paciente."); return; }
     if (modo === "sessoes" && marcadas.size === 0) { toast.error("Marque ao menos uma sessão, ou use “Valor livre”."); return; }
-    if (!Number.isFinite(v) || v < VALOR_MINIMO_COBRANCA) { toast.error(`O valor mínimo é ${formatarMoeda(VALOR_MINIMO_COBRANCA)}.`); return; }
+    const r0 = novaCobrancaSchema.safeParse({ pacienteId, sessoes: modo === "sessoes" ? [...marcadas] : [], valor, vencimento, descricao, forma });
+    if (!r0.success) {
+      const campos = errosPorCampo(r0.error.issues);
+      setErros(campos);
+      toast.error(Object.values(campos)[0] ?? "Confira os dados da cobrança.");
+      return;
+    }
+    setErros({});
     setEnviando(true);
     try {
-      const r = await criar({
-        data: { pacienteId, sessoes: modo === "sessoes" ? [...marcadas] : [], valor: Math.round(v * 100) / 100, vencimento, descricao, forma },
-      });
+      const r = await criar({ data: r0.data });
       toast.success("Cobrança gerada!");
       qc.invalidateQueries({ queryKey: ["cobrancas"] });
       limpar();
       onCriada(r.id);
       onClose();
     } catch (err) {
-      toast.error(erroAmigavel((err as Error).message));
+      toast.error(mensagemDeErro(err));
     } finally {
       setEnviando(false);
     }
@@ -205,16 +211,20 @@ export function NovaCobrancaDialog({ aberta, onClose, onCriada }: { aberta: bool
                 required
                 value={valor}
                 onChange={(e) => { setValor(e.target.value); setValorEditado(true); }}
+                aria-invalid={!!erros["valor"]}
               />
+              {erros["valor"] && <p className="text-xs text-destructive">{erros["valor"]}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="cb-venc">Vencimento</Label>
-              <Input id="cb-venc" type="date" required min={format(new Date(), "yyyy-MM-dd")} value={vencimento} onChange={(e) => setVencimento(e.target.value)} />
+              <Input id="cb-venc" type="date" required min={format(new Date(), "yyyy-MM-dd")} value={vencimento} onChange={(e) => setVencimento(e.target.value)} aria-invalid={!!erros["vencimento"]} />
+              {erros["vencimento"] && <p className="text-xs text-destructive">{erros["vencimento"]}</p>}
             </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="cb-desc">Descrição (aparece para o responsável)</Label>
-            <Input id="cb-desc" required maxLength={500} value={descricao} onChange={(e) => { setDescricao(e.target.value); setDescEditada(true); }} />
+            <Input id="cb-desc" required maxLength={500} value={descricao} onChange={(e) => { setDescricao(e.target.value); setDescEditada(true); }} aria-invalid={!!erros["descricao"]} />
+            {erros["descricao"] && <p className="text-xs text-destructive">{erros["descricao"]}</p>}
           </div>
           <div className="space-y-2">
             <Label>Forma de pagamento</Label>

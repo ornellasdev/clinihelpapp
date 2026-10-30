@@ -101,3 +101,70 @@ export const cidValido = (valor: string) =>
 
 /** Links de arquivos privados valem entre 60 e 300 segundos. */
 export const validadeLinkTemporario = (segundos: number) => Math.min(300, Math.max(60, Math.round(segundos)));
+
+// ---------- Valores em reais e percentuais ----------
+/**
+ * Lê um valor digitado em reais: "150", "150,5", "1.234,56", "1234.56" ou "R$ 80,00".
+ * Devolve null quando não é um número.
+ */
+export function lerValorReais(entrada: string | number): number | null {
+  if (typeof entrada === "number") return Number.isFinite(entrada) ? entrada : null;
+  let s = entrada.replace(/R\$\s?/i, "").replace(/\s/g, "");
+  if (!s) return null;
+  if (s.includes(",")) s = s.replace(/\./g, "").replace(",", ".");
+  else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, "");
+  if (!/^-?\d+(\.\d+)?$/.test(s)) return null;
+  return Number(s);
+}
+
+/** Percentual de repasse: de 0 a 100, no máximo 2 casas decimais. */
+export function percentualValido(valor: number): boolean {
+  return Number.isFinite(valor) && valor >= 0 && valor <= 100 && Math.abs(Math.round(valor * 100) - valor * 100) < 1e-6;
+}
+
+/** Valor em reais validado (aceita texto com vírgula). Mensagem pronta para a pessoa. */
+export const valorReais = (rotulo = "Valor", minimo = 0) =>
+  z
+    .union([z.string(), z.number()])
+    .transform((v, ctx) => {
+      const n = lerValorReais(v);
+      if (n === null) {
+        ctx.addIssue({ code: "custom", message: `${rotulo}: digite um número (ex.: 150,00).` });
+        return z.NEVER;
+      }
+      return n;
+    })
+    .refine((n) => valorMonetarioValido(n), `${rotulo}: use um valor entre R$ 0,00 e R$ 1.000.000,00 com até 2 casas decimais.`)
+    .refine((n) => n >= minimo, `${rotulo}: o mínimo é R$ ${minimo.toFixed(2).replace(".", ",")}.`)
+    .transform((n) => Math.round(n * 100) / 100);
+
+export const percentualRepasse = (rotulo = "Repasse") =>
+  z
+    .union([z.string(), z.number()])
+    .transform((v, ctx) => {
+      const n = typeof v === "number" ? v : lerValorReais(v.replace("%", ""));
+      if (n === null) {
+        ctx.addIssue({ code: "custom", message: `${rotulo}: digite um número de 0 a 100.` });
+        return z.NEVER;
+      }
+      return n;
+    })
+    .refine(percentualValido, `${rotulo}: use de 0 a 100%, com até 2 casas decimais.`);
+
+/** Vencimento de cobrança: de hoje até 1 ano à frente. */
+export function vencimentoValido(iso: string, hoje = new Date()): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso) || Number.isNaN(new Date(`${iso}T12:00:00`).getTime())) return false;
+  const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const limite = new Date(hoje);
+  limite.setFullYear(limite.getFullYear() + 1);
+  return iso >= fmt(hoje) && iso <= fmt(limite);
+}
+
+/** Valor para mostrar num campo editável: 150 → "150,00". */
+export const valorParaCampo = (n: number | string | null | undefined) => Number(n ?? 0).toFixed(2).replace(".", ",");
+
+/** "Hoje" no fuso de São Paulo (vale igual no navegador e no servidor). */
+export function hojeEmSaoPaulo(agora = new Date()): Date {
+  const iso = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit" }).format(agora);
+  return new Date(`${iso}T12:00:00`);
+}

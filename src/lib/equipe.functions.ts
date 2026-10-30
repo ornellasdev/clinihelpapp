@@ -1,3 +1,4 @@
+import { percentualRepasse, valorReais } from "./validacao";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -42,8 +43,8 @@ const membroSchema = z.object({
   registro: z.string().trim().max(40).optional().default(""),
   papeis: z.array(papelSchema).min(1),
   especialidades: z.array(z.string().uuid()).default([]),
-  valorPadrao: z.number().min(0).default(0),
-  percentualPadrao: z.number().min(0).max(100).default(50),
+  valorPadrao: valorReais("Valor padrão da sessão").default(0),
+  percentualPadrao: percentualRepasse("Repasse de profissional").default(50),
 });
 
 export const criarMembro = createServerFn({ method: "POST" })

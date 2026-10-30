@@ -123,3 +123,4 @@ export function pagadorDoPaciente(p: DadosResponsaveis) {
 export function mensagemWhatsapp(clinica: string, descricao: string, valor: string, link: string) {
   return `Olá! Segue a cobrança da ${clinica}: ${descricao} — ${valor}.\nPague por Pix, boleto ou cartão neste link: ${link}`;
 }
+

@@ -1,3 +1,5 @@
+import { configRepasseSchema, salvarConfigRepasse } from "@/services/financeiro";
+import { mensagemDeErro } from "@/services/resultado";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -231,7 +233,7 @@ function SenhaTemporariaDialog({ membro, onClose }: { membro: Membro; onClose: (
       qc.invalidateQueries({ queryKey: ["equipe"] });
       onClose();
     } catch (e) {
-      toast.error(erroAmigavel((e as Error).message));
+      toast.error(mensagemDeErro(e));
     } finally {
       setSalvando(false);
     }
@@ -295,6 +297,9 @@ function MembroDialog({
     if (!nome.trim() || papeis.length === 0) { toast.error("Informe o nome e ao menos um papel."); return; }
     if (isProf && esps.length === 0) { toast.error("Profissionais precisam de ao menos uma especialidade."); return; }
     if (!membro && !senhaForte(senha)) { toast.error(MSG_SENHA_FRACA); return; }
+    const repasse = configRepasseSchema.safeParse({ valor_sessao_padrao: valor || "0", percentual_repasse_padrao: isProf ? pct : pct || "0" });
+    if (!repasse.success) { toast.error(repasse.error.issues[0]?.message ?? "Repasse inválido."); return; }
+    const { valor_sessao_padrao, percentual_repasse_padrao } = repasse.data;
     setSalvando(true);
     try {
       if (!membro) {
@@ -308,8 +313,8 @@ function MembroDialog({
             registro,
             papeis,
             especialidades: isProf ? esps : [],
-            valorPadrao: Number(valor) || 0,
-            percentualPadrao: Number(pct) || 0,
+            valorPadrao: valor_sessao_padrao,
+            percentualPadrao: percentual_repasse_padrao,
           },
         });
       } else {
@@ -331,12 +336,7 @@ function MembroDialog({
         const remE = membro.especialidades.filter((e) => !alvo.includes(e));
         if (addE.length && !travarEspecialidades) await supabase.from("profissional_especialidades").insert(addE.map((especialidade_id) => ({ user_id: id, especialidade_id })));
         if (remE.length && !travarEspecialidades) await supabase.from("profissional_especialidades").delete().eq("user_id", id).in("especialidade_id", remE);
-        const c = await supabase.from("profissional_config").upsert({
-          user_id: id,
-          valor_sessao_padrao: Number(valor) || 0,
-          percentual_repasse_padrao: Number(pct) || 0,
-        });
-        if (c.error) throw c.error;
+        await salvarConfigRepasse(id, { valor_sessao_padrao, percentual_repasse_padrao });
       }
       toast.success(membro ? "Dados atualizados." : "Membro criado. Envie o e-mail e a senha temporária: no primeiro login a pessoa cria a própria senha e ativa a verificação em duas etapas.");
       qc.invalidateQueries({ queryKey: ["equipe"] });
@@ -427,7 +427,8 @@ function MembroDialog({
                 </div>
                 <div className="grid gap-1.5">
                   <Label>Repasse de profissional (%)</Label>
-                  <Input type="number" min={0} max={100} step="0.5" value={pct} onChange={(e) => setPct(e.target.value)} />
+                  <Input inputMode="decimal" value={pct} onChange={(e) => setPct(e.target.value)} placeholder="Ex.: 50" />
+                  <p className="text-xs text-muted-foreground">De 0 a 100%. Pode ser ajustado em cada sessão no Financeiro.</p>
                 </div>
               </div>
             </>

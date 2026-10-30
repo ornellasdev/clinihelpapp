@@ -1,9 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { novaCobrancaSchema, type NovaCobranca } from "./cobranca-schema";
 import {
   STATUS_QUE_PRENDEM_SESSAO,
-  VALOR_MINIMO_COBRANCA,
   billingTypeAsaas,
   cpfValido,
   pagadorDoPaciente,
@@ -23,18 +23,14 @@ async function exigirFinanceiro(supabase: any, userId: string): Promise<string> 
   return clinica as string;
 }
 
-const novaSchema = z.object({
-  pacienteId: z.string().uuid(),
-  sessoes: z.array(z.string().uuid()).max(200),
-  valor: z.number().min(VALOR_MINIMO_COBRANCA).max(1_000_000),
-  vencimento: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  descricao: z.string().trim().min(1).max(500),
-  forma: z.enum(["pix", "boleto", "cartao", "todas"]),
-});
 
 export const criarCobranca = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: z.infer<typeof novaSchema>) => novaSchema.parse(input))
+  .inputValidator((input: NovaCobranca) => {
+    const r = novaCobrancaSchema.safeParse(input);
+    if (!r.success) throw new Error(r.error.issues[0]?.message ?? "Dados da cobrança inválidos.");
+    return r.data;
+  })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const clinicaId = await exigirFinanceiro(supabase, userId);

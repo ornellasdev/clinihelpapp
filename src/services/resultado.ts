@@ -41,3 +41,8 @@ export function validar<S extends z.ZodType>(schema: S, dados: unknown): z.outpu
 
 export const mensagemDeErro = (e: unknown) =>
   e instanceof ErroServico ? e.message : erroAmigavel(e instanceof Error ? e.message : String(e));
+
+/** Tira chaves com undefined (o banco não aceita "undefined" em campos opcionais). */
+export function semIndefinidos<T extends object>(o: T): { [K in keyof T]?: Exclude<T[K], undefined> } {
+  return Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined)) as { [K in keyof T]?: Exclude<T[K], undefined> };
+}
