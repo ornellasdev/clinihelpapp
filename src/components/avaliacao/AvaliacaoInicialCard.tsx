@@ -95,7 +95,7 @@ export function AvaliacaoInicialCard({ paciente, onVerFormulario }: { paciente: 
             <span className={cn("rounded-full px-2 py-0.5 text-xs", STATUS_COBRANCA[cob.status as StatusCobranca]?.className)}>
               {STATUS_COBRANCA[cob.status as StatusCobranca]?.label}
             </span>
-            <Link to="/$clinica/financeiro" params={{ clinica }} search={{ aba: "cobrancas" } as never} className="text-primary hover:underline">
+            <Link to="/$clinica/financeiro" params={{ clinica }} search={{ aba: "cobrancas" }} className="text-primary hover:underline">
               Ver em Cobranças
             </Link>
           </p>
