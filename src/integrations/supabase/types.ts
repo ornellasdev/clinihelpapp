@@ -234,6 +234,7 @@ export type Database = {
           nome: string
           pagamentos_ativos: boolean
           slug: string
+          updated_at: string
         }
         Insert: {
           ativa?: boolean
@@ -242,6 +243,7 @@ export type Database = {
           nome: string
           pagamentos_ativos?: boolean
           slug: string
+          updated_at?: string
         }
         Update: {
           ativa?: boolean
@@ -250,6 +252,7 @@ export type Database = {
           nome?: string
           pagamentos_ativos?: boolean
           slug?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -421,25 +424,31 @@ export type Database = {
           ativo: boolean
           clinica_id: string
           created_at: string
+          criado_por: string | null
           id: string
           nome: string
           tipo: string
+          updated_at: string
         }
         Insert: {
           ativo?: boolean
           clinica_id?: string
           created_at?: string
+          criado_por?: string | null
           id?: string
           nome: string
           tipo?: string
+          updated_at?: string
         }
         Update: {
           ativo?: boolean
           clinica_id?: string
           created_at?: string
+          criado_por?: string | null
           id?: string
           nome?: string
           tipo?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -482,22 +491,28 @@ export type Database = {
           clinica_id: string
           cor: string
           created_at: string
+          criado_por: string | null
           id: string
           nome: string
+          updated_at: string
         }
         Insert: {
           clinica_id?: string
           cor?: string
           created_at?: string
+          criado_por?: string | null
           id?: string
           nome: string
+          updated_at?: string
         }
         Update: {
           clinica_id?: string
           cor?: string
           created_at?: string
+          criado_por?: string | null
           id?: string
           nome?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -1173,6 +1188,7 @@ export type Database = {
           paciente_id: string
           storage_path: string
           tamanho: number | null
+          updated_at: string
         }
         Insert: {
           agendamento_id?: string | null
@@ -1186,6 +1202,7 @@ export type Database = {
           paciente_id: string
           storage_path: string
           tamanho?: number | null
+          updated_at?: string
         }
         Update: {
           agendamento_id?: string | null
@@ -1199,6 +1216,7 @@ export type Database = {
           paciente_id?: string
           storage_path?: string
           tamanho?: number | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -1238,6 +1256,7 @@ export type Database = {
           convenio_id: string | null
           cpf: string | null
           created_at: string
+          criado_por: string | null
           data_nascimento: string | null
           diagnostico: string | null
           endereco: string | null
@@ -1281,6 +1300,7 @@ export type Database = {
           convenio_id?: string | null
           cpf?: string | null
           created_at?: string
+          criado_por?: string | null
           data_nascimento?: string | null
           diagnostico?: string | null
           endereco?: string | null
@@ -1324,6 +1344,7 @@ export type Database = {
           convenio_id?: string | null
           cpf?: string | null
           created_at?: string
+          criado_por?: string | null
           data_nascimento?: string | null
           diagnostico?: string | null
           endereco?: string | null
@@ -1631,6 +1652,7 @@ export type Database = {
           storage_path: string
           tamanho: number | null
           titulo: string
+          updated_at: string
         }
         Insert: {
           clinica_id?: string
@@ -1645,6 +1667,7 @@ export type Database = {
           storage_path: string
           tamanho?: number | null
           titulo: string
+          updated_at?: string
         }
         Update: {
           clinica_id?: string
@@ -1659,6 +1682,7 @@ export type Database = {
           storage_path?: string
           tamanho?: number | null
           titulo?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -1682,25 +1706,31 @@ export type Database = {
           ativa: boolean
           clinica_id: string
           created_at: string
+          criado_por: string | null
           descricao: string | null
           id: string
           nome: string
+          updated_at: string
         }
         Insert: {
           ativa?: boolean
           clinica_id?: string
           created_at?: string
+          criado_por?: string | null
           descricao?: string | null
           id?: string
           nome: string
+          updated_at?: string
         }
         Update: {
           ativa?: boolean
           clinica_id?: string
           created_at?: string
+          criado_por?: string | null
           descricao?: string | null
           id?: string
           nome?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -1737,6 +1767,7 @@ export type Database = {
           texto_hash: string
           tipo: string
           titulo: string
+          updated_at: string
           user_agent: string | null
         }
         Insert: {
@@ -1763,6 +1794,7 @@ export type Database = {
           texto_hash: string
           tipo?: string
           titulo: string
+          updated_at?: string
           user_agent?: string | null
         }
         Update: {
@@ -1789,6 +1821,7 @@ export type Database = {
           texto_hash?: string
           tipo?: string
           titulo?: string
+          updated_at?: string
           user_agent?: string | null
         }
         Relationships: [
@@ -1820,6 +1853,7 @@ export type Database = {
           ativo: boolean
           clinica_id: string
           created_at: string
+          criado_por: string | null
           id: string
           texto: string
           tipo: string
@@ -1830,6 +1864,7 @@ export type Database = {
           ativo?: boolean
           clinica_id?: string
           created_at?: string
+          criado_por?: string | null
           id?: string
           texto: string
           tipo?: string
@@ -1840,6 +1875,7 @@ export type Database = {
           ativo?: boolean
           clinica_id?: string
           created_at?: string
+          criado_por?: string | null
           id?: string
           texto?: string
           tipo?: string

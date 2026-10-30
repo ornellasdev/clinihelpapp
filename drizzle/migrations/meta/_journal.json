@@ -162,6 +162,13 @@
       "when": 1793373590482,
       "tag": "0022_senha_temporaria_2fa",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1793375986385,
+      "tag": "0023_integridade_referencial_metadados_indices",
+      "breakpoints": true
     }
   ]
 }
