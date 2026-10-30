@@ -64,7 +64,10 @@ export function AgendamentoDialog({
     setObs("");
   }, [open, padrao]);
 
-  const profissionais = equipe.filter((m) => m.ativo && m.papeis.includes("profissional"));
+  const todosProfissionais = equipe.filter((m) => m.ativo && m.papeis.includes("profissional"));
+  // Vindo da lista de espera: mostra só quem atende a especialidade pedida (se houver alguém).
+  const daEspecialidade = padrao.especialidadeId ? todosProfissionais.filter((m) => m.especialidades.includes(padrao.especialidadeId!)) : [];
+  const profissionais = daEspecialidade.length ? daEspecialidade : todosProfissionais;
   const prof = profissionais.find((p) => p.id === profissionalId);
   const espsDoProf = useMemo(
     () => especialidades.filter((e) => prof?.especialidades.includes(e.id)),
@@ -72,9 +75,10 @@ export function AgendamentoDialog({
   );
 
   useEffect(() => {
+    if (!prof) return;
     if (espsDoProf.length === 1) setEspecialidadeId(espsDoProf[0]!.id);
     else if (!espsDoProf.some((e) => e.id === especialidadeId)) setEspecialidadeId("");
-  }, [espsDoProf, especialidadeId]);
+  }, [prof, espsDoProf, especialidadeId]);
 
   async function salvar() {
     if (!pacienteId || !profissionalId || !especialidadeId || !salaId || !data || !hora) {
