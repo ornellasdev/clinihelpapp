@@ -11,8 +11,8 @@
 
 ## Cobranças dos pacientes (Asaas por trás, cara do CliniHelp)
 - [x] Banco: contas de recebimento por clínica (chave protegida), cobranças e sessões cobradas
-- [x] Painel /dev: ativar recebimentos da clínica (cria a conta da clínica no Asaas)
+- [x] Cada clínica conecta a própria chave do Asaas em Cobranças (painel /dev só consulta)
 - [x] Página Cobranças: por sessão, mensal (soma do mês) e avulsa; Pix, boleto, cartão ou à escolha
 - [x] Página pública de pagamento CliniHelp (Pix QR, boleto, cartão)
 - [x] Aviso automático de pagamento (webhook) marca a sessão como paga
-- [x] Chave da conta-mãe Asaas do desenvolvedor
+- [x] Chave de teste do desenvolvedor (não é mais usada pelo sistema)
