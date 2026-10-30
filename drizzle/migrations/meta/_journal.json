@@ -211,6 +211,13 @@
       "when": 1793376967526,
       "tag": "0029_prontuario_imutavel_e_dados_clinicos_fora_do_cadastro",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1793377627360,
+      "tag": "0030_dados_clinicos_nao_sobrescrever_com_vazio",
+      "breakpoints": true
     }
   ]
 }
