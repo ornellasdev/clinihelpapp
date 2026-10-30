@@ -8,6 +8,10 @@ import { conveniosQuery, especialidadesQuery, type Guia } from "@/lib/queries";
 import { useMe } from "@/hooks/use-me";
 import { STATUS_GRAVADOS, exigeGuia } from "@/lib/guias";
 import { erroAmigavel } from "@/lib/ui-helpers";
+import { REGRA_GUIA } from "@/lib/validacao";
+import { BUCKETS, abrirArquivoPrivado, caminhoArquivo, desfazerEnvio, enviarArquivo } from "@/services/arquivos";
+import { codigosGuiaSchema } from "@/services/guias";
+import { mensagemDeErro, validar } from "@/services/resultado";
 import { PacienteCombobox } from "@/components/PacienteCombobox";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -16,16 +20,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-export const BUCKET_GUIAS = "guias-convenio";
+export const BUCKET_GUIAS = BUCKETS.guias;
 
-export async function abrirAnexoGuia(path: string) {
-  const { data, error } = await supabase.storage.from(BUCKET_GUIAS).createSignedUrl(path, 120);
-  if (error || !data) {
-    toast.error("Não foi possível abrir o anexo.");
-    return;
-  }
-  window.open(data.signedUrl, "_blank", "noopener");
-}
+/** Abre o anexo da guia por link temporário (2 min), gerado só na hora do clique. */
+export const abrirAnexoGuia = (path: string) => abrirArquivoPrivado(BUCKETS.guias, path);
 
 const hoje = () => format(new Date(), "yyyy-MM-dd");
 
@@ -92,11 +90,19 @@ export function GuiaDialog({ open, onOpenChange, guia }: { open: boolean; onOpen
 
   async function salvar() {
     if (!pacienteId || !convenioId || !especialidadeId) return void toast.error("Escolha o paciente, o convênio e a especialidade.");
-    if (!tuss.trim() || !codGuia.trim() || !codFat.trim()) return void toast.error("Preencha os três códigos: TUSS, guia e faturamento.");
-    const nSol = Number(solicitadas);
-    if (!Number.isInteger(nSol) || nSol < 1) return void toast.error("Informe quantas sessões foram solicitadas.");
-    const nAut = autorizadas === "" ? null : Number(autorizadas);
-    if (nAut !== null && (!Number.isInteger(nAut) || nAut < 0)) return void toast.error("Quantidade autorizada inválida.");
+    let codigos: ReturnType<typeof codigosGuiaSchema.parse>;
+    try {
+      codigos = validar(codigosGuiaSchema, {
+        codigo_tuss: tuss,
+        codigo_guia: codGuia,
+        codigo_faturamento: codFat,
+        sessoes_solicitadas: Number(solicitadas),
+        sessoes_autorizadas: autorizadas === "" ? null : Number(autorizadas),
+      });
+    } catch (e) {
+      return void toast.error(mensagemDeErro(e));
+    }
+    const nAut = codigos.sessoes_autorizadas;
     if ((status === "autorizada" || status === "faturada") && (nAut === null || !dataLib || !validade))
       return void toast.error("Guia autorizada precisa de sessões autorizadas, data da liberação e validade.");
     if (validade && dataLib && validade < dataLib) return void toast.error("A validade não pode ser antes da liberação.");
@@ -105,12 +111,13 @@ export function GuiaDialog({ open, onOpenChange, guia }: { open: boolean; onOpen
     const id = guia?.id ?? crypto.randomUUID();
     let anexo: { anexo_path: string | null; anexo_nome: string | null; anexo_mime: string | null } | null = null;
     if (arquivo) {
-      const seguro = arquivo.name.normalize("NFD").replace(/[^\w.-]+/g, "_");
-      const path = `${me.clinica?.id}/${id}/${crypto.randomUUID()}-${seguro}`;
-      const up = await supabase.storage.from(BUCKET_GUIAS).upload(path, arquivo, { contentType: arquivo.type });
-      if (up.error) {
+      let path: string;
+      try {
+        path = caminhoArquivo(me.clinica?.id, id, arquivo.name);
+        await enviarArquivo(BUCKETS.guias, path, arquivo, REGRA_GUIA);
+      } catch (e) {
         setSalvando(false);
-        return void toast.error(`Anexo: ${erroAmigavel(up.error.message)}`);
+        return void toast.error(`Anexo: ${mensagemDeErro(e)}`);
       }
       anexo = { anexo_path: path, anexo_nome: arquivo.name.slice(0, 200), anexo_mime: arquivo.type || null };
     } else if (removerAnexo) {
@@ -121,11 +128,7 @@ export function GuiaDialog({ open, onOpenChange, guia }: { open: boolean; onOpen
       paciente_id: pacienteId,
       convenio_id: convenioId,
       especialidade_id: especialidadeId,
-      codigo_tuss: tuss.trim(),
-      codigo_guia: codGuia.trim(),
-      codigo_faturamento: codFat.trim(),
-      sessoes_solicitadas: nSol,
-      sessoes_autorizadas: nAut,
+      ...codigos,
       data_solicitacao: dataSol || hoje(),
       data_liberacao: dataLib || null,
       validade: validade || null,
@@ -138,10 +141,9 @@ export function GuiaDialog({ open, onOpenChange, guia }: { open: boolean; onOpen
       : await supabase.from("guias_convenio").insert({ id, ...dados });
     setSalvando(false);
     if (error) {
-      if (anexo?.anexo_path) await supabase.storage.from(BUCKET_GUIAS).remove([anexo.anexo_path]);
+      if (anexo?.anexo_path) await desfazerEnvio(BUCKETS.guias, anexo.anexo_path);
       return void toast.error(erroAmigavel(error.message));
     }
-    if (anexo && guia?.anexo_path) await supabase.storage.from(BUCKET_GUIAS).remove([guia.anexo_path]);
     toast.success(guia ? "Guia atualizada." : "Guia cadastrada.");
     qc.invalidateQueries({ queryKey: ["guias"] });
     onOpenChange(false);

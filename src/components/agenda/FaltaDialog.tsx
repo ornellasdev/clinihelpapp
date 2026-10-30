@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { AgendaItem } from "@/lib/queries";
 import { useMe } from "@/hooks/use-me";
 import type { StatusFalta } from "@/lib/agenda-status";
-import { STATUS_AGENDA, erroAmigavel, fmtData, fmtHora } from "@/lib/ui-helpers";
+import { STATUS_AGENDA, fmtData, fmtHora } from "@/lib/ui-helpers";
 import { abrirDocumento } from "./AnexoAtestado";
 import { REGRA_ATESTADO, problemaNoArquivo } from "@/lib/validacao";
 import { BUCKETS, caminhoArquivo, desfazerEnvio, enviarArquivo } from "@/services/arquivos";

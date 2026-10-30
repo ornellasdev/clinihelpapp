@@ -2,8 +2,6 @@ import { Paperclip } from "lucide-react";
 import { BUCKETS, abrirArquivoPrivado } from "@/services/arquivos";
 import { cn } from "@/lib/utils";
 
-export const BUCKET_DOCUMENTOS = BUCKETS.documentos;
-
 type Doc = { id: string; nome: string; storage_path: string };
 
 /** Abre o atestado/documento por link temporário (2 min), gerado só na hora do clique. */
