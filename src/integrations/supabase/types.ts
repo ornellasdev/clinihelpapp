@@ -1498,6 +1498,7 @@ export type Database = {
           id: string
           nome: string
           registro_profissional: string | null
+          senha_temporaria: boolean
           telefone: string | null
           updated_at: string
         }
@@ -1510,6 +1511,7 @@ export type Database = {
           id: string
           nome?: string
           registro_profissional?: string | null
+          senha_temporaria?: boolean
           telefone?: string | null
           updated_at?: string
         }
@@ -1522,6 +1524,7 @@ export type Database = {
           id?: string
           nome?: string
           registro_profissional?: string | null
+          senha_temporaria?: boolean
           telefone?: string | null
           updated_at?: string
         }
@@ -1902,6 +1905,7 @@ export type Database = {
       }
     }
     Functions: {
+      acesso_seguro: { Args: never; Returns: boolean }
       can_view_especialidade: {
         Args: { _esp: string; _user_id: string }
         Returns: boolean

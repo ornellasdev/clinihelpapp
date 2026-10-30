@@ -37,7 +37,9 @@ export const ACOES_AUDITORIA: Record<string, { label: string; tom: "criou" | "al
   logout: { label: "Saiu", tom: "neutro" },
   desativou: { label: "Desativou conta", tom: "removeu" },
   reativou: { label: "Reativou conta", tom: "criou" },
-  redefiniu_senha: { label: "Redefiniu senha", tom: "alterou" },
+  redefiniu_senha: { label: "Criou senha temporária", tom: "alterou" },
+  definiu_senha: { label: "Criou a própria senha", tom: "alterou" },
+  redefiniu_2fa: { label: "Redefiniu verificação em 2 etapas", tom: "alterou" },
 };
 
 const CAMPOS: Record<string, string> = {

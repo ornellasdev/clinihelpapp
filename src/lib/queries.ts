@@ -21,6 +21,11 @@ export type Me = {
   dev: boolean;
   /** E-mail de desenvolvedor, mas ainda sem a verificação em duas etapas nesta sessão. */
   dev_pendente: boolean;
+  /**
+   * Etapa de segurança que falta nesta sessão (equipe da clínica). Enquanto houver, o banco não libera os dados.
+   * senha = trocar a senha temporária; codigo = digitar o código do autenticador; cadastro_2fa = cadastrar o autenticador.
+   */
+  pendencia: "senha" | "codigo" | "cadastro_2fa" | null;
   clinica: ClinicaAtual | null;
 };
 
@@ -55,6 +60,8 @@ export type Membro = {
   conselho: string | null;
   registro_profissional: string | null;
   ativo: boolean;
+  /** Ainda com a senha temporária (não fez o primeiro acesso depois da criação/redefinição). */
+  senha_temporaria: boolean;
   papeis: Papel[];
   especialidades: string[];
 };

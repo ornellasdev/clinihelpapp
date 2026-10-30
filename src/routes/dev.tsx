@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Building2, ExternalLink, KeyRound, Loader2, LogOut, Plus, ShieldCheck, ShieldX, Wallet } from "lucide-react";
+import { Building2, ExternalLink, KeyRound, Loader2, LogOut, Plus, ShieldX, Wallet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { meQuery, type Me } from "@/lib/queries";
@@ -17,6 +17,9 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { RecebimentosDialog } from "@/components/dev/RecebimentosDialog";
+import { VerificacaoDuasEtapas } from "@/components/seguranca/VerificacaoDuasEtapas";
+import { RequisitosSenha } from "@/components/seguranca/RequisitosSenha";
+import { gerarSenhaTemporaria, senhaForte, MSG_SENHA_FRACA } from "@/lib/senha";
 
 export const Route = createFileRoute("/dev")({
   ssr: false,
@@ -174,76 +177,11 @@ function Entrar({ onNegado }: { onNegado: () => void }) {
   );
 }
 
-/** Segunda etapa: código de 6 dígitos de um app autenticador (Google Authenticator, Authy etc.). */
+/** Segunda etapa: código do aplicativo autenticador (Google Authenticator, Authy etc.). */
 function Verificar({ onOk }: { onOk: () => void }) {
-  const [fator, setFator] = useState<{ id: string; qr?: string; secret?: string } | null>(null);
-  const [codigo, setCodigo] = useState("");
-  const [enviando, setEnviando] = useState(false);
-  const [erro, setErro] = useState<string | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      const { data, error } = await supabase.auth.mfa.listFactors();
-      if (error) { setErro(error.message); return; }
-      const verificado = data.totp.find((f) => f.status === "verified");
-      if (verificado) { setFator({ id: verificado.id }); return; }
-      for (const f of data.all.filter((f) => f.status !== "verified")) {
-        await supabase.auth.mfa.unenroll({ factorId: f.id });
-      }
-      const en = await supabase.auth.mfa.enroll({ factorType: "totp", friendlyName: `CliniHelp ${Date.now()}` });
-      if (en.error) { setErro(en.error.message); return; }
-      setFator({ id: en.data.id, qr: en.data.totp.qr_code, secret: en.data.totp.secret });
-    })();
-  }, []);
-
-  async function confirmar(e: React.FormEvent) {
-    e.preventDefault();
-    if (!fator) return;
-    setEnviando(true);
-    const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: fator.id, code: codigo.trim() });
-    setEnviando(false);
-    if (error) { toast.error("Código inválido ou expirado. Tente o código atual do aplicativo."); setCodigo(""); return; }
-    onOk();
-  }
-
   return (
     <Cartao titulo="Verificação em duas etapas">
-      {erro && <p className="text-sm text-destructive">{erroAmigavel(erro)}</p>}
-      {!fator && !erro && <Loader2 className="mx-auto size-6 animate-spin text-muted-foreground" />}
-      {fator && (
-        <form onSubmit={confirmar} className="space-y-4">
-          {fator.qr ? (
-            <>
-              <p className="text-sm text-muted-foreground">
-                Primeiro acesso: leia o QR code com o Google Authenticator (ou outro autenticador) e digite o código gerado.
-              </p>
-              <div className="mx-auto w-48 rounded-xl bg-card p-2 ring-1 ring-border">
-                <img src={fator.qr} alt="QR code para o aplicativo autenticador" className="w-full" />
-              </div>
-              <p className="break-all text-center font-mono text-xs text-muted-foreground">{fator.secret}</p>
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground">Digite o código de 6 dígitos do seu aplicativo autenticador.</p>
-          )}
-          <div className="space-y-2">
-            <Label htmlFor="codigo">Código</Label>
-            <Input
-              id="codigo"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              maxLength={6}
-              autoFocus
-              required
-              value={codigo}
-              onChange={(e) => setCodigo(e.target.value.replace(/\D/g, ""))}
-              className="text-center font-mono text-lg tracking-[0.5em]"
-            />
-          </div>
-          <Button type="submit" className="h-11 w-full" disabled={enviando || codigo.length !== 6}>
-            {enviando ? <Loader2 className="animate-spin" /> : <ShieldCheck />} Verificar
-          </Button>
-        </form>
-      )}
+      <VerificacaoDuasEtapas onOk={onOk} />
     </Cartao>
   );
 }
@@ -343,6 +281,7 @@ function NovaClinica({ aberta, onClose, onCriada }: { aberta: boolean; onClose: 
   async function salvar(e: React.FormEvent) {
     e.preventDefault();
     if (!slugValido(slug)) { toast.error("Endereço inválido: use letras minúsculas, números e hífens (mín. 3)."); return; }
+    if (!senhaForte(masterSenha)) { toast.error(MSG_SENHA_FRACA); return; }
     setEnviando(true);
     try {
       await criar({ data: { nome, slug, masterNome, masterEmail, masterSenha } });
@@ -403,8 +342,13 @@ function NovaClinica({ aberta, onClose, onCriada }: { aberta: boolean; onClose: 
                 <Input id="m-email" type="email" required value={masterEmail} onChange={(e) => setMasterEmail(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="m-senha">Senha inicial (mínimo 8 caracteres)</Label>
-                <Input id="m-senha" type="text" minLength={8} required value={masterSenha} onChange={(e) => setMasterSenha(e.target.value)} />
+                <Label htmlFor="m-senha">Senha temporária</Label>
+                <div className="flex gap-2">
+                  <Input id="m-senha" type="text" required value={masterSenha} onChange={(e) => setMasterSenha(e.target.value)} className="font-mono" />
+                  <Button type="button" variant="outline" onClick={() => setMasterSenha(gerarSenhaTemporaria())}>Gerar</Button>
+                </div>
+                <RequisitosSenha senha={masterSenha} />
+                <p className="text-xs text-muted-foreground">No primeiro login o master cria a própria senha e ativa a verificação em duas etapas.</p>
               </div>
             </div>
           </div>
