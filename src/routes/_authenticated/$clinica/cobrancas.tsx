@@ -11,11 +11,12 @@ import { cobrancasQuery, meQuery, recebimentosAtivosQuery } from "@/lib/queries"
 import { cancelarCobranca, sincronizarCobranca } from "@/lib/cobrancas.functions";
 import { STATUS_COBRANCA, linkPagamento, mensagemWhatsapp, podeCancelar, rotuloForma, type StatusCobranca } from "@/lib/cobrancas";
 import { formatarMoeda } from "@/lib/financeiro";
-import { podeGerirFinanceiro } from "@/lib/permissions";
+import { ehGestor, podeGerirFinanceiro } from "@/lib/permissions";
 import { erroAmigavel, fmtData } from "@/lib/ui-helpers";
 import { useMe } from "@/hooks/use-me";
 import { PageHeader } from "@/components/PageHeader";
 import { NovaCobrancaDialog } from "@/components/cobrancas/NovaCobrancaDialog";
+import { ConectarAsaas, ContaAsaasConectada } from "@/components/cobrancas/ContaAsaas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -129,12 +130,18 @@ function CobrancasPage() {
     return (
       <div>
         <PageHeader titulo="Cobranças" />
-        <div className="mx-auto max-w-lg rounded-2xl border border-dashed p-10 text-center">
-          <Receipt className="mx-auto size-10 text-muted-foreground" />
-          <h2 className="mt-4 text-lg font-semibold">Recebimentos ainda não ativados</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Para cobrar os responsáveis por Pix, boleto e cartão, a conta de recebimento da clínica precisa ser ativada. Fale com o suporte CliniHelp.
-          </p>
+        <div className="mx-auto max-w-xl">
+          {ehGestor(me.papeis) ? (
+            <ConectarAsaas clinicaId={me.clinica!.id} />
+          ) : (
+            <div className="rounded-2xl border border-dashed p-10 text-center">
+              <Receipt className="mx-auto size-10 text-muted-foreground" />
+              <h2 className="mt-4 text-lg font-semibold">Conta Asaas não conectada</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Para cobrar os responsáveis por Pix, boleto e cartão, o master ou o administrador precisa conectar a conta Asaas da clínica nesta página.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -158,6 +165,8 @@ function CobrancasPage() {
           </Button>
         }
       />
+
+      <ContaAsaasConectada clinicaId={me.clinica!.id} gestor={ehGestor(me.papeis)} />
 
       <div className="mb-5 flex flex-wrap gap-2">
         <Input type="month" value={mes} onChange={(e) => e.target.value && navigate({ search: (s) => ({ ...s, mes: e.target.value }) })} className="w-auto" />
