@@ -58,7 +58,6 @@ const CAMPOS: Record<string, string> = {
   cid: "CID",
   alergias: "Alergias",
   medicamentos: "Medicamentos",
-  motivo: "Motivo",
   excluido_em: "Excluído em",
   lgpd_consentimento_status: "Consentimento LGPD",
   escola: "Escola",
