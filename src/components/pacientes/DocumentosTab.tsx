@@ -7,11 +7,14 @@ import { documentosQuery } from "@/lib/queries";
 import { useMe } from "@/hooks/use-me";
 import { ehGestor } from "@/lib/permissions";
 import { erroAmigavel, fmtData } from "@/lib/ui-helpers";
+import { REGRA_DOCUMENTO } from "@/lib/validacao";
+import { BUCKETS, abrirArquivoPrivado, caminhoArquivo, desfazerEnvio, enviarArquivo } from "@/services/arquivos";
+import { mensagemDeErro } from "@/services/resultado";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const CATEGORIAS = ["Laudo", "Relatório", "Exame", "Receita", "Atestado", "Documento pessoal", "Termo / contrato", "Encaminhamento", "Outros"];
-const BUCKET = "documentos-pacientes";
+const CLINICAS = new Set(["Laudo", "Relatório", "Exame", "Receita"]);
 
 function tamanho(b?: number | null) {
   if (!b) return "";
@@ -30,11 +33,12 @@ export function DocumentosTab({ pacienteId }: { pacienteId: string }) {
     if (!files?.length) return;
     setEnviando(true);
     for (const file of Array.from(files)) {
-      const seguro = file.name.normalize("NFD").replace(/[^\w.-]+/g, "_");
-      const path = `${me.clinica?.id}/${pacienteId}/${crypto.randomUUID()}-${seguro}`;
-      const up = await supabase.storage.from(BUCKET).upload(path, file, { contentType: file.type });
-      if (up.error) {
-        toast.error(`${file.name}: ${erroAmigavel(up.error.message)}`);
+      let path: string;
+      try {
+        path = caminhoArquivo(me.clinica?.id, pacienteId, file.name);
+        await enviarArquivo(BUCKETS.documentos, path, file, REGRA_DOCUMENTO);
+      } catch (e) {
+        toast.error(mensagemDeErro(e));
         continue;
       }
       const { error } = await supabase.from("paciente_documentos").insert({
@@ -46,7 +50,10 @@ export function DocumentosTab({ pacienteId }: { pacienteId: string }) {
         mime_type: file.type,
         enviado_por: me.id,
       });
-      if (error) toast.error(erroAmigavel(error.message));
+      if (error) {
+        await desfazerEnvio(BUCKETS.documentos, path);
+        toast.error(erroAmigavel(error.message));
+      }
     }
     setEnviando(false);
     if (input.current) input.current.value = "";
@@ -54,15 +61,10 @@ export function DocumentosTab({ pacienteId }: { pacienteId: string }) {
     toast.success("Envio concluído.");
   }
 
-  async function baixar(path: string) {
-    const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(path, 120);
-    if (error || !data) { toast.error("Não foi possível abrir o arquivo."); return; }
-    window.open(data.signedUrl, "_blank", "noopener");
-  }
+  const baixar = (path: string) => abrirArquivoPrivado(BUCKETS.documentos, path);
 
-  async function remover(id: string, path: string) {
-    if (!confirm("Remover este documento?")) return;
-    await supabase.storage.from(BUCKET).remove([path]);
+  async function remover(id: string) {
+    if (!confirm("Remover este documento da ficha? Ele continua guardado no histórico da clínica.")) return;
     const { error } = await supabase.from("paciente_documentos").delete().eq("id", id);
     if (error) { toast.error(erroAmigavel(error.message)); return; }
     qc.invalidateQueries({ queryKey: ["documentos", pacienteId] });
@@ -116,7 +118,7 @@ export function DocumentosTab({ pacienteId }: { pacienteId: string }) {
                   <Download />
                 </Button>
                 {(ehGestor(me.papeis) || d.enviado_por === me.id) && (
-                  <Button size="icon" variant="ghost" className="text-destructive" onClick={() => remover(d.id, d.storage_path)} aria-label="Remover">
+                  <Button size="icon" variant="ghost" className="text-destructive" onClick={() => remover(d.id)} aria-label="Remover">
                     <Trash2 />
                   </Button>
                 )}
