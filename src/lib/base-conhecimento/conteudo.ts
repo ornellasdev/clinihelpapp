@@ -524,9 +524,33 @@ export const ARTIGOS: Artigo[] = [
     ],
     atualizadoEm: "2026-10-30",
   },
+  {
+    id: "migracao-dados",
+    categoria: "Desenvolvedor",
+    titulo: "Migração de dados de um cliente novo",
+    resumo: "Como trazer convênios e pacientes do sistema antigo pela aba Migração do /dev.",
+    quemUsa: "Somente desenvolvedores (Google + 2 etapas).",
+    onde: "/dev → Migração",
+    blocos: [
+      {
+        itens: [
+          "Crie a clínica primeiro em Clínicas.",
+          "Baixe o modelo (Convênios ou Pacientes), cole os dados do sistema antigo e salve como CSV (separador ; ou ,).",
+          "Importe Convênios antes de Pacientes: a coluna convenio do paciente é ligada pelo nome.",
+          "Datas em DD/MM/AAAA. CPF, telefone com DDD, e-mail, CEP e UF são conferidos linha a linha.",
+          "Nada é gravado enquanto houver linha com erro; o servidor confere tudo de novo.",
+          "Registros que já existem (convênio com mesmo nome; paciente com mesmo nome e nascimento) são ignorados, então reimportar é seguro.",
+          "Equipe é criada em Equipe pelo Master (senha temporária + 2 etapas). Diagnóstico e prontuário antigo entram como documento na ficha, não como evolução.",
+          "Cada importação fica registrada na auditoria da clínica.",
+        ],
+      },
+    ],
+    atualizadoEm: "2026-10-30",
+  },
 ];
 
 export const HISTORICO: { data: string; texto: string }[] = [
+  { data: "2026-10-30", texto: "Aba Migração no /dev: importação de convênios e pacientes por planilha." },
   { data: "2026-10-30", texto: "Base de conhecimento criada no painel do desenvolvedor." },
   { data: "2026-10-30", texto: "Lembrete de sessão por WhatsApp na agenda." },
   { data: "2026-10-30", texto: "Treinamento CliniHelp (LMS) por cargo." },
