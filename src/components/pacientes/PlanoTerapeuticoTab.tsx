@@ -158,14 +158,14 @@ function MetaDialog({
   const [salvando, setSalvando] = useState(false);
 
   async function salvar() {
-    if (!titulo.trim()) return toast.error("Escreva a meta.");
+    if (!titulo.trim()) { toast.error("Escreva a meta."); return; }
     setSalvando(true);
     const payload = { titulo: titulo.trim(), descricao: descricao.trim() || null, status, prazo: prazo || null };
     const { error } = meta
       ? await supabase.from("plano_metas").update(payload).eq("id", meta.id)
       : await supabase.from("plano_metas").insert({ ...payload, paciente_id: pacienteId, especialidade_id: especialidadeId });
     setSalvando(false);
-    if (error) return toast.error(erroAmigavel(error.message));
+    if (error) { toast.error(erroAmigavel(error.message)); return; }
     toast.success("Meta salva.");
     qc.invalidateQueries({ queryKey: ["metas", pacienteId] });
     onClose();

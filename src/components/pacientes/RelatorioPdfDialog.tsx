@@ -38,9 +38,9 @@ export function RelatorioPdfDialog({
   const qtd = evolucoes.filter((e) => e.data_atendimento >= de && e.data_atendimento <= ate && esps.includes(e.especialidade_id)).length;
 
   async function gerar() {
-    if (!de || !ate || de > ate) return toast.error("Confira o período.");
-    if (!esps.length) return toast.error("Escolha ao menos uma especialidade.");
-    if (!incluirMetas && !incluirEvolucoes) return toast.error("Escolha o que incluir no relatório.");
+    if (!de || !ate || de > ate) { toast.error("Confira o período."); return; }
+    if (!esps.length) { toast.error("Escolha ao menos uma especialidade."); return; }
+    if (!incluirMetas && !incluirEvolucoes) { toast.error("Escolha o que incluir no relatório."); return; }
     setGerando(true);
     try {
       const [paciente, metas, progresso] = await Promise.all([
