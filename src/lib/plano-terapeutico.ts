@@ -6,7 +6,7 @@ export const NIVEIS = [
   { valor: 2, curto: "Ajuda total", label: "Com ajuda total" },
   { valor: 3, curto: "Ajuda parcial", label: "Com ajuda parcial" },
   { valor: 4, curto: "Pouca ajuda", label: "Com pouca ajuda" },
-  { valor: 5, curto: "Independente", label: "Independente" },
+  { valor: 5, curto: "Indepen\u00addente", label: "Independente" },
 ] as const;
 
 export const rotuloNivel = (n: number) => NIVEIS.find((x) => x.valor === n)?.label ?? "—";
