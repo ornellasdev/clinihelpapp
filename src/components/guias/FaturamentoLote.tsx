@@ -88,7 +88,7 @@ export function FaturamentoLote({
   async function faturarGuias() {
     const { error } = await supabase.from("guias_convenio").update({ status: "faturada" }).in("id", guiasAFaturar);
     setConfirmar(false);
-    if (error) return toast.error(erroAmigavel(error.message));
+    if (error) return void toast.error(erroAmigavel(error.message));
     toast.success(`${guiasAFaturar.length} ${guiasAFaturar.length === 1 ? "guia marcada" : "guias marcadas"} como faturada.`);
     qc.invalidateQueries({ queryKey: ["guias"] });
   }

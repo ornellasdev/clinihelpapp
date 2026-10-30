@@ -32,7 +32,7 @@ export function GlosasLista({ onEditar }: { onEditar: (g: Glosa) => void }) {
   async function remover(g: Glosa) {
     const { error } = await supabase.from("glosas").delete().eq("id", g.id);
     setExcluir(null);
-    if (error) return toast.error(erroAmigavel(error.message));
+    if (error) return void toast.error(erroAmigavel(error.message));
     toast.success("Glosa excluída.");
     qc.invalidateQueries({ queryKey: ["glosas"] });
   }

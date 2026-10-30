@@ -78,8 +78,8 @@ export function GlosaDialog({
 
   async function salvar() {
     const v = Number(valor.replace(",", "."));
-    if (!pacienteId || !convenioId) return toast.error("Escolha o paciente e o convênio.");
-    if (!(v > 0)) return toast.error("Informe o valor glosado.");
+    if (!pacienteId || !convenioId) return void toast.error("Escolha o paciente e o convênio.");
+    if (!(v > 0)) return void toast.error("Informe o valor glosado.");
     setSalvando(true);
     const resolvido = status === "recuperada" || status === "perda";
     const dados = {
@@ -96,7 +96,7 @@ export function GlosaDialog({
     };
     const { error } = glosa ? await supabase.from("glosas").update(dados).eq("id", glosa.id) : await supabase.from("glosas").insert(dados);
     setSalvando(false);
-    if (error) return toast.error(erroAmigavel(error.message));
+    if (error) return void toast.error(erroAmigavel(error.message));
     toast.success(glosa ? "Glosa atualizada." : "Glosa registrada.");
     qc.invalidateQueries({ queryKey: ["glosas"] });
     onOpenChange(false);

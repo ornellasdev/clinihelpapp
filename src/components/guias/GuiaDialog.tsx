@@ -91,15 +91,15 @@ export function GuiaDialog({ open, onOpenChange, guia }: { open: boolean; onOpen
   }
 
   async function salvar() {
-    if (!pacienteId || !convenioId || !especialidadeId) return toast.error("Escolha o paciente, o convênio e a especialidade.");
-    if (!tuss.trim() || !codGuia.trim() || !codFat.trim()) return toast.error("Preencha os três códigos: TUSS, guia e faturamento.");
+    if (!pacienteId || !convenioId || !especialidadeId) return void toast.error("Escolha o paciente, o convênio e a especialidade.");
+    if (!tuss.trim() || !codGuia.trim() || !codFat.trim()) return void toast.error("Preencha os três códigos: TUSS, guia e faturamento.");
     const nSol = Number(solicitadas);
-    if (!Number.isInteger(nSol) || nSol < 1) return toast.error("Informe quantas sessões foram solicitadas.");
+    if (!Number.isInteger(nSol) || nSol < 1) return void toast.error("Informe quantas sessões foram solicitadas.");
     const nAut = autorizadas === "" ? null : Number(autorizadas);
-    if (nAut !== null && (!Number.isInteger(nAut) || nAut < 0)) return toast.error("Quantidade autorizada inválida.");
+    if (nAut !== null && (!Number.isInteger(nAut) || nAut < 0)) return void toast.error("Quantidade autorizada inválida.");
     if ((status === "autorizada" || status === "faturada") && (nAut === null || !dataLib || !validade))
-      return toast.error("Guia autorizada precisa de sessões autorizadas, data da liberação e validade.");
-    if (validade && dataLib && validade < dataLib) return toast.error("A validade não pode ser antes da liberação.");
+      return void toast.error("Guia autorizada precisa de sessões autorizadas, data da liberação e validade.");
+    if (validade && dataLib && validade < dataLib) return void toast.error("A validade não pode ser antes da liberação.");
 
     setSalvando(true);
     const id = guia?.id ?? crypto.randomUUID();
@@ -110,7 +110,7 @@ export function GuiaDialog({ open, onOpenChange, guia }: { open: boolean; onOpen
       const up = await supabase.storage.from(BUCKET_GUIAS).upload(path, arquivo, { contentType: arquivo.type });
       if (up.error) {
         setSalvando(false);
-        return toast.error(`Anexo: ${erroAmigavel(up.error.message)}`);
+        return void toast.error(`Anexo: ${erroAmigavel(up.error.message)}`);
       }
       anexo = { anexo_path: path, anexo_nome: arquivo.name.slice(0, 200), anexo_mime: arquivo.type || null };
     } else if (removerAnexo) {
@@ -139,7 +139,7 @@ export function GuiaDialog({ open, onOpenChange, guia }: { open: boolean; onOpen
     setSalvando(false);
     if (error) {
       if (anexo?.anexo_path) await supabase.storage.from(BUCKET_GUIAS).remove([anexo.anexo_path]);
-      return toast.error(erroAmigavel(error.message));
+      return void toast.error(erroAmigavel(error.message));
     }
     if (anexo && guia?.anexo_path) await supabase.storage.from(BUCKET_GUIAS).remove([guia.anexo_path]);
     toast.success(guia ? "Guia atualizada." : "Guia cadastrada.");

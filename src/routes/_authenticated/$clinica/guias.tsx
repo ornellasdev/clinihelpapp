@@ -35,7 +35,7 @@ export const Route = createFileRoute("/_authenticated/$clinica/guias")({
   loader: async ({ context, deps }) => {
     const qc = context.queryClient;
     const me = await qc.ensureQueryData(meQuery);
-    const base = [qc.ensureQueryData(guiasQuery), qc.ensureQueryData(guiasUsoQuery), qc.ensureQueryData(conveniosQuery), qc.ensureQueryData(especialidadesQuery)];
+    const base: Promise<unknown>[] = [qc.ensureQueryData(guiasQuery), qc.ensureQueryData(guiasUsoQuery), qc.ensureQueryData(conveniosQuery), qc.ensureQueryData(especialidadesQuery)];
     if (deps.aba === "dia") {
       const [a, b] = intervaloDia(deps.data);
       base.push(qc.ensureQueryData(agendaQuery(a, b)));

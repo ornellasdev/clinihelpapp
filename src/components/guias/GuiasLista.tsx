@@ -51,14 +51,14 @@ export function GuiasLista({ onEditar, onGlosar }: { onEditar: (g: Guia) => void
 
   async function faturar(g: Guia) {
     const { error } = await supabase.from("guias_convenio").update({ status: "faturada" }).eq("id", g.id);
-    if (error) return toast.error(erroAmigavel(error.message));
+    if (error) return void toast.error(erroAmigavel(error.message));
     toast.success(`Guia ${g.codigo_guia} marcada como faturada.`);
     qc.invalidateQueries({ queryKey: ["guias"] });
   }
 
   async function remover(g: Guia) {
     const { error } = await supabase.from("guias_convenio").delete().eq("id", g.id);
-    if (error) return toast.error(erroAmigavel(error.message));
+    if (error) return void toast.error(erroAmigavel(error.message));
     if (g.anexo_path) await supabase.storage.from(BUCKET_GUIAS).remove([g.anexo_path]);
     toast.success("Guia excluída.");
     qc.invalidateQueries({ queryKey: ["guias"] });

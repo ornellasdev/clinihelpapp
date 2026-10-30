@@ -173,7 +173,7 @@ function SessaoCard({ s, guias, uso, pode, data }: { s: SessaoConvenio; guias: G
         { onConflict: "agendamento_id" },
       );
     setSalvando(null);
-    if (error) return toast.error(erroAmigavel(error.message));
+    if (error) return void toast.error(erroAmigavel(error.message));
     if (patch.status === "liberado") toast.success(`${i.paciente?.nome}: liberado.`);
     qc.invalidateQueries({ queryKey: ["agenda"] });
     qc.invalidateQueries({ queryKey: ["guias"] });
