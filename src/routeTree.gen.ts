@@ -17,6 +17,7 @@ import { Route as FamiliaRouteImport } from './routes/familia'
 import { Route as AuthenticatedClinicaRouteRouteImport } from './routes/_authenticated/$clinica/route'
 import { Route as ApiEvolucaoVozRouteImport } from './routes/api/evolucao-voz'
 import { Route as FamiliaIndexRouteImport } from './routes/familia.index'
+import { Route as FamiliaAvaliacaoRouteImport } from './routes/familia.avaliacao'
 import { Route as PagarTokenRouteImport } from './routes/pagar.$token'
 import { Route as AuthenticatedClinicaIndexRouteImport } from './routes/_authenticated/$clinica/index'
 import { Route as AuthenticatedClinicaAgendaRouteImport } from './routes/_authenticated/$clinica/agenda'
@@ -78,6 +79,11 @@ const ApiEvolucaoVozRoute = ApiEvolucaoVozRouteImport.update({
 const FamiliaIndexRoute = FamiliaIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => FamiliaRoute,
+} as any)
+const FamiliaAvaliacaoRoute = FamiliaAvaliacaoRouteImport.update({
+  id: '/avaliacao',
+  path: '/avaliacao',
   getParentRoute: () => FamiliaRoute,
 } as any)
 const PagarTokenRoute = PagarTokenRouteImport.update({
@@ -218,6 +224,7 @@ export interface FileRoutesByFullPath {
   '/familia': typeof FamiliaRouteWithChildren
   '/$clinica': typeof AuthenticatedClinicaRouteRouteWithChildren
   '/api/evolucao-voz': typeof ApiEvolucaoVozRoute
+  '/familia/avaliacao': typeof FamiliaAvaliacaoRoute
   '/pagar/$token': typeof PagarTokenRoute
   '/familia/': typeof FamiliaIndexRoute
   '/$clinica/agenda': typeof AuthenticatedClinicaAgendaRoute
@@ -247,6 +254,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/dev': typeof DevRoute
   '/api/evolucao-voz': typeof ApiEvolucaoVozRoute
+  '/familia/avaliacao': typeof FamiliaAvaliacaoRoute
   '/pagar/$token': typeof PagarTokenRoute
   '/familia': typeof FamiliaIndexRoute
   '/$clinica/agenda': typeof AuthenticatedClinicaAgendaRoute
@@ -279,6 +287,7 @@ export interface FileRoutesById {
   '/familia': typeof FamiliaRouteWithChildren
   '/_authenticated/$clinica': typeof AuthenticatedClinicaRouteRouteWithChildren
   '/api/evolucao-voz': typeof ApiEvolucaoVozRoute
+  '/familia/avaliacao': typeof FamiliaAvaliacaoRoute
   '/pagar/$token': typeof PagarTokenRoute
   '/familia/': typeof FamiliaIndexRoute
   '/_authenticated/$clinica/agenda': typeof AuthenticatedClinicaAgendaRoute
@@ -312,6 +321,7 @@ export interface FileRouteTypes {
     | '/familia'
     | '/$clinica'
     | '/api/evolucao-voz'
+    | '/familia/avaliacao'
     | '/pagar/$token'
     | '/familia/'
     | '/$clinica/agenda'
@@ -341,6 +351,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dev'
     | '/api/evolucao-voz'
+    | '/familia/avaliacao'
     | '/pagar/$token'
     | '/familia'
     | '/$clinica/agenda'
@@ -372,6 +383,7 @@ export interface FileRouteTypes {
     | '/familia'
     | '/_authenticated/$clinica'
     | '/api/evolucao-voz'
+    | '/familia/avaliacao'
     | '/pagar/$token'
     | '/familia/'
     | '/_authenticated/$clinica/agenda'
@@ -464,6 +476,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/familia/'
       preLoaderRoute: typeof FamiliaIndexRouteImport
+      parentRoute: typeof FamiliaRoute
+    }
+    '/familia/avaliacao': {
+      id: '/familia/avaliacao'
+      path: '/avaliacao'
+      fullPath: '/familia/avaliacao'
+      preLoaderRoute: typeof FamiliaAvaliacaoRouteImport
       parentRoute: typeof FamiliaRoute
     }
     '/pagar/$token': {
@@ -706,10 +725,12 @@ const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface FamiliaRouteChildren {
+  FamiliaAvaliacaoRoute: typeof FamiliaAvaliacaoRoute
   FamiliaIndexRoute: typeof FamiliaIndexRoute
 }
 
 const FamiliaRouteChildren: FamiliaRouteChildren = {
+  FamiliaAvaliacaoRoute: FamiliaAvaliacaoRoute,
   FamiliaIndexRoute: FamiliaIndexRoute,
 }
 
