@@ -26,3 +26,8 @@
 - [x] Modelos de evolução por especialidade (preenchimento rápido no celular)
 - [x] Evolução por voz: grava no celular, IA escreve, profissional revisa antes de salvar
 - [x] Relatório do paciente em PDF por período (escola, médico, convênio)
+
+## Para os pais
+- [x] Área da família (/familia): entrada por código no e-mail; agenda, cobranças, recibos e relatórios liberados
+- [x] Termos com assinatura no dedo (consentimento de tratamento e uso de imagem); comprovante em PDF
+- [ ] E-mails com a marca da clínica e aviso de termo novo (depende de um domínio de e-mail próprio)
