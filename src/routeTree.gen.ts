@@ -13,8 +13,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DevRouteImport } from './routes/dev'
+import { Route as FamiliaRouteImport } from './routes/familia'
 import { Route as AuthenticatedClinicaRouteRouteImport } from './routes/_authenticated/$clinica/route'
 import { Route as ApiEvolucaoVozRouteImport } from './routes/api/evolucao-voz'
+import { Route as FamiliaIndexRouteImport } from './routes/familia.index'
 import { Route as PagarTokenRouteImport } from './routes/pagar.$token'
 import { Route as AuthenticatedClinicaIndexRouteImport } from './routes/_authenticated/$clinica/index'
 import { Route as AuthenticatedClinicaAgendaRouteImport } from './routes/_authenticated/$clinica/agenda'
@@ -50,6 +52,11 @@ const DevRoute = DevRouteImport.update({
   path: '/dev',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FamiliaRoute = FamiliaRouteImport.update({
+  id: '/familia',
+  path: '/familia',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedClinicaRouteRoute =
   AuthenticatedClinicaRouteRouteImport.update({
     id: '/$clinica',
@@ -60,6 +67,11 @@ const ApiEvolucaoVozRoute = ApiEvolucaoVozRouteImport.update({
   id: '/api/evolucao-voz',
   path: '/api/evolucao-voz',
   getParentRoute: () => rootRouteImport,
+} as any)
+const FamiliaIndexRoute = FamiliaIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => FamiliaRoute,
 } as any)
 const PagarTokenRoute = PagarTokenRouteImport.update({
   id: '/pagar/$token',
@@ -154,9 +166,11 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dev': typeof DevRoute
+  '/familia': typeof FamiliaRouteWithChildren
   '/$clinica': typeof AuthenticatedClinicaRouteRouteWithChildren
   '/api/evolucao-voz': typeof ApiEvolucaoVozRoute
   '/pagar/$token': typeof PagarTokenRoute
+  '/familia/': typeof FamiliaIndexRoute
   '/$clinica/agenda': typeof AuthenticatedClinicaAgendaRoute
   '/$clinica/auditoria': typeof AuthenticatedClinicaAuditoriaRoute
   '/$clinica/cobrancas': typeof AuthenticatedClinicaCobrancasRoute
@@ -178,6 +192,7 @@ export interface FileRoutesByTo {
   '/dev': typeof DevRoute
   '/api/evolucao-voz': typeof ApiEvolucaoVozRoute
   '/pagar/$token': typeof PagarTokenRoute
+  '/familia': typeof FamiliaIndexRoute
   '/$clinica/agenda': typeof AuthenticatedClinicaAgendaRoute
   '/$clinica/auditoria': typeof AuthenticatedClinicaAuditoriaRoute
   '/$clinica/cobrancas': typeof AuthenticatedClinicaCobrancasRoute
@@ -199,9 +214,11 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/dev': typeof DevRoute
+  '/familia': typeof FamiliaRouteWithChildren
   '/_authenticated/$clinica': typeof AuthenticatedClinicaRouteRouteWithChildren
   '/api/evolucao-voz': typeof ApiEvolucaoVozRoute
   '/pagar/$token': typeof PagarTokenRoute
+  '/familia/': typeof FamiliaIndexRoute
   '/_authenticated/$clinica/agenda': typeof AuthenticatedClinicaAgendaRoute
   '/_authenticated/$clinica/auditoria': typeof AuthenticatedClinicaAuditoriaRoute
   '/_authenticated/$clinica/cobrancas': typeof AuthenticatedClinicaCobrancasRoute
@@ -223,9 +240,11 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dev'
+    | '/familia'
     | '/$clinica'
     | '/api/evolucao-voz'
     | '/pagar/$token'
+    | '/familia/'
     | '/$clinica/agenda'
     | '/$clinica/auditoria'
     | '/$clinica/cobrancas'
@@ -247,6 +266,7 @@ export interface FileRouteTypes {
     | '/dev'
     | '/api/evolucao-voz'
     | '/pagar/$token'
+    | '/familia'
     | '/$clinica/agenda'
     | '/$clinica/auditoria'
     | '/$clinica/cobrancas'
@@ -267,9 +287,11 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/dev'
+    | '/familia'
     | '/_authenticated/$clinica'
     | '/api/evolucao-voz'
     | '/pagar/$token'
+    | '/familia/'
     | '/_authenticated/$clinica/agenda'
     | '/_authenticated/$clinica/auditoria'
     | '/_authenticated/$clinica/cobrancas'
@@ -291,6 +313,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   DevRoute: typeof DevRoute
+  FamiliaRoute: typeof FamiliaRouteWithChildren
   ApiEvolucaoVozRoute: typeof ApiEvolucaoVozRoute
   PagarTokenRoute: typeof PagarTokenRoute
   ApiPublicAsaasWebhookRoute: typeof ApiPublicAsaasWebhookRoute
@@ -326,6 +349,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DevRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/familia': {
+      id: '/familia'
+      path: '/familia'
+      fullPath: '/familia'
+      preLoaderRoute: typeof FamiliaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/$clinica': {
       id: '/_authenticated/$clinica'
       path: '/$clinica'
@@ -339,6 +369,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/evolucao-voz'
       preLoaderRoute: typeof ApiEvolucaoVozRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/familia/': {
+      id: '/familia/'
+      path: '/'
+      fullPath: '/familia/'
+      preLoaderRoute: typeof FamiliaIndexRouteImport
+      parentRoute: typeof FamiliaRoute
     }
     '/pagar/$token': {
       id: '/pagar/$token'
@@ -499,11 +536,23 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface FamiliaRouteChildren {
+  FamiliaIndexRoute: typeof FamiliaIndexRoute
+}
+
+const FamiliaRouteChildren: FamiliaRouteChildren = {
+  FamiliaIndexRoute: FamiliaIndexRoute,
+}
+
+const FamiliaRouteWithChildren =
+  FamiliaRoute._addFileChildren(FamiliaRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   DevRoute: DevRoute,
+  FamiliaRoute: FamiliaRouteWithChildren,
   ApiEvolucaoVozRoute: ApiEvolucaoVozRoute,
   PagarTokenRoute: PagarTokenRoute,
   ApiPublicAsaasWebhookRoute: ApiPublicAsaasWebhookRoute,

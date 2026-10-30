@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { queryOptions, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Suspense, useState } from "react";
 import { z } from "zod";
@@ -297,7 +297,6 @@ function TermosFamilia({ pacienteId }: { pacienteId: string }) {
   const { data } = useSuspenseQuery(termosQ(pacienteId));
   const comprovante = useServerFn(comprovanteTermoFamilia);
   const [assinar, setAssinar] = useState<TermoFamilia | null>(null);
-  const { data: _ } = useQuery({ ...criancasQuery, enabled: false });
   if (!data.length) return <Vazio texto="Nenhum termo para assinar." />;
   return (
     <div className="space-y-2">
