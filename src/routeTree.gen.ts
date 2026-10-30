@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DevRouteImport } from './routes/dev'
 import { Route as AuthenticatedClinicaRouteRouteImport } from './routes/_authenticated/$clinica/route'
+import { Route as PagarTokenRouteImport } from './routes/pagar.$token'
 import { Route as AuthenticatedClinicaIndexRouteImport } from './routes/_authenticated/$clinica/index'
 import { Route as AuthenticatedClinicaAgendaRouteImport } from './routes/_authenticated/$clinica/agenda'
 import { Route as AuthenticatedClinicaAuditoriaRouteImport } from './routes/_authenticated/$clinica/auditoria'
@@ -52,6 +53,11 @@ const AuthenticatedClinicaRouteRoute =
     path: '/$clinica',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const PagarTokenRoute = PagarTokenRouteImport.update({
+  id: '/pagar/$token',
+  path: '/pagar/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedClinicaIndexRoute =
   AuthenticatedClinicaIndexRouteImport.update({
     id: '/',
@@ -129,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/dev': typeof DevRoute
   '/$clinica': typeof AuthenticatedClinicaRouteRouteWithChildren
+  '/pagar/$token': typeof PagarTokenRoute
   '/$clinica/agenda': typeof AuthenticatedClinicaAgendaRoute
   '/$clinica/auditoria': typeof AuthenticatedClinicaAuditoriaRoute
   '/$clinica/cobrancas': typeof AuthenticatedClinicaCobrancasRoute
@@ -146,6 +153,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dev': typeof DevRoute
+  '/pagar/$token': typeof PagarTokenRoute
   '/$clinica/agenda': typeof AuthenticatedClinicaAgendaRoute
   '/$clinica/auditoria': typeof AuthenticatedClinicaAuditoriaRoute
   '/$clinica/cobrancas': typeof AuthenticatedClinicaCobrancasRoute
@@ -166,6 +174,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/dev': typeof DevRoute
   '/_authenticated/$clinica': typeof AuthenticatedClinicaRouteRouteWithChildren
+  '/pagar/$token': typeof PagarTokenRoute
   '/_authenticated/$clinica/agenda': typeof AuthenticatedClinicaAgendaRoute
   '/_authenticated/$clinica/auditoria': typeof AuthenticatedClinicaAuditoriaRoute
   '/_authenticated/$clinica/cobrancas': typeof AuthenticatedClinicaCobrancasRoute
@@ -186,6 +195,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dev'
     | '/$clinica'
+    | '/pagar/$token'
     | '/$clinica/agenda'
     | '/$clinica/auditoria'
     | '/$clinica/cobrancas'
@@ -203,6 +213,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dev'
+    | '/pagar/$token'
     | '/$clinica/agenda'
     | '/$clinica/auditoria'
     | '/$clinica/cobrancas'
@@ -222,6 +233,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dev'
     | '/_authenticated/$clinica'
+    | '/pagar/$token'
     | '/_authenticated/$clinica/agenda'
     | '/_authenticated/$clinica/auditoria'
     | '/_authenticated/$clinica/cobrancas'
@@ -241,6 +253,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   DevRoute: typeof DevRoute
+  PagarTokenRoute: typeof PagarTokenRoute
   ApiPublicAsaasWebhookRoute: typeof ApiPublicAsaasWebhookRoute
 }
 
@@ -280,6 +293,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/$clinica'
       preLoaderRoute: typeof AuthenticatedClinicaRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/pagar/$token': {
+      id: '/pagar/$token'
+      path: '/pagar/$token'
+      fullPath: '/pagar/$token'
+      preLoaderRoute: typeof PagarTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/$clinica/': {
       id: '/_authenticated/$clinica/'
@@ -420,6 +440,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   DevRoute: DevRoute,
+  PagarTokenRoute: PagarTokenRoute,
   ApiPublicAsaasWebhookRoute: ApiPublicAsaasWebhookRoute,
 }
 export const routeTree = rootRouteImport

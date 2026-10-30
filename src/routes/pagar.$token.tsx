@@ -7,7 +7,6 @@ import { Barcode, CheckCircle2, Copy, CreditCard, FileDown, Loader2, Lock, QrCod
 import { obterPagamento, pagarComCartao, type PagamentoPublico } from "@/lib/pagamento-publico.functions";
 import { STATUS_COBRANCA, somenteDigitos } from "@/lib/cobrancas";
 import { formatarMoeda } from "@/lib/financeiro";
-import { buscarCep } from "@/lib/cep";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
