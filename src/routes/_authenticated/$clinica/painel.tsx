@@ -9,7 +9,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { agendaQuery, type AgendaItem } from "@/lib/queries";
 import { useMe } from "@/hooks/use-me";
-import { podeAgendar, podeEditarPaciente, podeEscreverEvolucao } from "@/lib/permissions";
+import { podeAgendar, podeEditarPaciente, podeEscreverEvolucao, podeGerirFinanceiro } from "@/lib/permissions";
+import { AvaliacoesPainel } from "@/components/avaliacao/AvaliacoesPainel";
 import { NA_FILA, ehPrevisto, iniciaAoAbrirEvolucao, ordemFila } from "@/lib/agenda-status";
 import { STATUS_AGENDA, barraEsp, erroAmigavel, fmtHora } from "@/lib/ui-helpers";
 import { Button } from "@/components/ui/button";
@@ -85,6 +86,8 @@ function Painel() {
           )}
         </div>
       </div>
+
+      {(podeAgendar(me.papeis) || podeGerirFinanceiro(me.papeis)) && <AvaliacoesPainel />}
 
       {ehProfissional && <MeusAtendimentos itens={meus} />}
 
