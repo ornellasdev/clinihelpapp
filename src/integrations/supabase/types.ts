@@ -767,9 +767,11 @@ export type Database = {
           asaas_conta_id: string
           asaas_wallet_id: string | null
           clinica_id: string
+          conectada_por: string | null
           created_at: string
           titular_documento: string | null
           titular_nome: string | null
+          webhook_id: string | null
           webhook_token_hash: string
         }
         Insert: {
@@ -778,9 +780,11 @@ export type Database = {
           asaas_conta_id: string
           asaas_wallet_id?: string | null
           clinica_id: string
+          conectada_por?: string | null
           created_at?: string
           titular_documento?: string | null
           titular_nome?: string | null
+          webhook_id?: string | null
           webhook_token_hash: string
         }
         Update: {
@@ -789,9 +793,11 @@ export type Database = {
           asaas_conta_id?: string
           asaas_wallet_id?: string | null
           clinica_id?: string
+          conectada_por?: string | null
           created_at?: string
           titular_documento?: string | null
           titular_nome?: string | null
+          webhook_id?: string | null
           webhook_token_hash?: string
         }
         Relationships: [
