@@ -1,18 +1,22 @@
 import { useClinica } from "@/hooks/use-clinica";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense, useState } from "react";
 import { format } from "date-fns";
 import { ArrowLeft, CalendarPlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
 import { agendaPacienteQuery, conveniosQuery, pacienteQuery } from "@/lib/queries";
 import { useMe } from "@/hooks/use-me";
-import { podeAgendar, podeEditarPaciente } from "@/lib/permissions";
+import { podeAgendar, podeEditarPaciente, podeVerDadosClinicos } from "@/lib/permissions";
+import { dadosClinicosQuery } from "@/services/pacientes";
+import { mensagemDeErro } from "@/services/resultado";
+import { useAtualizarPaciente } from "@/hooks/use-pacientes";
 import { ClipeAtestado } from "@/components/agenda/AnexoAtestado";
-import { STATUS_AGENDA, corEsp, erroAmigavel, fmtData, fmtHora, idade, iniciais } from "@/lib/ui-helpers";
+import { STATUS_AGENDA, corEsp, fmtData, fmtHora, idade, iniciais } from "@/lib/ui-helpers";
 import { PacienteForm } from "@/components/pacientes/PacienteForm";
+import { DadosClinicosCard } from "@/components/pacientes/DadosClinicosCard";
+import { ConsentimentoLgpd } from "@/components/pacientes/ConsentimentoLgpd";
 import { ProntuarioTab } from "@/components/pacientes/ProntuarioTab";
 import { PlanoTerapeuticoTab } from "@/components/pacientes/PlanoTerapeuticoTab";
 import { FamiliaTab } from "@/components/pacientes/FamiliaTab";
@@ -52,8 +56,10 @@ function PacientePage() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const me = useMe();
-  const qc = useQueryClient();
   const { data: p } = useSuspenseQuery(pacienteQuery(id));
+  const veClinico = podeVerDadosClinicos(me.papeis, me.especialidades);
+  const { data: clinico } = useQuery({ ...dadosClinicosQuery(id), enabled: veClinico });
+  const atualizar = useAtualizarPaciente(id);
   const [agendar, setAgendar] = useState(false);
   const aba = search.aba ?? "prontuario";
 
@@ -77,7 +83,7 @@ function PacientePage() {
                 {idade(p.data_nascimento)} · {fmtData(p.data_nascimento)}
               </span>
             )}
-            {p.diagnostico && <span>{p.diagnostico}</span>}
+            {clinico?.diagnostico && <span>{clinico.diagnostico}</span>}
             {p.responsavel_nome && (
               <span>
                 Resp.: {p.responsavel_nome} {p.responsavel_telefone && `· ${p.responsavel_telefone}`}
@@ -112,17 +118,24 @@ function PacientePage() {
             <PlanoTerapeuticoTab pacienteId={id} />
           </Suspense>
         </TabsContent>
-        <TabsContent value="cadastro">
+        <TabsContent value="cadastro" className="space-y-5">
+          <ConsentimentoLgpd paciente={p} />
+          {veClinico && (
+            <Suspense fallback={<Carregando />}>
+              <DadosClinicosCard pacienteId={id} />
+            </Suspense>
+          )}
           <PacienteForm
             key={p.updated_at}
             inicial={p}
             somenteLeitura={!podeEditarPaciente(me.papeis)}
             onSalvar={async (d) => {
-              const { error } = await supabase.from("pacientes").update(d).eq("id", id);
-              if (error) return void toast.error(erroAmigavel(error.message));
-              toast.success("Cadastro atualizado.");
-              qc.invalidateQueries({ queryKey: ["paciente", id] });
-              qc.invalidateQueries({ queryKey: ["pacientes"] });
+              try {
+                await atualizar.mutateAsync(d);
+                toast.success("Cadastro atualizado.");
+              } catch (e) {
+                toast.error(mensagemDeErro(e));
+              }
             }}
           />
         </TabsContent>

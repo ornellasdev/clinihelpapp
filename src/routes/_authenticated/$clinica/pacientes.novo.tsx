@@ -1,10 +1,9 @@
 import { useClinica } from "@/hooks/use-clinica";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { erroAmigavel } from "@/lib/ui-helpers";
+import { useCriarPaciente } from "@/hooks/use-pacientes";
+import { mensagemDeErro } from "@/services/resultado";
 import { conveniosQuery } from "@/lib/queries";
 import { PageHeader } from "@/components/PageHeader";
 import { PacienteForm } from "@/components/pacientes/PacienteForm";
@@ -25,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/$clinica/pacientes/novo")(
 function NovoPaciente() {
   const clinica = useClinica();
   const navigate = useNavigate();
-  const qc = useQueryClient();
+  const criar = useCriarPaciente();
   return (
     <div>
       <Button asChild variant="ghost" size="sm" className="-ml-2 mb-2">
@@ -33,18 +32,17 @@ function NovoPaciente() {
           <ArrowLeft /> Pacientes
         </Link>
       </Button>
-      <PageHeader titulo="Novo paciente" descricao="Depois de salvar, você poderá anexar documentos." />
+      <PageHeader titulo="Novo paciente" descricao="Cadastro administrativo. Depois de salvar, você poderá anexar documentos; os dados clínicos são preenchidos pela equipe terapêutica." />
       <PacienteForm
         textoBotao="Cadastrar paciente"
         onSalvar={async (d) => {
-          const { data, error } = await supabase.from("pacientes").insert(d).select("id").single();
-          if (error) {
-            toast.error(erroAmigavel(error.message));
-            return;
+          try {
+            const id = await criar.mutateAsync(d);
+            toast.success("Paciente cadastrado.");
+            navigate({ to: "/$clinica/pacientes/$id", params: { clinica, id }, search: { aba: "documentos" } });
+          } catch (e) {
+            toast.error(mensagemDeErro(e));
           }
-          toast.success("Paciente cadastrado.");
-          qc.invalidateQueries({ queryKey: ["pacientes"] });
-          navigate({ to: "/$clinica/pacientes/$id", params: { clinica, id: data.id }, search: { aba: "documentos" } });
         }}
       />
     </div>

@@ -73,7 +73,7 @@ function PacientesPage() {
                   {!p.ativo && <span className="rounded bg-muted px-1.5 text-[10px] uppercase text-muted-foreground">inativo</span>}
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  {[idade(p.data_nascimento), p.diagnostico].filter(Boolean).join(" · ") || "—"}
+                  {[idade(p.data_nascimento), p.convenio].filter(Boolean).join(" · ") || "—"}
                 </div>
                 {p.responsavel_nome && (
                   <div className="mt-1.5 flex items-center gap-1.5 truncate text-xs text-muted-foreground">
